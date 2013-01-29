@@ -1,0 +1,5 @@
+[
+	{
+		"keys": ["f10"], "command": "unreal_goto_definition"
+	}
+]

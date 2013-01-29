@@ -1,0 +1,8 @@
+[
+   { "caption": "-" },
+   {
+		"caption": "UnrealScript Goto Definition",
+		"command": "unreal_goto_definition"
+	},
+   { "caption": "-" }
+]

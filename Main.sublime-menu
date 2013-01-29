@@ -1,0 +1,106 @@
+[
+    {
+        "caption": "Goto",
+        "id": "goto",
+        "children":
+        [
+            { "caption": "-" },
+            {
+                "caption": "UnrealScript Goto Declaration", "id": "unreal_script_goto_declaration", "command": "unreal_goto_definition"
+            }
+        ]
+    },
+    {
+        "caption": "Preferences",
+        "id": "preferences",
+        "children":
+        [
+            {
+                "caption": "Package Settings",
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "UnrealScriptIDE",
+                        "id":"Unreal_Script_IDE",
+                        "children":
+                        [
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/UnrealScriptIDE/README.md"
+                              },
+                              "caption": "Readme"
+                            },
+                            { "caption": "-" },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/UnrealScriptIDE/Default (Windows).sublime-keymap",
+                                  "platform": "Windows"
+                              },
+                              "caption": "Keymap – Default"
+                            },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/UnrealScriptIDE/Default (OSX).sublime-keymap",
+                                  "platform": "OSX"
+                              },
+                              "caption": "Keymap – Default"
+                            },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/UnrealScriptIDE/Default (Linux).sublime-keymap",
+                                  "platform": "Linux"
+                              },
+                              "caption": "Keymap – Default"
+                            },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/User/Default (Windows).sublime-keymap",
+                                  "platform": "Windows"
+                              },
+                              "caption": "Keymap – User"
+                            },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/User/Default (OSX).sublime-keymap",
+                                  "platform": "OSX"
+                              },
+                              "caption": "Keymap – User"
+                            },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/User/Default (Linux).sublime-keymap",
+                                  "platform": "Linux"
+                              },
+                              "caption": "Keymap – User"
+                            },
+                            { "caption": "-" },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/UnrealScriptIDE/Default.sublime-mousemap"
+                              },
+                              "caption": "Mousemap – Default"
+                            },
+                            {
+                              "command": "open_file",
+                              "args": {
+                                  "file": "${packages}/User/Default.sublime-mousemap"
+                              },
+                              "caption": "Mousemap – User"
+                            },
+                            { "caption": "-" }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
