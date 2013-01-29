@@ -3,9 +3,8 @@
 
 UnrealScript IDE mainly adds better auto-completion features to Sublime Text 2 for UnrealScript and a goto declaration command.
 
-------------
-*For syntax highlighting, various snippets and integrated build system I'd recommend downloading the package "UnrealScript"
-by Michael Alexander with "Package Control" or manually from [here](https://github.com/beefsack/unrealscript-sublime "https://github.com/beefsack/unrealscript-sublime") to truly make this an UnrealScript IDE*
+
+![Pic](http://www.mediafire.com/conv/a12c7703e035e63ecb6ff1d39b8677716286a0f50c386ac5de0329f53e3e1e3d6g.jpg)
 
 
 Feautures
@@ -48,6 +47,10 @@ Installation
 **please note:**
 UnrealScriptIDE will only work properly if you add the src folder as a project. 
 To do so, goto 'Project' -> 'Add Folder To Project...' -> add the Src folder (/UDK/UDK-201*-**/Development/Src/)
+
+------------
+*For syntax highlighting, various snippets and integrated build system I'd recommend downloading the package "UnrealScript"
+by Michael Alexander with "Package Control" or manually from [here](https://github.com/beefsack/unrealscript-sublime "https://github.com/beefsack/unrealscript-sublime") to truly make this an UnrealScript IDE*
 
 My auto-complete settings
 ------------
