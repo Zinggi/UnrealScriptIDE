@@ -14,7 +14,7 @@ Feautures
 * **dynamic, intelligent auto-completion**
 	* parameter hints
 	* display documentation when you need it
-	* everything feels like the great Sublime Text 2 snippets
+	* completions feel like the great Sublime Text 2 snippets
 	* get other completions depending where you are typing (e.g. in the defaultproperties block you only want to get variables)
 
 * **goto declaration and back again** (F10, alt + left, right click menu or via 'Goto' -> 'UnrealScript Goto Declaration')
@@ -27,8 +27,8 @@ Planned
 
 * **object-oriented auto-completions**
 	* if you write e.g. "Controller." you'd want to see it's methods, functions and variables. Currently this doesn't work.
-	* add support for enumerations, structs and CONST
-	* multiline function declaration aren't parsed right yet
+* **add support for enumerations, structs and CONST**
+* **multiline function declaration aren't parsed right yet**
 
 
 Installation
@@ -45,6 +45,9 @@ Installation
 1.  Clone or download this package
 2.	Put it into your Packages directory (find using 'Preferences' -> 'Browse Packages...')
 
+**please note:**
+UnrealScriptIDE will only work properly if you add the src folder as a project. 
+To do so, goto 'Project' -> 'Add Folder To Project...' -> add the Src folder (/UDK/UDK-201*-**/Development/Src/)
 
 My auto-complete settings
 ------------
