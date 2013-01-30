@@ -18,6 +18,8 @@ Feautures
 
 * **goto declaration and back again** (F10, alt + left, right click menu or via 'Goto' -> 'UnrealScript Goto Declaration')
 
+* **Add bookmarks to your comments** and navigate to them quickly via Ctrl + R (just write your comments like this: // ! text or /** ! text*/)
+
 * **more coming...**
 
 
