@@ -10,26 +10,32 @@ UnrealScript IDE mainly adds better auto-completion features to Sublime Text 2 f
 Feautures
 ------------
 
-* **dynamic, intelligent auto-completion**
+* **Dynamic, intelligent auto-completion**
 	* parameter hints
 	* display documentation when you need it
 	* completions feel like the great Sublime Text 2 snippets
 	* get other completions depending where you are typing (e.g. in the defaultproperties block you only want to get variables)
 
-* **goto declaration and back again** (F10, alt + left, right click menu or via 'Goto' -> 'UnrealScript Goto Declaration')
+* **Goto declaration and back again**
+	* use F10, alt + left click, right click menu or via 'Goto' -> 'UnrealScript Goto Declaration'
+	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 
-* **Add bookmarks to your comments** and navigate to them quickly via Ctrl + R (just write your comments like this: // ! text or /** ! text*/)
+* **Add bookmarks to your comments**
+	* to add a bookmark write your comments like this: // ! text or /** ! text*/
+	* navigate to them quickly via Ctrl + R
 
-* **more coming...**
+* **More coming...**
 
 
 Planned
 ------------
 
-* **object-oriented auto-completions**
+* **Object-oriented auto-completions**
 	* if you write e.g. "Controller." you'd want to see it's methods, functions and variables. Currently this doesn't work.
-* **add support for enumerations, structs and CONST**
-* **multiline function declaration aren't parsed right yet**
+* **Object-oriented goto declaration command**
+	* Goto declaration currently doesn't work on statements such as Controller.bIsPlayer
+* **Add support for enumerations, structs and CONST**
+* **Your suggestion here...**
 
 
 Installation
@@ -41,7 +47,7 @@ Installation
 2.  Search for "inst", hit enter
 3.  Search for "UnrealScriptIDE", hit enter
 
-**Manually (the idiotically tedious way ;-) ):**
+**Manually (not recommended):**
 
 1.  Clone or download this package
 2.	Put it into your Packages directory (find using 'Preferences' -> 'Browse Packages...')
@@ -59,6 +65,7 @@ My auto-complete settings
 Here are some relevant settings for auto-completion that I've found quite helpful:
 
 	{
+		"auto_complete_with_fields": true,	//this allows auto-completion inside snippets.
 		"auto_complete_triggers":	//this activates auto-completion on '.' and '('
 		[
 			{

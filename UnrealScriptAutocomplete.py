@@ -6,16 +6,7 @@
 #   Uses context sensitive completions.
 #
 #   TODO:
-#       -autocomplete classes after expand
-#       -variable read in error: var bool bOne, bTwo, bTrhee; doesn't work yet
-#       -problematic function declaration:
-#           native(548) noexport final function bool FastTrace
-#           (
-#               vector          TraceEnd,
-#               optional vector TraceStart,
-#               optional vector BoxExtent,
-#               optional bool   bTraceBullet
-#           );
+#       -autocomplete classes after extends
 #       -load auto complete suggestions from current object before a '.'
 #       -same for goto definition
 #
@@ -68,17 +59,11 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
             window = sublime.active_window()
 
             global last_location, current_location
-            if last_location != None:
-                if current_location == active_file:
-                    window.open_file(last_location, sublime.ENCODED_POSITION)
-                    window.open_file(last_location, sublime.ENCODED_POSITION)
-                    last_location = None
-                    return
-                last_location = None
 
-            # Save current position so we can return to it
-            row, col = self.view.rowcol(self.view.sel()[0].begin())
-            last_location = "%s:%d" % (active_file, row + 1)
+            if last_location == None:
+                # Save current position so we can return to it
+                row, col = self.view.rowcol(self.view.sel()[0].begin())
+                last_location = "%s:%d" % (active_file, row + 1)
 
             function = self.get_function(word)
             if function != None:
@@ -107,7 +92,18 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                 else:
                     print _class[1] + 'does not exist'
                 return
-            print_to_panel(self.view, word + " not found")
+
+            row, col = self.view.rowcol(self.view.sel()[0].begin())
+            if last_location != None and (word.strip() == "" or col == 0):
+                if current_location == active_file:
+                    window.open_file(last_location, sublime.ENCODED_POSITION)
+                    window.open_file(last_location, sublime.ENCODED_POSITION)
+                    last_location = None
+                    return
+                last_location = None
+            else:
+                print_to_panel(self.view, word + " not found")
+
             sublime.set_timeout(lambda: self.hide_panel(self.view), OPEN_TIME * 1000)
 
     def get_function(self, name):
@@ -151,7 +147,8 @@ class UnrealScriptAutocomplete:
 
     def add_func(self, function_modifiers, return_type, function_name, arguments, line_number, file_name, description="", is_funct=1):
         if self.get_function(function_name) == None:
-            self._functions.append(Function(function_modifiers, return_type, function_name, arguments, line_number + 1, file_name, description, is_funct))
+            if function_name != "":
+                self._functions.append(Function(function_modifiers, return_type, function_name, arguments, line_number + 1, file_name, description, is_funct))
 
     def add_var(self, var_modifiers, var_name, comment, line_number, file_name, description=""):
         if self.get_variable(var_name) == None:
@@ -178,11 +175,11 @@ class UnrealScriptAutocomplete:
     def get_autocomplete_list(self, word, b_only_var=False):
         autocomplete_list = []
         for variable in self._variables:
-            if word in variable.name():
+            if word.lower() in variable.name().lower():
                 autocomplete_list.append((variable.name(), variable.name()))
         if not b_only_var:
             for function in self._functions:
-                if word in function.function_name():
+                if word.lower() in function.function_name().lower():
                     function_str = function.function_name() + '\t(' + function.arguments() + ')'    # add arguments
                     autocomplete_list.append((function_str, function.function_name()))
 
@@ -242,11 +239,12 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
         if current_file != None and is_unrealscript_file(current_file):
             # if is in defaultproperties, only get variables:
             line_number = 1000000
-            with open(current_file, 'rU') as file_lines:
-                for i, line in enumerate(file_lines):
-                    if "defaultproperties" in line.lower():
-                        line_number = i + 1
-                        break
+            defaultproperties_region = view.find('defaultproperties', 0, sublime.IGNORECASE)
+            if defaultproperties_region:
+                (line_number, col) = view.rowcol(defaultproperties_region.a)
+            else:
+                return self.get_autocomplete_list(prefix)
+
             (row, col) = view.rowcol(view.sel()[0].begin())
             if row > line_number:
                 return self.get_autocomplete_list(prefix, True)
@@ -383,20 +381,76 @@ class FunctionsCollectorThread(threading.Thread):
     def save_functions(self, file_name):
         with open(file_name, 'rU') as file_lines:
             current_documentation = ""
-
+            long_line = ""
+            b_function = True
+            bBracesNotOnSameLine = False
             for i, line in enumerate(file_lines):
-                if "/**" in line or "//" in line:
+                if line == "":
+                    continue
+                if "/**" in line:                       # start capturing documentation
+                    current_documentation = line
+                elif line.lstrip() != "" and "/" == line.lstrip()[0] and current_documentation == "":
                     current_documentation = line
 
-                if "function" in line.lower():  # get possible lines containing functions
-                    function_matches = re.search(r'(.*)\bfunction \b(\b.*\b)(.+)\((.*)\)', line)		# search for:  1: function modifiers, 2: return type, 3: function name, 4: arguments
-                    if function_matches != None:
-                        if function_matches.group(3) == None or function_matches.group(3) == " ":
-                            pass
-                            #print "not a real function!!! ", line   # some wrong lines
-                        else:
-                            self.collector.add_func(function_matches.group(1), function_matches.group(2), function_matches.group(3), function_matches.group(4), i, file_name, current_documentation)
+                if line.lstrip() != "" and (line.lstrip()[0] == '*' or line.lstrip()[0] == '/'):  # add to documentation
+                    if current_documentation != line:
+                        current_documentation += line
+                    continue
+
+                if bBracesNotOnSameLine:
+                    if ')' in line:
+                        bBracesNotOnSameLine = False
+                        new_line = ' '.join(long_line.split())
+                        function_matches = self.extract_complicated_function(new_line, b_function)
+                        self.collector.add_func(function_matches[0], function_matches[1], function_matches[2], function_matches[3], i, file_name, current_documentation, b_function)
+                        current_documentation = ""
+                        continue
+                    else:
+                        long_line += line
+
+                if "function" in line.lower() or "event" in line.lower():  # get possible lines containing functions / events
+                    if "function" in line.lower():
+                        b_function = True
+                        regex_str = r'(.*)\bfunction \b(\b.*\b)(.+)\((.*)\)'
+                    elif "event" in line.lower():
+                        b_function = False
+                        regex_str = r'(.*)\bevent \b(\b.*\b)(.+)\((.*)\)'
+
+                    matches = re.search(regex_str, line)        # search for:  1: modifiers, 2: return type, 3: name, 4: arguments
+                    if matches != None:
+                        if matches.group(3) == None or matches.group(3) == " ":     # fail
+                            matches = self.extract_complicated_function(line, b_function)   # try again without regex
+                            self.collector.add_func(matches[0], matches[1], matches[2], matches[3], i, file_name, current_documentation, b_function)
                             current_documentation = ""
+                            continue
+                        else:
+                            self.collector.add_func(matches.group(1), matches.group(2), matches.group(3), matches.group(4), i, file_name, current_documentation, b_function)
+                            current_documentation = ""
+                            continue
+
+                    else:   # epic fail of my regex, try with python:
+                        if b_function:
+                            if 'function' not in line.split('//')[0]:   # the keyword was in the comments
+                                continue
+                        else:
+                            if 'event' not in line.split('//')[0]:
+                                continue
+
+                        new_line = ' '.join(line.split())
+                        matches = re.search(regex_str, new_line)        # search for:  1: modifiers, 2: return type, 3: name, 4: arguments
+                        if matches != None:
+                            if matches.group(3) == None or matches.group(3) == " ":
+                                matches = self.extract_complicated_function(new_line, b_function)
+                                self.collector.add_func(matches[0], matches[1], matches[2], matches[3], i, file_name, current_documentation, b_function)
+                                current_documentation = ""
+                                continue
+                            else:
+                                self.collector.add_func(matches.group(1), matches.group(2), matches.group(3), matches.group(4), i, file_name, current_documentation, b_function)
+                                current_documentation = ""
+                                continue
+                        else:
+                            bBracesNotOnSameLine = True
+                            long_line = new_line
 
                 elif "var" in line.lower():  # get possible lines containing variables
                     # 1: vartype, 2: name, 3: documentation
@@ -422,19 +476,31 @@ class FunctionsCollectorThread(threading.Thread):
                         self.collector.add_var(var_line, name, doc_line, i, file_name, current_documentation)
                     current_documentation = ""
 
-                elif "event" in line.lower():
-                    event_matches = re.search(r'(.*)\bevent \b(\b.*\b)(.+)\((.*)\)', line)        # search for:  1: event modifiers, 2: return type, 3: event name, 4: arguments
-                    if event_matches != None:
-                        if event_matches.group(3) == None or event_matches.group(3) == " ":
-                            pass
-                            # print "not a real event!!! ", line   # some wrong lines
-                        else:
-                            self.collector.add_func(event_matches.group(1), event_matches.group(2), event_matches.group(3), event_matches.group(4), i, file_name, current_documentation, 0)
-                            current_documentation = ""
+    # manual extraction, because I failed at regex :(
+    def extract_complicated_function(self, line, b_function):
+        matches = []
+        if b_function:
+            function_split = line.split('function')
+        else:
+            function_split = line.split('event')
+        if len(function_split) > 1:
+            braces_split = function_split[1].split('(')
+        else:
+            return ["", "", "", ""]
 
-                if "/**" in current_documentation:
-                    if current_documentation != line:
-                        current_documentation += line
+        matches.append(function_split[0])  # function modifiers
+        if len(braces_split[0].split()) > 1:   # if name and return:
+            matches.append(braces_split[0].split()[0])     # return
+            matches.append(braces_split[0].split()[1])     # name
+        else:
+            matches.append('')     # no return
+            matches.append(braces_split[0])    # name
+        if len(braces_split) > 1:
+            matches.append(braces_split[1].rstrip('\n\r\t ;)'))    # parameters
+        else:
+            return ["", "", "", ""]
+
+        return matches
 
     def stop(self):
         if self.isAlive():
