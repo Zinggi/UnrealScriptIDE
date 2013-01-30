@@ -411,8 +411,15 @@ class FunctionsCollectorThread(threading.Thread):
                     if len(var_doc_line) > 1:
                         doc_line = var_doc_line[1].rstrip()
 
-                    var_name = var_line.pop().rstrip('\n\r\t ;')
-                    self.collector.add_var(var_line, var_name, doc_line, i, file_name, current_documentation)
+                    var_names = []
+                    var_names.append(var_line.pop().rstrip('\n\r\t ;'))     # get the right most variable
+                    for v in var_line:
+                        if "," in var_line[-1]:     # if there are multiple variable names in one line separated by ',' , get them.
+                            var_names.append(var_line.pop().rstrip('\n\r\t ,'))
+                        else:
+                            break
+                    for name in var_names:
+                        self.collector.add_var(var_line, name, doc_line, i, file_name, current_documentation)
                     current_documentation = ""
 
                 elif "event" in line.lower():
