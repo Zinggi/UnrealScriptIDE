@@ -257,7 +257,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
     def on_query_context(self, view, key, operator, operand, match_all):
         current_file = view.file_name()
         if current_file != None and is_unrealscript_file(current_file):
-            if key == "advanced_new_file_completion":
+            if key == "insert_dynamic_snippet":
                 region = view.sel()[0]
                 if region.empty():
                     self.b_did_autocomplete = True

@@ -1,5 +1,17 @@
 [
 	{
 		"keys": ["f10"], "command": "unreal_goto_definition"
+	},
+	// Add event right before auto-completion to insert a dynamic snippet
+	{
+		"keys": ["tab"],
+		"command": "insert_best_completion", 
+		"args": {"default": "", "exact": false}, 
+		"context": [
+			{ "key": "insert_dynamic_snippet"},
+			{ "key": "setting.tab_completion", "operator": "equal", "operand": true },
+			{ "key": "last_command", "operator": "not_equal", "operand": "insert_best_completion" },
+			{ "key": "auto_complete_visible" , "operator": "equal", "operand": false}
+		]
 	}
 ]
