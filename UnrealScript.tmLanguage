@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-  <key>fileTypes</key>
+	<key>fileTypes</key>
 	<array>
 		<string>uc</string>
 	</array>
@@ -69,14 +69,14 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(class|extends|const|array|var|struct|cpptext|if|else|while|replication|event|function|Switch|defaultproperties|Super|delegate|none|other|editinline|repnotify|virtual|default|within|AddEventListener|ConsoleCommand))\b</string>
+			<string>\b(?i:(class|extends|const|array|var|struct|cpptext|if|else|while|replication|event|reliable|server|exec|function|Switch|defaultproperties|Super|delegate|none|other|editinline|repnotify|virtual|default|within|AddEventListener|ConsoleCommand))\b</string>
 			<key>name</key>
 			<string>keyword.control.unrealscript</string>
 			
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(Actor|Object|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|SequenceEvent|Sequence|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|Components|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|PlayerOwner|Material|WidgetBindings))\b</string>
+			<string>\b(?i:(Actor|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|SequenceEvent|Sequence|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|Components|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|PlayerOwner|Material|WidgetBindings|self))\b</string>
 			<key>name</key>
 			<string>storage.type.unrealscript</string>
 		</dict>
