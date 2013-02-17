@@ -35,17 +35,19 @@ Planned
 * **Object-oriented goto declaration command**
 	* Goto declaration currently doesn't work on statements such as Controller.bIsPlayer
 * **Add support for enumerations, structs and CONST**
+* **Better build system**
 * **Your suggestion here...**
 
 
 Installation
 ------------
+**For now use Manual method, because it's not yet included in Package Control**
 
-**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control "http://wbond.net/sublime_packages/package_control") right inside Sublime Text 2 (Package Control needs to be installed):**
+	**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control "http://wbond.net/sublime_packages/package_control") right inside Sublime Text 2 (Package Control needs to be installed):**
 
-1.	Ctrl + shift + P
-2.  Search for "inst", hit enter
-3.  Search for "UnrealScriptIDE", hit enter
+	1.	Ctrl + shift + P
+	2.  Search for "inst", hit enter
+	3.  Search for "UnrealScriptIDE", hit enter
 
 **Manually (not recommended):**
 
@@ -53,11 +55,12 @@ Installation
 2.	Put it into your Packages directory (find using 'Preferences' -> 'Browse Packages...')
 
 **please note:**
-UnrealScriptIDE will only work properly if you add the src folder as a project. 
+----------------
+UnrealScriptIDE will **only** work properly if you add the **Src** folder as a project. 
 To do so, goto 'Project' -> 'Add Folder To Project...' -> add the Src folder (/UDK/UDK-201*-**/Development/Src/)
 
 ------------
-*For syntax highlighting, various snippets and integrated build system I'd recommend downloading the package "UnrealScript"
+*For syntax highlighting, various snippets and a not working build system I'd recommend downloading the package "UnrealScript"
 by Michael Alexander with "Package Control" or manually from [here](https://github.com/beefsack/unrealscript-sublime "https://github.com/beefsack/unrealscript-sublime") to truly make this an UnrealScript IDE*
 
 My auto-complete settings

@@ -1,12 +1,18 @@
 #-----------------------------------------------------------------------------------
 # UnrealScript Auto-complete Plug-in
 #-----------------------------------------------------------------------------------
-#	This plug in displays UnrealScript Functions with parameters.
+#	This plug-in displays UnrealScript Functions with parameters.
 #   It searches in all parent classes of the current class.
 #   Uses context sensitive completions.
 #
 #   TODO:
 #       -autocomplete classes after extends
+#       -save all classes (name, file_name, description) when first UnrealScript file is opened:
+#           store in _classes, don't clear them
+#           optimize search file by using the new _classes
+#           create a class for _classes
+#           use classes in autocompletion suggestions and display description
+#
 #       -load auto complete suggestions from current object before a '.'
 #       -same for goto definition
 #
@@ -50,8 +56,10 @@ class HelperObject:
                 print "'NoneType' object has no attribute 'run_command'"
 
 
+# opens the definition of the current selected word.
+#   if b_new_start_point is true, the current cursor position will be stored.
 class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
-    def run(self, edit):
+    def run(self, edit, b_new_start_point=False):
         active_file = self.view.file_name()
         if is_unrealscript_file(active_file):
             region_word = self.view.word(self.view.sel()[0])
@@ -60,39 +68,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
 
             global last_location, current_location
 
-            if last_location == None:
-                # Save current position so we can return to it
-                row, col = self.view.rowcol(self.view.sel()[0].begin())
-                last_location = "%s:%d" % (active_file, row + 1)
-
-            function = self.get_function(word)
-            if function != None:
-                if os.path.exists(function.file_name()):
-                    window.open_file(function.file_name() + ':' + str(function.line_number()) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)     # somehow calling this twice fixes a bug that makes sublime crash...
-                    window.open_file(function.file_name() + ':' + str(function.line_number()) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
-                    current_location = function.file_name()
-                else:
-                    print function.file_name() + 'does not exist'
-                return
-            variable = self.get_variable(word)
-            if variable != None:
-                if os.path.exists(variable.file_name()):
-                    window.open_file(variable.file_name() + ':' + str(variable.line_number()) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
-                    window.open_file(variable.file_name() + ':' + str(variable.line_number()) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
-                    current_location = variable.file_name()
-                else:
-                    print variable.file_name() + 'does not exist'
-                return
-            _class = self.get_class(word)
-            if _class != None:
-                if os.path.exists(_class[1]):
-                    window.open_file(_class[1] + ":1:0", sublime.ENCODED_POSITION | sublime.TRANSIENT)
-                    window.open_file(_class[1] + ":1:0", sublime.ENCODED_POSITION | sublime.TRANSIENT)
-                    current_location = _class[1]
-                else:
-                    print _class[1] + 'does not exist'
-                return
-
+            # if no word is selected or the cursor is at the beginning of the line, return to last location
             row, col = self.view.rowcol(self.view.sel()[0].begin())
             if last_location != None and (word.strip() == "" or col == 0):
                 if current_location == active_file:
@@ -100,11 +76,44 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                     window.open_file(last_location, sublime.ENCODED_POSITION)
                     last_location = None
                     return
-                last_location = None
-            else:
-                print_to_panel(self.view, word + " not found")
 
+            # search the current word in functions, variables and classes and if found, open the file.
+            _class = self.get_class(word)
+            if _class != None:
+                self.open_file(_class[1], 1, b_new_start_point)
+                return
+
+            function = self.get_function(word)
+            if function != None:
+                self.open_file(function.file_name(), function.line_number(), b_new_start_point)
+                return
+
+            variable = self.get_variable(word)
+            if variable != None:
+                self.open_file(variable.file_name(), variable.line_number(), b_new_start_point)
+                return
+
+            # if the word wasn't found:
+            print_to_panel(self.view, word + " not found")
             sublime.set_timeout(lambda: self.hide_panel(self.view), OPEN_TIME * 1000)
+
+    def open_file(self, file_name, line_number=1, b_new_start_point=False):
+        global last_location, current_location
+        active_file = self.view.file_name()
+        window = sublime.active_window()
+
+        if last_location == None or b_new_start_point:
+            # Save current position so we can return to it
+            row, col = self.view.rowcol(self.view.sel()[0].begin())
+            last_location = "%s:%d" % (active_file, row + 1)
+
+        if os.path.exists(file_name):
+            # somehow calling this twice fixes a bug that makes sublime crash...
+            window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
+            window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
+            current_location = file_name
+        else:
+            print file_name + 'does not exist'
 
     def get_function(self, name):
         global functions_reference
@@ -128,6 +137,10 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                 return _class
         return None
 
+#================================================================================
+#================Autocompletion==================================================
+#================================================================================
+
 
 # base class for adding new auto-complete suggestions
 class UnrealScriptAutocomplete:
@@ -137,7 +150,7 @@ class UnrealScriptAutocomplete:
     _variables = []
     # store all parent classes and information. (class_name, class_path, description)
     _classes = []
-    # stores all functions to use on a file
+    # stores all functions, variables and classes to use on a file
     _functions_for_file = []
 
     def clear(self):
@@ -156,14 +169,21 @@ class UnrealScriptAutocomplete:
 
     def get_function(self, name):
         for function in self._functions:
-            if function.function_name() == name:
+            if function.function_name().lower() == name.lower():
                 return function
         return None
 
     def get_variable(self, name):
         for variable in self._variables:
-            if variable.name() == name:
+            if variable.name().lower() == name.lower():
                 return variable
+        return None
+
+    # (class_name, class_path, description)
+    def get_class(self, name):
+        for _class in self._class:
+            if _class[0].lower() == name.lower():
+                return _class
         return None
 
     def save_functions_to_list(self, filename):
@@ -172,16 +192,24 @@ class UnrealScriptAutocomplete:
         if filename not in names:
             self._functions_for_file.append((self._functions, filename, self._variables, self._classes))
 
-    def get_autocomplete_list(self, word, b_only_var=False):
+    def get_autocomplete_list(self, word, b_only_var=False, b_only_classes=False):
         autocomplete_list = []
-        for variable in self._variables:
-            if word.lower() in variable.name().lower():
-                autocomplete_list.append((variable.name(), variable.name()))
-        if not b_only_var:
-            for function in self._functions:
-                if word.lower() in function.function_name().lower():
-                    function_str = function.function_name() + '\t(' + function.arguments() + ')'    # add arguments
-                    autocomplete_list.append((function_str, function.function_name()))
+
+        # filter relevant items:
+        for _class in self._classes:
+            if word.lower() in _class[0].lower():
+                autocomplete_list.append((_class[0], _class[0]))
+
+        if not b_only_classes:
+            for variable in self._variables:
+                if word.lower() in variable.name().lower():
+                    autocomplete_list.append((variable.name(), variable.name()))
+
+            if not b_only_var:
+                for function in self._functions:
+                    if word.lower() in function.function_name().lower():
+                        function_str = function.function_name() + '\t(' + function.arguments() + ')'    # add arguments
+                        autocomplete_list.append((function_str, function.function_name()))
 
         return autocomplete_list
 
@@ -211,7 +239,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
         if view.file_name() != None and is_unrealscript_file(view.file_name()):
             open_folder_arr = view.window().folders()   # Gets all opened folders in the Sublime Text editor.
 
-            if view.file_name() not in self._filenames:     # if the wasn't parsed before
+            if view.file_name() not in self._filenames:     # if the file wasn't parsed before
                 self._filenames.append(view.file_name())
                 self.add_thread(view.file_name(), open_folder_arr)  # create a new thread to search for relevant functions for the active file
 
@@ -237,18 +265,28 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
         completions = []
 
         if current_file != None and is_unrealscript_file(current_file):
+            # check if in at class declaration:
+            line = view.line(view.sel()[0])
+            line_contents = view.substr(line)
+            if "class" in line_contents and "extends" in line_contents:
+                print "get classes"
+                return self.get_autocomplete_list(prefix, False, True)
+
             # if is in defaultproperties, only get variables:
             line_number = 1000000
             defaultproperties_region = view.find('defaultproperties', 0, sublime.IGNORECASE)
             if defaultproperties_region:
                 (line_number, col) = view.rowcol(defaultproperties_region.a)
             else:
+                # no defaultproperties found
                 return self.get_autocomplete_list(prefix)
 
             (row, col) = view.rowcol(view.sel()[0].begin())
             if row > line_number:
+                # below defaultproperties
                 return self.get_autocomplete_list(prefix, True)
             else:
+                # above defaultproperties
                 return self.get_autocomplete_list(prefix)
 
         return (completions, sublime.INHIBIT_EXPLICIT_COMPLETIONS)
@@ -328,6 +366,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
 
 
 # create a new thread for scanning one file, as this may take a while.
+# parses one file and creates a new thread for the parent class
 class FunctionsCollectorThread(threading.Thread):
     def __init__(self, collector, filename, timeout_seconds, open_folder_arr):
         self.collector = collector
@@ -340,25 +379,23 @@ class FunctionsCollectorThread(threading.Thread):
         if self.filename != None:
             self.save_functions(self.filename)  # parse current file
 
-        file_lines = open(self.filename, 'rU')
         description = ""
+        with open(self.filename, 'rU') as file_lines:
+            for line in file_lines:
+                description += line
+                classline = re.match(r'(class\b.+\bextends )(\b.+\b)', line.lower())  # get class declaration line of current file
+                if classline != None:
+                    parent_class_name = classline.group(2)    # get parent class
 
-        for line in file_lines:
-            description += line
-            classline = re.match(r'(class\b.+\bextends )(\b.+\b)', line.lower())  # get class declaration line of current file
-            if classline != None:
-                parent_class_name = classline.group(2)    # get parent class
-
-                # search open folders for parent class file
-                for folder in self.open_folder_arr:
-                    parent_file = self.search_file(folder, parent_class_name)
-                    self.collector._classes.append((parent_class_name, parent_file, description))
-                    if parent_file != None:
-                        self.save_functions(parent_file)
-                        self.collector.add_thread(parent_file, self.open_folder_arr)    # create a new thread to do the same stuff on the parent_file
-                    else:
-                        print "parent file not found in: ", folder
-                break
+                    # search open folders for parent class file
+                    for folder in self.open_folder_arr:
+                        parent_file = self.search_file(folder, parent_class_name)
+                        self.collector._classes.append((parent_class_name, parent_file, description))
+                        if parent_file != None:
+                            self.collector.add_thread(parent_file, self.open_folder_arr)    # create a new thread to do the same stuff on the parent_file
+                        else:
+                            print "parent file not found in: ", folder
+                    break
 
         self.stop()
 

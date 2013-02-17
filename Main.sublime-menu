@@ -6,7 +6,7 @@
         [
             { "caption": "-" },
             {
-                "caption": "UnrealScript Goto Declaration", "id": "unreal_script_goto_declaration", "command": "unreal_goto_definition"
+                "caption": "UnrealScript Goto Declaration (or back)", "id": "unreal_script_goto_declaration", "command": "unreal_goto_definition", "args": {"b_new_start_point": false}
             }
         ]
     },

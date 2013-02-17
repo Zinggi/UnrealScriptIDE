@@ -1,8 +1,9 @@
 [
    { "caption": "-" },
    {
-		"caption": "UnrealScript Goto Definition",
-		"command": "unreal_goto_definition"
+		"caption": "UnrealScript Goto Definition (new start point, alt + LMB)",
+		"command": "unreal_goto_definition",
+		"args": {"b_new_start_point": true}
 	},
    { "caption": "-" }
 ]

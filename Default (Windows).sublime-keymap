@@ -1,6 +1,8 @@
 [
 	{
-		"keys": ["f10"], "command": "unreal_goto_definition"
+		"keys": ["f10"],
+		"command": "unreal_goto_definition",
+		"args": {"b_new_start_point": false}
 	},
 	// Add event right before auto-completion to insert a dynamic snippet
 	{
