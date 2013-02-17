@@ -1,0 +1,15 @@
+<snippet>
+	<content><![CDATA[
+class $1 extends SimpleGame;
+
+defaultproperties
+{
+	DefaultPawnClass=class'$2.$3'
+	PlayerControllerClass=class'$2.$4'
+	HUDType=class'$2.$5'
+}]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>gameinfo</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.unrealscript</scope>
+</snippet>

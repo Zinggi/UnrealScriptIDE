@@ -1,0 +1,11 @@
+<snippet>
+	<content><![CDATA[
+Begin Object class=$1 name=$2
+	$3
+End Object
+$4]]></content>
+	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
+	<tabTrigger>beginobject</tabTrigger>
+	<!-- Optional: Set a scope to limit where the snippet will trigger -->
+	<scope>source.unrealscript</scope>
+</snippet>

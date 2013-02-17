@@ -1,0 +1,5 @@
+{
+	"cmd": ["C:\\UDK\\UDK-2011-11\\Binaries\\Win64\\UDK.exe", "make"],
+	"selector": "source.unrealscript",
+    "file_regex": "^(.+?)\\\\(\\w+)\\.uc\\((\\d+)\\)\\s*:\\s*Warning,\\s*(.+?)$"
+}

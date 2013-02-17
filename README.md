@@ -20,6 +20,10 @@ Feautures
 	* use F10, alt + left click, right click menu or via 'Goto' -> 'UnrealScript Goto Declaration'
 	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 
+* **Syntax highlighting**
+
+* **Various useful Snippets**
+
 * **Add bookmarks to your comments**
 	* to add a bookmark write your comments like this: // ! text or /** ! text*/
 	* navigate to them quickly via Ctrl + R
@@ -32,10 +36,14 @@ Planned
 
 * **Object-oriented auto-completions**
 	* if you write e.g. "Controller." you'd want to see it's methods, functions and variables. Currently this doesn't work.
+
 * **Object-oriented goto declaration command**
 	* Goto declaration currently doesn't work on statements such as Controller.bIsPlayer
+
 * **Add support for enumerations, structs and CONST**
+
 * **Better build system**
+
 * **Your suggestion here...**
 
 
@@ -60,8 +68,7 @@ UnrealScriptIDE will **only** work properly if you add the **Src** folder as a p
 To do so, goto 'Project' -> 'Add Folder To Project...' -> add the Src folder (/UDK/UDK-201*-**/Development/Src/)
 
 ------------
-*For syntax highlighting, various snippets and a not working build system I'd recommend downloading the package "UnrealScript"
-by Michael Alexander with "Package Control" or manually from [here](https://github.com/beefsack/unrealscript-sublime "https://github.com/beefsack/unrealscript-sublime") to truly make this an UnrealScript IDE*
+All **credits** for Syntax highlighting and Snippets goes to **[Michael Alexander](https://github.com/beefsack "https://github.com/beefsack")**. Thanks!
 
 My auto-complete settings
 ------------
