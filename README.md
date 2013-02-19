@@ -49,13 +49,11 @@ Planned
 
 Installation
 ------------
-**For now use Manual method, because it's not yet included in Package Control**
+**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control "http://wbond.net/sublime_packages/package_control") right inside Sublime Text 2 (Package Control needs to be installed):**
 
-	**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control "http://wbond.net/sublime_packages/package_control") right inside Sublime Text 2 (Package Control needs to be installed):**
-
-	1.	Ctrl + shift + P
-	2.  Search for "inst", hit enter
-	3.  Search for "UnrealScriptIDE", hit enter
+1.	Ctrl + shift + P
+2.  Search for "inst", hit enter
+3.  Search for "UnrealScriptIDE", hit enter
 
 **Manually (not recommended):**
 

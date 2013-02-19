@@ -1,5 +1,5 @@
 #-----------------------------------------------------------------------------------
-# UnrealScript Auto-complete Plug-in
+# UnrealScriptIDE Auto-complete Plug-in
 #-----------------------------------------------------------------------------------
 #	This plug-in displays UnrealScript Functions with parameters.
 #   It searches in all parent classes of the current class.
@@ -108,7 +108,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
             last_location = "%s:%d" % (active_file, row + 1)
 
         if os.path.exists(file_name):
-            # somehow calling this twice fixes a bug that makes sublime crash...
+            # somehow calling this twice fixes a bug that makes sublime crash, no idea why though...
             window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
             window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
             current_location = file_name
@@ -234,7 +234,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
 
     # start parsing when a tab becomes active
     def on_activated(self, view):
-        self.clear()    # empty the function list, so that we only get the relevant ones.
+        self.clear()    # empty the completions list, so that we only get the relevant ones.
 
         if view.file_name() != None and is_unrealscript_file(view.file_name()):
             open_folder_arr = view.window().folders()   # Gets all opened folders in the Sublime Text editor.
