@@ -1,11 +1,11 @@
 <snippet>
 	<content><![CDATA[
-exec function ${1:FunctionName} (${2:Args})
+do
 {
-	${3:// body...};
-}]]></content>
+  $1
+} until(${2:true})]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>exec</tabTrigger>
+	<tabTrigger>do</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
 </snippet>

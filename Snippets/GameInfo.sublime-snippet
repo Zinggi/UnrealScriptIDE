@@ -1,12 +1,14 @@
 <snippet>
 	<content><![CDATA[
-class $1 extends SimpleGame;
+class $1 extends ${2:Simple}Game;
+
+$7
 
 defaultproperties
 {
-	DefaultPawnClass=class'$2.$3'
-	PlayerControllerClass=class'$2.$4'
-	HUDType=class'$2.$5'
+	DefaultPawnClass=class'$3.$4'
+	PlayerControllerClass=class'$3.$5'
+	HUDType=class'$3.$6'
 }]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>gameinfo</tabTrigger>

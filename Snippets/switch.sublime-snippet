@@ -1,11 +1,19 @@
 <snippet>
 	<content><![CDATA[
-exec function ${1:FunctionName} (${2:Args})
+switch (${1:expression})
 {
-	${3:// body...};
+  case ${2:expression2}:
+    $3
+    break;
+  
+  case ${4:expression3}:
+    $5
+  
+  default:
+    $6
 }]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>exec</tabTrigger>
+	<tabTrigger>switch</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
 </snippet>

@@ -1,8 +1,8 @@
 <snippet>
 	<content><![CDATA[
-foreach $1($2)
+foreach ${1:Array/Iterator Function}(${2:Class}, ${3:OutActor})
 {
-	$3
+	${3:OutActor}$4
 }]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>foreach</tabTrigger>

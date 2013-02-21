@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-class $1 extends SimplePC;
+class ${1:ClassName} extends ${2:Simple}Controller;
 
 $4
 
@@ -9,7 +9,7 @@ defaultproperties
 	InputClass=class'$2.$3'
 }]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>playercontroller</tabTrigger>
+	<tabTrigger>controller</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
 </snippet>

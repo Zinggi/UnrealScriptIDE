@@ -1,8 +1,8 @@
 <snippet>
 	<content><![CDATA[
-class $1 extends MobileHUD;
+class ${1:ClassName} extends ${2:HUD};
 
-$2
+$3
 
 defaultproperties
 {
