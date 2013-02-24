@@ -1,0 +1,21 @@
+[
+    {
+        "caption": "UnrealScriptIDE: Goto Declaration",
+        "command": "unreal_goto_definition",
+        "args": {"b_new_start_point": false}
+    },
+    {
+        "caption": "UnrealScriptIDE: Goto Declaration (New starting point)",
+        "command": "unreal_goto_definition",
+        "args": {"b_new_start_point": true}
+    },
+    {
+        "caption": "UnrealScriptIDE: Build Project",
+        "command": "unreal_build_project"
+    }
+    {
+        "caption": "UnrealScriptIDE: Build and Run last opened map",
+        "command": "unreal_build_project",
+        "args": {"b_build_and_run": true}
+    }
+]

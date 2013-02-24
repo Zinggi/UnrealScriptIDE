@@ -1,0 +1,34 @@
+{
+	// Add additional startup settings here. A complete overview of all available startup settings can be found here: http://udn.epicgames.com/Three/CommandLineArguments.html
+	// DO NOT USE: editor, server, 127.0.0.1, yourmap.udk as those are handled internally by my plug-in.
+	// For example, use "-ResX=1920 -ResY=1080 -fullscreen" for full-screen and HD or use "-log" to display the log
+	"additional_startup_settings": "",
+
+	// If you launch a server and 2 clients, these will be used instead:
+	"additional_startup_settings_server": "-ConsolePosX=600 -ConsolePosY=600",
+	"additional_startup_settings_client1": "-log -resx=800 -resy=600 -ConsolePosX=0 -ConsolePosY=600 -posx=0 -posy=0",
+	"additional_startup_settings_client2": "-log -resx=800 -resy=600 -ConsolePosX=1250 -ConsolePosY=600 -posx=1200 -posy=0",
+
+
+
+	// --------------------------------------
+	// DO NOT SET BOTH SETTINGS BELOW TO TRUE
+	//---------------------------------------
+	// If this is set to true, you wont get asked if you want to open the error log or start the game when there were only warnings in your build.
+	// Instead the log will be opened immediately as if there were build errors.
+	"always_open_log": false,
+	// If this is set to true, you wont get asked if you want to open the error log or start the game when there were only warnings in your build.
+	// Instead it will start the game, as if there were 0 errors and 0 warnings.
+	"always_start_game": false,
+
+
+
+
+	//=======================
+	// Nothing of interest...
+	//=======================
+	// Used to save your last opened map. No need to overwrite this, as it is done automatically
+	"last_opened_map": "",
+	// Used to save if you opened a server the last time. No need to overwrite this, as it is done automatically
+	"b_multi_player": false
+}

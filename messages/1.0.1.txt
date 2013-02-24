@@ -1,0 +1,19 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+
+* **Build system**
+	* use Ctrl + B, F7 or search in the command palette to build your game
+	* if the build contains errors, the error log will be opened, allowing you to navigate to your errors quickly.
+	* if the build was successful, the game will start
+
+* **Launch Game**
+	* quickly open the game with your last configuration
+	* you can chose witch map to open
+	* chose between Standalone or a Server and 2 Clients
+	* you can specify additional startup settings
+
+For an in detail explanation, read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki

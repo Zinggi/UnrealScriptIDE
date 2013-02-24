@@ -1,5 +1,5 @@
-#UnrealScript IDE Plug-in for Sublime Text 2
-* * *
+UnrealScript IDE Plug-in for Sublime Text 2
+===========================
 
 UnrealScript IDE mainly adds better auto-completion features to Sublime Text 2 for UnrealScript and a goto declaration command.
 
@@ -17,10 +17,21 @@ Feautures
 	* get other completions depending where you are typing (e.g. in the defaultproperties block you only want to get variables)
 
 * **Goto declaration and back again**
-	* use F10, alt + left click, right click menu or via 'Goto' -> 'UnrealScript Goto Declaration'
+	* use F10, alt + left click, right click menu, via 'Goto' -> 'UnrealScript Goto Declaration' or search in the command palette to go to the declaration of the currently selected word
 	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 
 * **Syntax highlighting**
+
+* **Build system**
+	* use Ctrl + B, F7 or search in the command palette to build your game
+	* if the build contains errors, the error log will be opened, allowing you to navigate to your errors quickly.
+	* if the build was successful, the game will start
+
+* **Launch Game**
+	* quickly open the game with your last configuration
+	* you can chose witch map to open
+	* chose between Standalone or a Server and 2 Clients
+	* you can specify additional startup settings
 
 * **Various useful Snippets**
 
@@ -42,18 +53,19 @@ Planned
 
 * **Add support for enumerations, structs and CONST**
 
-* **Better build system**
-
-* **Your suggestion here...**
+* **Your suggestion here?**
+	* You can suggest features, report bugs and vote for features on this site here: [UnrealScript IDE - Userecho](http://unrealscriptide.userecho.com/)
 
 
 Installation
 ------------
-**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control "http://wbond.net/sublime_packages/package_control") right inside Sublime Text 2 (Package Control needs to be installed):**
+**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control) right inside Sublime Text 2 (Package Control needs to be installed):**
 
 1.	Ctrl + shift + P
 2.  Search for "inst", hit enter
 3.  Search for "UnrealScriptIDE", hit enter
+
+For a more in detail explanation visit the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki/Getting-Started
 
 **Manually (not recommended):**
 
@@ -65,8 +77,13 @@ Installation
 UnrealScriptIDE will **only** work properly if you add the **Src** folder as a project. 
 To do so, goto 'Project' -> 'Add Folder To Project...' -> add the Src folder (/UDK/UDK-201*-**/Development/Src/)
 
+Usage
+----------------
+Please refer to the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
+
 ------------
-All **credits** for Syntax highlighting and Snippets goes to **[Michael Alexander](https://github.com/beefsack "https://github.com/beefsack")**. Thanks!
+All **credits** for Syntax highlighting and Snippets goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!
+All **credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
 
 My auto-complete settings
 ------------

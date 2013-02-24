@@ -71,7 +71,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
             # if no word is selected or the cursor is at the beginning of the line, return to last location
             row, col = self.view.rowcol(self.view.sel()[0].begin())
             if last_location != None and (word.strip() == "" or col == 0):
-                if current_location == active_file:
+                if current_location.lower() == active_file.lower():
                     window.open_file(last_location, sublime.ENCODED_POSITION)
                     window.open_file(last_location, sublime.ENCODED_POSITION)
                     last_location = None
@@ -94,8 +94,16 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                 return
 
             # if the word wasn't found:
-            print_to_panel(self.view, word + " not found")
+            print word + " not found"    # print_to_panel(self.view, word + " not found")
             sublime.set_timeout(lambda: self.hide_panel(self.view), OPEN_TIME * 1000)
+
+        elif is_unreal_log_file(active_file):
+            line = self.view.substr(self.view.line(self.view.sel()[0]))
+            split_line = re.split(r"\(|\)", line)   # line.split("()")
+            if len(split_line) > 1:
+                self.open_file(split_line[0], split_line[1], True)
+            else:
+                print '"', line, '"', " not found!!"
 
     def open_file(self, file_name, line_number=1, b_new_start_point=False):
         global last_location, current_location
@@ -394,7 +402,7 @@ class FunctionsCollectorThread(threading.Thread):
                         if parent_file != None:
                             self.collector.add_thread(parent_file, self.open_folder_arr)    # create a new thread to do the same stuff on the parent_file
                         else:
-                            print "parent file not found in: ", folder
+                            pass    # print "parent file not found in: ", folder
                     break
 
         self.stop()
@@ -546,6 +554,9 @@ class FunctionsCollectorThread(threading.Thread):
 
 def is_unrealscript_file(filename):
     return '.uc' in filename
+
+def is_unreal_log_file(filename):
+    return '.log' in filename
 
 
 # class to store a function/ event
