@@ -69,7 +69,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(class|extends|const|array|var|struct|cpptext|if|else|while|foreach|replication|event|reliable|server|exec|function|Switch|defaultproperties|Super|delegate|none|other|editinline|repnotify|virtual|default|within|AddEventListener|ConsoleCommand))\b</string>
+			<string>\b(?i:(abstract|native|nativereplication|hidecategories|private|transient|deprecated|editconst|static|final|simulated|out|local|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements))\b</string>
 			<key>name</key>
 			<string>keyword.control.unrealscript</string>
 			
@@ -82,7 +82,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(abstract|native|nativereplication|hidecategories|private|transient|deprecated|editconst|static|final|simulated|out|local|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements|case|break))\b</string>
+			<string>\b(?i:(class|extends|const|array|var|struct|cpptext|if|else|case|break|while|foreach|replication|event|reliable|server|exec|function|Switch|defaultproperties|Super|delegate|none|other|editinline|repnotify|virtual|default|within|AddEventListener|ConsoleCommand))\b</string>
 			<key>name</key>
 			<string>storage.modifier.unrealscript</string>
 		</dict>
