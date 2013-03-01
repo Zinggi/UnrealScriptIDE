@@ -82,8 +82,8 @@ Usage
 Please refer to the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
 
 ------------
-All **credits** for Syntax highlighting and Snippets goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!
-All **credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
+All **credits** for various Snippets (and also for the old (now unused) Syntax highlighting file) goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!
+All **credits** for Syntax highlighting in UnrealScript files and Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
 
 My auto-complete settings
 ------------
