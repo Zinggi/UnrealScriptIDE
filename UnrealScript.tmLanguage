@@ -69,25 +69,26 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(class|extends))\b</string>
+			<string>\b(?i:(abstract|native|nativereplication|hidecategories|private|transient|deprecated|editconst|static|final|simulated|out|local|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements))\b</string>
 			<key>name</key>
 			<string>keyword.control.unrealscript</string>
+			
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(abstract|add|always|array|arraycount|assert|atomic|atomicwhencooked|auto|autoexpandcategories|automated|bool|break|byte|case|client|coerce|collapsecategories|config|const|continue|databinding|default|defaultproperties|delegate|dependson|deprecated|do|dontcollapsecategories|duplicatetransient|edfindable|editconst|editconstarray|editfixedsize|editinline|editinlinenew|editinlinenotify|editinlineuse|editoronly|else|enum|enumcount|event|exec|expands|export|exportstructs|final|float|for|forcescriptorder|foreach|function|global|globalconfig|goto|guid|hidecategories|hidedropdown|if|ignores|implements|import|immutable|immutablewhencooked|inherits|init|input|insert|instanced|int|interface|interp|intrinsic|invariant|iterator|latent|length|local|localized|name|nameof|native|nativereplication|new|noclear|noexport|noexportheader|noimport|nontransactional|nontransient|noteditinlinenew|notforconsole|notplaceable|nousercreate|operator|optional|out|outer|perobjectconfig|perobjectlocalized|placeable|pointer|postoperator|preoperator|private|privatewrite|protected|protectedwrite|public|reliable|remove|replace|replication|repnotify|repretry|return|rng|rot|safereplace|server|showcategories|simulated|singular|skip|state|static|stop|strictconfig|string|struct|structdefaultproperties|super|switch|transient|travel|unreliable|until|var|vect|while|within))\b</string>
+			<string>\b(?i:(Actor|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|SequenceEvent|Sequence|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|Components|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|PlayerOwner|Material|WidgetBindings|self|Instigator))\b</string>
 			<key>name</key>
 			<string>storage.type.unrealscript</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(local|const|native|placeable|simulated|event|private|transient|config|editable|static|singular|exec))\b</string>
+			<string>\b(?i:(class|extends|const|array|var|struct|cpptext|if|else|case|break|while|foreach|replication|event|reliable|server|exec|function|Switch|defaultproperties|Super|delegate|none|other|editinline|repnotify|virtual|default|within|AddEventListener|ConsoleCommand))\b</string>
 			<key>name</key>
 			<string>storage.modifier.unrealscript</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(none|self|this|true|false))\b</string>
+			<string>\b(?i:(bool|int|vector|rotator|float|enum|Name|Quat|byte|return|string|spawn|true|false|state|EPhysics|void|UBOOL|Widget|Add|Begin|End|sleep|GotoState|Goto))\b</string>
 			<key>name</key>
 			<string>constant.language.unrealscript</string>
 		</dict>
