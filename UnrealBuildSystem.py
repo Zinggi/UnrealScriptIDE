@@ -179,6 +179,8 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                         "Start with default map"]
         # add all maps found in the maps folder.
         self._map_list = self.search_mapfiles(self.udk_maps_folder)
+        if not self._map_list:
+            return
         input_list += self._map_list
 
         self.view.window().show_quick_panel(input_list, self.on_done_run_game_input)
@@ -244,6 +246,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     # returns all map files in the path folder
     def search_mapfiles(self, path):
         maps = []
+        if not os.path.exists(path):
+            print "maps not found"
+            return
         for file in os.listdir(path):
             dirfile = os.path.join(path, file)
 
@@ -281,6 +286,10 @@ class UDKbuild(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):  # gets called when the thread is created
+        if not os.path.exists(self.exe_path):
+            print "UDK.exe not found!!!"
+            self.stop()
+            return
         pipe = subprocess.Popen([self.exe_path, "make"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # saves output lines
         while True:

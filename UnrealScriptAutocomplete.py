@@ -33,7 +33,7 @@ current_location = None
 # how many seconds the help panel will stay up
 OPEN_TIME = 10
 
-
+# prints the text to the "helper panel" (Actually the console)
 def print_to_panel(view, text):
     panel = view.window().get_output_panel('UnrealScriptAutocomplete_panel')
     panel_edit = panel.begin_edit()
@@ -43,6 +43,7 @@ def print_to_panel(view, text):
     view.window().run_command("show_panel", {"panel": "output.UnrealScriptAutocomplete_panel"})
 
 
+# only used to hide the panel. The hide_panel doesn't work as a global function, so this is a workaround
 class HelperObject:
     pending_modification = 0
 
@@ -61,6 +62,7 @@ class HelperObject:
 class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
     def run(self, edit, b_new_start_point=False):
         active_file = self.view.file_name()
+
         if is_unrealscript_file(active_file):
             region_word = self.view.word(self.view.sel()[0])
             word = self.view.substr(region_word)
@@ -77,6 +79,8 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                     last_location = None
                     return
 
+            # ! TODO:   adapt to class object.
+            #           get line and check if it has a '.' before the variable
             # search the current word in functions, variables and classes and if found, open the file.
             _class = self.get_class(word)
             if _class != None:
@@ -94,8 +98,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                 return
 
             # if the word wasn't found:
-            print word + " not found"    # print_to_panel(self.view, word + " not found")
-            sublime.set_timeout(lambda: self.hide_panel(self.view), OPEN_TIME * 1000)
+            self.view.set_status('UnrealScriptGotoDefinition', '"' + word + '" not found!')
 
         elif is_unreal_log_file(active_file):
             line = self.view.substr(self.view.line(self.view.sel()[0]))
@@ -103,13 +106,15 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
             if len(split_line) > 1:
                 self.open_file(split_line[0], split_line[1], True)
             else:
-                print '"', line, '"', " not found!!"
+                self.view.set_status('UnrealScriptGotoDefinition', '"' + line + '" not found!')
 
+    # opens the file (file_name) at (line_number). If b_new_start_point is true, save the current position.
     def open_file(self, file_name, line_number=1, b_new_start_point=False):
         global last_location, current_location
         active_file = self.view.file_name()
         window = sublime.active_window()
 
+        # save position, if we either didn't save any before, or b_new_start_point is set to true
         if last_location == None or b_new_start_point:
             # Save current position so we can return to it
             row, col = self.view.rowcol(self.view.sel()[0].begin())
@@ -121,7 +126,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
             window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
             current_location = file_name
         else:
-            print file_name + 'does not exist'
+            self.view.set_status('UnrealScriptGotoDefinition', '"' + file_name + '" does not exist!')
 
     def get_function(self, name):
         global functions_reference
@@ -137,6 +142,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
                 return variable
         return None
 
+    # ! TODO: change to class object.
     # (class_name, class_path, description)
     def get_class(self, name):
         global classes_reference
@@ -157,10 +163,13 @@ class UnrealScriptAutocomplete:
     # store all variables
     _variables = []
     # store all parent classes and information. (class_name, class_path, description)
+    # ! TODO: use classes object
     _classes = []
     # stores all functions, variables and classes to use on a file
+    # ! TODO: Maybe make an object for this?
     _functions_for_file = []
 
+    # clear the completions for the current file. To reset, use clear_all
     def clear(self):
         self._functions = []
         self._variables = []
@@ -188,22 +197,26 @@ class UnrealScriptAutocomplete:
         return None
 
     # (class_name, class_path, description)
+    # ! TODO: adept to class object
     def get_class(self, name):
         for _class in self._class:
             if _class[0].lower() == name.lower():
                 return _class
         return None
 
+    # saves all completions to a file.
+    # ! TODO: save per filename, save same functions multiple times, but add a variable if it already exists
     def save_functions_to_list(self, filename):
         names = [x[1] for x in self._functions_for_file]
 
         if filename not in names:
             self._functions_for_file.append((self._functions, filename, self._variables, self._classes))
-
+            
     def get_autocomplete_list(self, word, b_only_var=False, b_only_classes=False):
         autocomplete_list = []
 
         # filter relevant items:
+        # ! TODO: adept to class object
         for _class in self._classes:
             if word.lower() in _class[0].lower():
                 autocomplete_list.append((_class[0], _class[0]))
@@ -687,6 +700,35 @@ class Variable:
         print_to_panel(view, documentation)
 
 
+# stores classes
+class ClassReference:
+    def __init__(self, class_name, parent_class, description, file_name):
+        self._name = class_name
+        self._description = description
+        self._file_name = file_name
+        self._parent_class = parent_class
+
+    def description(self):
+        return self._description
+
+    def name(self):
+        return self._name
+
+    def file_name(self):
+        return self._file_name
+
+    def parent_class(self):
+        return self._parent_class
+
+    def insert_dynamic_snippet(self, view):
+        self.create_dynamic_tooltip(view)
+        view.run_command("insert_snippet", {"contents": (Class_Variable % {"name": self._name})})
+
+    def create_dynamic_tooltip(self, view):
+        documentation = self.description() + "class " + self.name() + "extends " + self.parent_class() + ";"
+        print_to_panel(view, documentation)
+
+
 Function_Snippet_Declaration = \
 """%(description)s%(function_modifiers)s%(return_type)s%(funct)s %(function_name)s(%(arguments)s)
 {
@@ -704,4 +746,7 @@ Variable_Snippet_Declaration = \
 """
 
 Variable_Snippet_Name = \
+"""%(name)s"""
+
+Class_Variable = \
 """%(name)s"""
