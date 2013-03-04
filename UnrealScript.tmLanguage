@@ -5,6 +5,7 @@
 	<key>fileTypes</key>
 	<array>
 		<string>uc</string>
+		<string>uci</string>
 	</array>
 	<key>foldingStartMarker</key>
 	<string>/\*\*|\{\s*$</string>
@@ -67,37 +68,136 @@
 			<key>include</key>
 			<string>#cpptext</string>
 		</dict>
+
+		<!-- declaration keywords -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(abstract|native|nativereplication|hidecategories|private|transient|deprecated|editconst|static|final|simulated|out|local|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements))\b</string>
+			<string>\b(?i:(class|interface|event|function|state|ignores|const|var|local|struct|enum|operator|preoperator|postoperator))\b</string>
 			<key>name</key>
-			<string>keyword.control.unrealscript</string>
-			
+			<string>keyword.declaration.unrealscript</string>
 		</dict>
+
+		<!-- block keywords (end/begin needs a custom implementation to for the full syntax "begin object VARS?..."-->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(Actor|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|SequenceEvent|Sequence|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|Components|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|PlayerOwner|Material|WidgetBindings|self|Instigator))\b</string>
+			<string>\b(?i:(structdefaultproperties|cpptext|structcpptext|cppstruct|defaultproperties|replication|begin|end))\b</string>
+			<key>name</key>
+			<string>keyword.block.unrealscript</string>
+		</dict>
+
+		<!-- modifier keywords -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(abstract|native|intrinsic|noexport|nativereplication|hidecategories|public|private|transient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|extends|expands|within|reliable|server|exec|editinline|repnotify|optional|virtual))\b</string>
+			<key>name</key>
+			<string>keyword.modifier.unrealscript</string>
+		</dict>
+
+		<!-- literal keywords -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(none|true|false|vect|rot|rng))\b</string>
+			<key>name</key>
+			<string>constant.literal.unrealscript</string>
+		</dict>
+
+		<!-- specifier keywords -->
+		<dict>
+			<key>match</key>
+			<!-- 
+				class'a' 
+					?.const.constName 
+					?.static.functionName 
+					?.default.varName
+
+			 	super|global|static.functionName 
+			 	self|default|const.fieldName
+			-->
+			<string>\b(?i:(default|super|global|static|const|self))\b</string>
+			<key>name</key>
+			<string>keyword.specifier.unrealscript</string>
+		</dict>
+
+		<!-- Built-in data types -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(byte|int|bool|array|map|delegate|button|class|float|name|string))\b</string>
 			<key>name</key>
 			<string>storage.type.unrealscript</string>
 		</dict>
+
+		<!-- Metafields(http://wiki.beyondunreal.com/Metadata ... An article I wrote on metadata - Eliot) -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(class|extends|const|array|var|struct|cpptext|if|else|case|break|while|foreach|replication|event|reliable|server|exec|function|Switch|defaultproperties|Super|delegate|none|other|editinline|repnotify|virtual|default|within|AddEventListener|ConsoleCommand))\b</string>
+			<string>\b(?i:(AllowAbstract|ArrayClamp|AutoComment|bShowOnlyWhenTrue|ClampMax|ClampMin|DisplayName|DMCOnly|EditCondition|FixedIncrement|FullyExpand|MaxPropertyDepth|MultilineWithMaxRows|Multiple|OrderIndex|RealTime|ScriptOrder|ToolTip|UIMax|UIMin))=\b</string>
 			<key>name</key>
-			<string>storage.modifier.unrealscript</string>
+			<string>storage.metafield.unrealscript</string>
 		</dict>
+
+		<!-- Common objects -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(bool|int|vector|rotator|float|enum|Name|Quat|byte|return|string|spawn|true|false|state|EPhysics|void|UBOOL|Widget|Add|Begin|End|sleep|GotoState|Goto))\b</string>
+			<string>\b(?i:(Actor|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|SequenceEvent|Sequence|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|Components|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|PlayerOwner|Material|WidgetBindings|Instigator))\b</string>
+			<key>name</key>
+			<string>storage.type.unrealscript</string>
+		</dict>
+
+		<!-- Common data structures -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(rotator|vector|scale|quat|qword|double|color|pointer|linearcolor|vector2d|vector4|twovectors|plane|intpoint|guid|box|boxspherebounds|matrix|cylinder|BoneAtom))\b</string>
+			<key>name</key>
+			<string>storage.struct.unrealscript</string>
+		</dict>
+
+		<!-- Common enumerations -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(AlphaBlendType|EAxis|EInputEvent|EPhysics|ENetRole|ECollisionType|ETickingGroup|EDoubleClickDir|ETravelType|EMoveDir|EActorMetricsType))\b</string>
+			<key>name</key>
+			<string>storage.enum.unrealscript</string>
+		</dict>
+
+		<!-- Common constants defined in Object and Actor that serve a purpose in subclasses -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(MaxInt|RadToDeg|DegToRad|UnrRotToRad|RadToUnrRot|DegToUnrRot|UnrRotToDeg|INDEX_NONE|Pi|AspectRatio4x3|AspectRatio5x4|AspectRatio16x9|InvAspectRatio4x3|InvAspectRatio5x4|InvAspectRatio16x9|MINFLOORZ|ACTORMAXSTEPHEIGHT|TRACEFLAG_Bullet|TRACEFLAG_PhysicsVolumes|TRACEFLAG_SkipMovers|TRACEFLAG_Blocking))\b</string>
+			<key>name</key>
+			<string>constant.constants.unrealscript</string>
+		</dict>
+
+		<!-- UnrealScript flow keywords -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(filtereditoronly|if|else|break|continue|do|until|while|goto|assert|return|for|foreach|switch|case))\b</string>
+			<key>name</key>
+			<string>storage.control.unrealscript</string>
+		</dict>
+
+		<!-- compile constants(assert is actually an hardcoded function - Eliot) -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(nameof|arraycount|enumcount))\b</string>
 			<key>name</key>
 			<string>constant.language.unrealscript</string>
 		</dict>
+
+		<!-- decimals and hexadecimals -->
 		<dict>
 			<key>match</key>
-			<string>\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\.?[0-9]*)|(\.[0-9]+))((e|E)(\+|-)?[0-9]+)?)(L|l|UL|ul|u|U|F|f|ll|LL|ull|ULL)?\b</string>
+			<string>\b((0(x|X)[0-9a-fA-F]*)|(([0-9]+\.?[0-9]*)|(\.[0-9]+))((e|E)(\+|-)?[0-9]+)?)(F|f)?\b</string>
 			<key>name</key>
 			<string>constant.numeric.unrealscript</string>
 		</dict>
+
+		<!-- Matches any puncation and known named operators (TODO:Split the operators and a part of the puncations - Eliot) -->
+		<dict>
+			<key>match</key>
+			<string>([?,.;()\[\]{}+\-/%*=&lt;&gt;^+~!|&amp;]+)|(\b(?i:(Dot|Cross|ClockwiseFrom|New)?)\b)</string>
+			<key>name</key>
+			<string>punctuation.operator.unrealscript</string>
+		</dict>
+
 		<dict>
 			<key>begin</key>
 			<string>"</string>
@@ -335,10 +435,13 @@
 		<dict>
 			<key>begin</key>
 			<string>^\s*#\s*if(n?def)?\b.*$</string>
+
 			<key>comment</key>
 			<string>eat nested preprocessor if(def)s</string>
+
 			<key>end</key>
 			<string>^\s*#\s*endif\b.*$</string>
+
 			<key>patterns</key>
 			<array>
 				<dict>
