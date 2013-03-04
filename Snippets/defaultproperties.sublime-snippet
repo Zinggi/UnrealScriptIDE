@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-defaultproperties
+DefaultProperties
 {
 	${1://defaults}
 }]]></content>
