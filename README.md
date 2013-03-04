@@ -83,7 +83,7 @@ Please refer to the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
 
 ------------
 All **credits** for various Snippets (and also for the old (now unused) Syntax highlighting file) goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!
-All **credits** for Syntax highlighting in UnrealScript files to **[Rokit](https://github.com/rokit)** and **[Eliot](https://github.com/EliotVU)**. Thanks!
+All **credits** for Syntax highlighting in UnrealScript files goes to **[Rokit](https://github.com/rokit)** and **[Eliot](https://github.com/EliotVU)**. Thanks!
 **credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
 
 My auto-complete settings
