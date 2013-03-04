@@ -101,7 +101,6 @@
                 "implements",
                 "Inherits",
                 "NonTransient",
-                "DefaultProperties",
                 "StructDefaultProperties"
         ]
 }
