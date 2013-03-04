@@ -25,13 +25,16 @@ import os
 import re
 
 
+# stores the currently used completions for this file. needed for Goto Declaration
 functions_reference, variables_reference, classes_reference = [], [], []
+
 last_location = None
 current_location = None
 
 
 # how many seconds the help panel will stay up
 OPEN_TIME = 10
+
 
 # prints the text to the "helper panel" (Actually the console)
 def print_to_panel(view, text):
@@ -58,7 +61,7 @@ class HelperObject:
 
 
 # opens the definition of the current selected word.
-#   if b_new_start_point is true, the current cursor position will be stored.
+#  - if b_new_start_point is true, the current cursor position will be stored.
 class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
     def run(self, edit, b_new_start_point=False):
         active_file = self.view.file_name()
@@ -72,7 +75,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
 
             # if no word is selected or the cursor is at the beginning of the line, return to last location
             row, col = self.view.rowcol(self.view.sel()[0].begin())
-            if last_location != None and (word.strip() == "" or col == 0):
+            if last_location is not None and (word.strip() == "" or col == 0):
                 if current_location.lower() == active_file.lower():
                     window.open_file(last_location, sublime.ENCODED_POSITION)
                     window.open_file(last_location, sublime.ENCODED_POSITION)
@@ -83,17 +86,17 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
             #           get line and check if it has a '.' before the variable
             # search the current word in functions, variables and classes and if found, open the file.
             _class = self.get_class(word)
-            if _class != None:
+            if _class is not None:
                 self.open_file(_class[1], 1, b_new_start_point)
                 return
 
             function = self.get_function(word)
-            if function != None:
+            if function is not None:
                 self.open_file(function.file_name(), function.line_number(), b_new_start_point)
                 return
 
             variable = self.get_variable(word)
-            if variable != None:
+            if variable is not None:
                 self.open_file(variable.file_name(), variable.line_number(), b_new_start_point)
                 return
 
@@ -115,7 +118,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand, HelperObject):
         window = sublime.active_window()
 
         # save position, if we either didn't save any before, or b_new_start_point is set to true
-        if last_location == None or b_new_start_point:
+        if last_location is None or b_new_start_point:
             # Save current position so we can return to it
             row, col = self.view.rowcol(self.view.sel()[0].begin())
             last_location = "%s:%d" % (active_file, row + 1)
@@ -162,27 +165,30 @@ class UnrealScriptAutocomplete:
     _functions = []
     # store all variables
     _variables = []
-    # store all parent classes and information. (class_name, class_path, description)
     # ! TODO: use classes object
+    # store all classes (not just parent classes)
+    # - at the beginning search trough the whole source folder and fill this
     _classes = []
-    # stores all functions, variables and classes to use on a file
+    # old (stores all functions, variables and classes to use on a file)
     # ! TODO: Maybe make an object for this?
-    _functions_for_file = []
+    #  - this should actually hold a copy of _functions and _variables to use on one specific file (without the information from parent classes)
+    _completions_for_file = []
 
     # clear the completions for the current file. To reset, use clear_all
     def clear(self):
         self._functions = []
         self._variables = []
-        self._classes = []
+        # ! NEW changed: _classes should remain on all files, because they are always relevant
+        # self._classes = []
 
     def add_func(self, function_modifiers, return_type, function_name, arguments, line_number, file_name, description="", is_funct=1):
-        if self.get_function(function_name) == None:
+        if self.get_function(function_name) is None:
             if function_name != "":
                 self._functions.append(Function(function_modifiers, return_type, function_name, arguments, line_number + 1, file_name, description, is_funct))
 
     def add_var(self, var_modifiers, var_name, comment, line_number, file_name, description=""):
-        if self.get_variable(var_name) == None:
-            self._variables.append(Variable(var_modifiers, var_name, comment, line_number + 1, file_name, description=""))
+        if self.get_variable(var_name) is None:
+            self._variables.append(Variable(var_modifiers, var_name, comment, line_number + 1, file_name, description))
 
     def get_function(self, name):
         for function in self._functions:
@@ -196,35 +202,45 @@ class UnrealScriptAutocomplete:
                 return variable
         return None
 
-    # (class_name, class_path, description)
+    # ! NEW
+    def add_class(self, class_name, parent_class, description, file_name):
+        if self.get_class(class_name) is None:
+            self._classes.append(ClassReference(class_name, parent_class, description, file_name))
+
+    # old (class_name, class_path, description)
+
     # ! TODO: adept to class object
+    # ! NEW changed:
     def get_class(self, name):
-        for _class in self._class:
-            if _class[0].lower() == name.lower():
+        for _class in self._classes:
+            if _class.name().lower() == name.lower():
                 return _class
         return None
 
     # saves all completions to a file.
     # ! TODO: save per filename, save same functions multiple times, but add a variable if it already exists
-    def save_functions_to_list(self, filename):
-        names = [x[1] for x in self._functions_for_file]
+    # ! NEW changed: don't save classes, filename at index 0
+    def save_completions_to_file(self, filename):
+        names = [x[0] for x in self._completions_for_file]
 
         if filename not in names:
-            self._functions_for_file.append((self._functions, filename, self._variables, self._classes))
-            
+            self._completions_for_file.append((filename, self._functions, self._variables))
+
+    # returns the current suggestions for this file.
     def get_autocomplete_list(self, word, b_only_var=False, b_only_classes=False):
         autocomplete_list = []
 
         # filter relevant items:
         # ! TODO: adept to class object
+        # ! NEW changed: done
         for _class in self._classes:
-            if word.lower() in _class[0].lower():
-                autocomplete_list.append((_class[0], _class[0]))
+            if word.lower() in _class.name().lower():
+                autocomplete_list.append((_class.name(), _class.name()))
 
         if not b_only_classes:
             for variable in self._variables:
                 if word.lower() in variable.name().lower():
-                    autocomplete_list.append((variable.name(), variable.name()))
+                    autocomplete_list.append((variable.name() + '\t' + variable.var_modifiers(), variable.name()))
 
             if not b_only_var:
                 for function in self._functions:
@@ -235,7 +251,7 @@ class UnrealScriptAutocomplete:
         return autocomplete_list
 
 
-# Creates threads for collecting any function, event or variable in the project folder that is relevant. e.g. collects from parent classes.
+# Creates threads (FunctionsCollectorThread) for collecting any function, event or variable in the project folder that is relevant. e.g. collects from parent classes.
 class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener, HelperObject):
     # active threads
     _collector_threads = []
@@ -248,16 +264,20 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
     # def on_close(self, view):
     #     pass
 
-    def on_post_save(self, view):  # gets called when a file is saved. reset everything
-        if view.file_name() != None and is_unrealscript_file(view.file_name()):
+    # gets called when a file is saved. reset everything
+    # ! TODO: only re-parse the just saved file
+    def on_post_save(self, view):
+        if view.file_name() is not None and is_unrealscript_file(view.file_name()):
             self.clear_all()
-            self.on_activated(view)
+            # self.on_activated(view)
 
     # start parsing when a tab becomes active
+    # ! TODO:   start parsing when sublime is opened.
+    #           at startup, scan for all classes and save them to _classes
     def on_activated(self, view):
         self.clear()    # empty the completions list, so that we only get the relevant ones.
 
-        if view.file_name() != None and is_unrealscript_file(view.file_name()):
+        if view.file_name() is not None and is_unrealscript_file(view.file_name()):
             open_folder_arr = view.window().folders()   # Gets all opened folders in the Sublime Text editor.
 
             if view.file_name() not in self._filenames:     # if the file wasn't parsed before
@@ -266,66 +286,72 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
 
             else:
                 # print("already parsed")
-                names = [x[1] for x in self._functions_for_file]
+                # ! TODO:   load from all parent classes
+                #           create a function for it
+                # ! NEW changed: removed _classes, index change
+                names = [x[0] for x in self._completions_for_file]
                 for i, name in enumerate(names):
                     if view.file_name() == name:    # get the functions we saved for the current file
-                        self._functions = self._functions_for_file[i][0]
-                        self._variables = self._functions_for_file[i][2]
-                        self._classes = self._functions_for_file[i][3]
-                        global functions_reference, variables_reference, classes_reference
+                        self._functions = self._completions_for_file[i][1]
+                        self._variables = self._completions_for_file[i][2]
+                        global functions_reference, variables_reference     # , classes_reference
                         functions_reference = self._functions
                         variables_reference = self._variables
-                        classes_reference = self._classes
+                        # classes_reference = self._classes
 
             self.handle_threads(self._collector_threads, view)  # display progress bar
 
-    # This function is called when auto-complete pop-up box is displayed and this function returns an array with tuples:
-    # [('<label>', '<text-to-paste>'),......]
+    # This function is called when auto-complete pop-up box is displayed.
+    # Used to get context sensitive suggestions
     def on_query_completions(self, view, prefix, locations):
         current_file = view.file_name()
         completions = []
+        b_got_list = False
 
-        if current_file != None and is_unrealscript_file(current_file):
+        if current_file is not None and is_unrealscript_file(current_file):
             # check if in at class declaration:
             line = view.line(view.sel()[0])
             line_contents = view.substr(line)
             if "class" in line_contents and "extends" in line_contents:
                 print "get classes"
-                return self.get_autocomplete_list(prefix, False, True)
+                completions = self.get_autocomplete_list(prefix, False, True)
+                b_got_list = True
 
-            # if is in defaultproperties, only get variables:
-            line_number = 1000000
-            defaultproperties_region = view.find('defaultproperties', 0, sublime.IGNORECASE)
-            if defaultproperties_region:
-                (line_number, col) = view.rowcol(defaultproperties_region.a)
-            else:
-                # no defaultproperties found
-                return self.get_autocomplete_list(prefix)
+            if not b_got_list:
+                # if is in defaultproperties, only get variables:
+                line_number = 1000000
+                defaultproperties_region = view.find('defaultproperties', 0, sublime.IGNORECASE)
+                if defaultproperties_region:
+                    (line_number, col) = view.rowcol(defaultproperties_region.a)
+                    (row, col) = view.rowcol(view.sel()[0].begin())
+                    if row > line_number:
+                        # below defaultproperties
+                        completions = self.get_autocomplete_list(prefix, True)
+                    else:
+                        # above defaultproperties
+                        completions = self.get_autocomplete_list(prefix)
+                else:
+                    # no defaultproperties found
+                    completions = self.get_autocomplete_list(prefix)
 
-            (row, col) = view.rowcol(view.sel()[0].begin())
-            if row > line_number:
-                # below defaultproperties
-                return self.get_autocomplete_list(prefix, True)
-            else:
-                # above defaultproperties
-                return self.get_autocomplete_list(prefix)
-
-        return (completions, sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+        return (completions, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
 
     # called right before auto completion.
     def on_query_context(self, view, key, operator, operand, match_all):
         current_file = view.file_name()
-        if current_file != None and is_unrealscript_file(current_file):
+        if current_file is not None and is_unrealscript_file(current_file):
             if key == "insert_dynamic_snippet":
                 region = view.sel()[0]
                 if region.empty():
                     self.b_did_autocomplete = True
 
     # remove auto completion and insert dynamic snippet instead, just after auto completion
+    # ! TODO:   fix problems with snippets in snippets.
+    #           only remove completion if a better suggestion was found.
     def on_modified(self, view):
         current_file = view.file_name()
 
-        if current_file != None and is_unrealscript_file(current_file):
+        if current_file is not None and is_unrealscript_file(current_file):
             if self.b_did_autocomplete:
                 self.b_did_autocomplete = False
 
@@ -353,7 +379,10 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
         self._collector_threads.append(FunctionsCollectorThread(self, file_name, 30, open_folder_arr))
         self._collector_threads[-1].start()
 
+    # animates an activity bar.
+    # does things when everything is finished
     def handle_threads(self, threads, view, i=0, dir=1):
+        # remove finished threads
         for thread in threads:
             if not thread.isAlive():
                 threads.remove(thread)
@@ -367,23 +396,28 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
             if not before:
                 dir = 1
             i += dir
-            view.set_status('UnrealScriptAutocomplete', 'UnrealScriptAutocomplete is Parsing [%s=%s]' % \
-                (' ' * before, ' ' * after))
+            view.set_status('UnrealScriptAutocomplete', 'UnrealScriptAutocomplete is Parsing [%s=%s]' % (' ' * before, ' ' * after))
 
             sublime.set_timeout(lambda: self.handle_threads(threads, view, i, dir), 100)
             return
         else:
+            # ! TODO: somehow save this when a single thread is finished, not when all are done, probably do this in the thread itself..
             #finished and keep functions for later use
-            self.save_functions_to_list(view.file_name())
+            self.save_completions_to_file(view.file_name())
             view.erase_status('UnrealScriptAutocomplete')
-            global functions_reference, variables_reference, classes_reference
+            # ! TODO: this should be done differently
+            global functions_reference, variables_reference  # , classes_reference
             functions_reference = self._functions
             variables_reference = self._variables
-            classes_reference = self._classes
+            # classes_reference = self._classes
 
+    # reset all and start from anew
     def clear_all(self):
-        self._functions_for_file = []
+        self.clear()
+        self._completions_for_file = []
         self._filenames = []
+        # re-parse (problem: no view object)
+        # self.on_activated(view)
 
 
 # create a new thread for scanning one file, as this may take a while.
@@ -397,27 +431,30 @@ class FunctionsCollectorThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):  # gets called when the thread is created
-        if self.filename != None:
+        if self.filename is not None:
             self.save_functions(self.filename)  # parse current file
 
-        description = ""
-        with open(self.filename, 'rU') as file_lines:
-            for line in file_lines:
-                description += line
-                classline = re.match(r'(class\b.+\bextends )(\b.+\b)', line.lower())  # get class declaration line of current file
-                if classline != None:
-                    parent_class_name = classline.group(2)    # get parent class
+            description = ""
+            with open(self.filename, 'rU') as file_lines:
+                for line in file_lines:
+                    description += line
+                    classline = re.match(r'(class\b.+\bextends )(\b.+\b)', line.lower())  # get class declaration line of current file
+                    if classline is not None:
+                        parent_class_name = classline.group(2)    # get parent class
 
-                    # search open folders for parent class file
-                    for folder in self.open_folder_arr:
-                        parent_file = self.search_file(folder, parent_class_name)
-                        self.collector._classes.append((parent_class_name, parent_file, description))
-                        if parent_file != None:
-                            self.collector.add_thread(parent_file, self.open_folder_arr)    # create a new thread to do the same stuff on the parent_file
-                        else:
-                            pass    # print "parent file not found in: ", folder
-                    break
+                        # search open folders for parent class file
+                        # ! TODO: use the _classes to search for the file and don't append classes here
+                        for folder in self.open_folder_arr:
+                            parent_file = self.search_file(folder, parent_class_name)
+                            # self.collector._classes.append((parent_class_name, parent_file, description))
+                            if parent_file is not None:
+                                self.collector.add_thread(parent_file, self.open_folder_arr)    # create a new thread to do the same stuff on the parent_file
+                                break
+                            else:
+                                pass    # print "parent file not found in: ", folder
+                        break
 
+        # ! TODO: here i should probably save all found completions to the _completions_for_file
         self.stop()
 
     # search for the given file (file_name) in the given path (path). Returns the found file.
@@ -432,7 +469,7 @@ class FunctionsCollectorThread(threading.Thread):
 
             elif os.path.isdir(dirfile):
                 match = self.search_file(dirfile, file_name)
-                if match != None:
+                if match is not None:
                     return match
 
     # extract functions, event and variables (TODO: STRUCTS, ENUMS, CONST) and split them into smaller groups.
@@ -475,8 +512,8 @@ class FunctionsCollectorThread(threading.Thread):
                         regex_str = r'(.*)\bevent \b(\b.*\b)(.+)\((.*)\)'
 
                     matches = re.search(regex_str, line)        # search for:  1: modifiers, 2: return type, 3: name, 4: arguments
-                    if matches != None:
-                        if matches.group(3) == None or matches.group(3) == " ":     # fail
+                    if matches is not None:
+                        if matches.group(3) is None or matches.group(3) == " ":     # fail
                             matches = self.extract_complicated_function(line, b_function)   # try again without regex
                             self.collector.add_func(matches[0], matches[1], matches[2], matches[3], i, file_name, current_documentation, b_function)
                             current_documentation = ""
@@ -496,8 +533,8 @@ class FunctionsCollectorThread(threading.Thread):
 
                         new_line = ' '.join(line.split())
                         matches = re.search(regex_str, new_line)        # search for:  1: modifiers, 2: return type, 3: name, 4: arguments
-                        if matches != None:
-                            if matches.group(3) == None or matches.group(3) == " ":
+                        if matches is not None:
+                            if matches.group(3) is None or matches.group(3) == " ":
                                 matches = self.extract_complicated_function(new_line, b_function)
                                 self.collector.add_func(matches[0], matches[1], matches[2], matches[3], i, file_name, current_documentation, b_function)
                                 current_documentation = ""
@@ -568,14 +605,13 @@ class FunctionsCollectorThread(threading.Thread):
 def is_unrealscript_file(filename):
     return '.uc' in filename
 
+
 def is_unreal_log_file(filename):
     return '.log' in filename
 
 
 # class to store a function/ event
 class Function:
-    # _function_modifiers = "" # _return_type = "" # _function_name = "" # _arguments = "" # _line_number = -1 # _file_name = "" # _description = "" # _b_is_function = -1
-
     def __init__(self, function_modifiers, return_type, function_name, arguments, line_number, file_name, description, is_funct):
         self._function_modifiers = function_modifiers
         self._return_type = return_type
@@ -626,13 +662,13 @@ class Function:
             if self._description != "":
                 description = '${1:' + self._description + '}'
             view.run_command("insert_snippet",
-                            {"contents": (Function_Snippet_Declaration % {"function_modifiers": self._function_modifiers,
+                            {"contents": (Function_Snippet_Declaration % {  "function_modifiers": self._function_modifiers,
                                                                             "return_type": self._return_type,
-                                                                             "function_name": self._function_name,
-                                                                             "arguments": self._arguments,
-                                                                             "description": description,
-                                                                             "funct": "function" if self._b_is_function == 1 else "event",
-                                                                             "less_arguments": less_arguments})})
+                                                                            "function_name": self._function_name,
+                                                                            "arguments": self._arguments,
+                                                                            "description": description,
+                                                                            "funct": "function" if self._b_is_function == 1 else "event",
+                                                                            "less_arguments": less_arguments})})
         else:
             less_args = self._arguments.split(',')
             arguments = ""
@@ -653,8 +689,6 @@ class Function:
 
 # stores variables
 class Variable:
-    # _variable_modifiers = "" # _name = "" # _description = "" # _comment = "" # _file_name = "" # _line_number = -1
-
     def __init__(self, var_modifiers, var_name, comment, line_number, file_name, description=""):
         self._variable_modifiers = var_modifiers
         self._name = var_name
@@ -700,7 +734,7 @@ class Variable:
         print_to_panel(view, documentation)
 
 
-# stores classes
+# ! NEW stores classes
 class ClassReference:
     def __init__(self, class_name, parent_class, description, file_name):
         self._name = class_name
@@ -738,8 +772,7 @@ Function_Snippet_Declaration = \
 """
 
 Function_Snippet_Call = \
-"""%(function_name)s(%(arguments)s)%(end_stop)s
-"""
+"""%(function_name)s(%(arguments)s)%(end_stop)s"""
 
 Variable_Snippet_Declaration = \
 """%(description)s%(var_modifiers)s%(name)s;%(comment)s

@@ -1,11 +1,11 @@
 <snippet>
 	<content><![CDATA[
-do
+defaultproperties
 {
-	$1
-} until(${2:true})]]></content>
+	${1://defaults}
+}]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>do</tabTrigger>
+	<tabTrigger>defaultproperties</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
 </snippet>

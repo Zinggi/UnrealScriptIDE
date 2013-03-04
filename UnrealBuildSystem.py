@@ -38,7 +38,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     # find src folder and start building
     def run(self, edit, b_build_and_run=False):
-        if self.view.file_name() != None:   # and is_unrealscript_file(self.view.file_name()):
+        if self.view.file_name() is not None:   # and is_unrealscript_file(self.view.file_name()):
             self.settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
             possible_src_folders = []
             open_folder_arr = self.view.window().folders()   # Gets all opened folders in the Sublime Text editor.
@@ -86,8 +86,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             if not before:
                 dir = 1
             i += dir
-            self.view.set_status('UnrealScript build', 'UnrealScriptIDE is building your project [%s=%s]' % \
-                (' ' * before, ' ' * after))
+            self.view.set_status('UnrealScript build', 'UnrealScriptIDE is building your project [%s=%s]' % (' ' * before, ' ' * after))
 
             sublime.set_timeout(lambda: self.handle_thread(i, dir), 100)
             return

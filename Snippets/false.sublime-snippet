@@ -1,11 +1,7 @@
 <snippet>
-	<content><![CDATA[
-do
-{
-	$1
-} until(${2:true})]]></content>
+	<content><![CDATA[false]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
-	<tabTrigger>do</tabTrigger>
+	<tabTrigger>false</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
 </snippet>
