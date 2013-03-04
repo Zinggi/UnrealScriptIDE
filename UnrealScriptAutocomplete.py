@@ -334,7 +334,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener,
                     # no defaultproperties found
                     completions = self.get_autocomplete_list(prefix)
 
-            return (completions, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
+            return completions  # , sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS)
 
     # called right before auto completion.
     def on_query_context(self, view, key, operator, operand, match_all):
