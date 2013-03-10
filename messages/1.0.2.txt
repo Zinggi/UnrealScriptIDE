@@ -6,7 +6,11 @@ New Stuff:
 ----------
 
 * **Performance increase**
-	* This comes with a downside of performance decrease at startup, but after startup it will be much faster
+	* This comes with a downside of performance decrease at the very first startup, but after that it will be much faster
+	* I'm saving a list of all classes to a cache file at startup, so that I can later load the classes from it.
+	  
+	  PLEASE NOTE: If you create new class files, modify the file name of your class or modify what your class extends
+		you'll have to delete the cache file to rebuild the class list (and restart Sublime). The cache file is in your Src directory and is named: classes_cache.obj
 
 * **Classes auto-completion**
 	* classes do now also appear in the completions list.

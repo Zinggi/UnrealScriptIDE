@@ -10,7 +10,7 @@
 #       -same for goto definition (almost there...)
 #
 # ! BUGS:
-#       -freeze at start-up because I'm parsing all classes
+#       -freeze at first start-up because I'm parsing all classes
 #
 # (c) Florian Zinggeler
 #-----------------------------------------------------------------------------------
@@ -19,6 +19,7 @@ import sublime_plugin
 import threading
 import os
 import re
+import pickle
 
 
 # stores the currently used completions for this file. needed for Goto Declaration
@@ -384,13 +385,16 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
     # ! TODO: fix startup bug: is true at the very beginning, but setting it to true,
     # therefore parsing all classes, freezes sublime at startup
     # - For debugging set this to true
-    b_first_time = False
+    b_first_time = True
     # when the first UnrealScript file is opened, all classes will be parsed.
     # During this time, no other threads shall be created and this will be True.
     b_still_parsing_classes = True
 
     # active threads
     _collector_threads = []
+
+    # the path to the src folder. This is used to save and load cache
+    src_folder = ""
 
     # will be set to true just after auto-completion
     b_did_autocomplete = False
@@ -405,11 +409,11 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
     # ! TODO: This fixes freezing at startup.
     #         not an elegant solution...
     #         while debugging uncomment this, because if it is on you have to restart sublime every time you want to try something
-    def on_load(self, view):
-        sublime.set_timeout(lambda: self.activate_plugin(), 1000)
+    # def on_load(self, view):
+    #     sublime.set_timeout(lambda: self.activate_plugin(), 1000)
 
-    def activate_plugin(self):
-        self.b_first_time = True
+    # def activate_plugin(self):
+    #     self.b_first_time = True
 
     # gets called when a file is saved. re-parse the current file.
     def on_post_save(self, view):
@@ -563,6 +567,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
                 self.b_still_parsing_classes = False
                 global classes_reference
                 classes_reference = self._classes
+                self.save_classes_to_cache()
                 self.on_activated(view)
             else:
                 global b_wanted_to_go_to_definition
@@ -592,6 +597,31 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
         # ! BUG: re-parse (problem: no view object)
         # self.on_activated(view)
 
+    # save the _classes array to a cache file in the src folder
+    def save_classes_to_cache(self):
+        if os.path.exists(self.src_folder):
+            with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'w') as cache_file:
+                pickle.dump(self._classes, cache_file)
+
+    # loads the _classes from the cache file
+    def load_classes_from_cache(self):
+        if os.path.exists(self.src_folder):
+            with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'r') as cache_file:
+                self._classes = pickle.load(cache_file)
+
+
+# rebuild cache: this will simply delete the cache file so that it can then rebuild the classes.
+class RebuildCacheCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        open_folder_arr = self.view.window().folders()
+        if open_folder_arr:
+            for f in open_folder_arr:
+                if "Development\\Src" in f:
+                    # if we saved the classes to a cache before, delete it.
+                    if os.path.exists(os.path.join(f, "classes_cache.obj")):
+                        pass
+                        # here I should fire an event to re-parse classes and re-build the cache
+
 
 # Adds the class inside (filename) to the collector.
 # if b_first is true, creates a thread for every file in the src directory
@@ -608,7 +638,14 @@ class ClassesCollectorThread(threading.Thread):
         if self.b_first:
             for f in self.open_folder_arr:
                 if "Development\\Src" in f:
-                    self.get_classes(f, self.open_folder_arr)
+                    self.collector.src_folder = f
+                    # if we saved the classes to a cache before, load them from there.
+                    if os.path.exists(os.path.join(f, "classes_cache.obj")):
+                        print "cache exists. Loading classes from memory"
+                        self.collector.load_classes_from_cache()
+                    else:
+                        self.get_classes(f, self.open_folder_arr)
+                    break
             self.stop()
 
         else:
@@ -620,10 +657,7 @@ class ClassesCollectorThread(threading.Thread):
     def get_classes(self, path, open_folder_arr):
         for file in os.listdir(path):
             dirfile = os.path.join(path, file)
-            if os.path.isfile(dirfile):
-                fileName, fileExtension = os.path.splitext(dirfile)
-
-                if fileExtension == ".uc":
+            if os.path.isfile(dirfile) and dirfile.endswith(".uc"):
                     self.collector._collector_threads.append(ClassesCollectorThread(self.collector, dirfile, 30, open_folder_arr))
                     self.collector._collector_threads[-1].start()
 

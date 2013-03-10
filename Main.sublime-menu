@@ -7,11 +7,19 @@
                 "caption": "-"
             },
             {
-                "caption": "UnrealScript Goto Declaration (or back)",
+                "caption": "UnrealScript Go to Declaration (or back)",
                 "id": "unreal_script_goto_declaration",
                 "command": "unreal_goto_definition",
                 "args": {
                     "b_new_start_point": false
+                }
+            },
+            {
+                "caption": "UnrealScript Go to Declaration \t (new start point, alt + LMB)",
+                "id": "unreal_script_goto_declaration",
+                "command": "unreal_goto_definition",
+                "args": {
+                    "b_new_start_point": true
                 }
             }
         ]

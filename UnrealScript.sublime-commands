@@ -17,5 +17,89 @@
         "caption": "UnrealScriptIDE: Build and Run last opened map",
         "command": "unreal_build_project",
         "args": {"b_build_and_run": true}
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/UnrealScriptIDE/README.md"
+        },
+        "caption": "Readme"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/UnrealScriptIDE/UnrealScriptIDE.sublime-settings"
+        },
+        "caption": "Settings - Default"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/User/UnrealScriptIDE.sublime-settings"
+        },
+        "caption": "Settings - User"
+    },
+
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/UnrealScriptIDE/Default (Windows).sublime-keymap",
+            "platform": "Windows"
+        },
+        "caption": "Keymap – Default"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/UnrealScriptIDE/Default (OSX).sublime-keymap",
+            "platform": "OSX"
+        },
+        "caption": "Keymap – Default"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/UnrealScriptIDE/Default (Linux).sublime-keymap",
+            "platform": "Linux"
+        },
+        "caption": "Keymap – Default"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/User/Default (Windows).sublime-keymap",
+            "platform": "Windows"
+        },
+        "caption": "Keymap – User"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/User/Default (OSX).sublime-keymap",
+            "platform": "OSX"
+        },
+        "caption": "Keymap – User"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/User/Default (Linux).sublime-keymap",
+            "platform": "Linux"
+        },
+        "caption": "Keymap – User"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/UnrealScriptIDE/Default.sublime-mousemap"
+        },
+        "caption": "Mousemap – Default"
+    },
+    {
+        "command": "open_file",
+        "args": {
+            "file": "${packages}/User/Default.sublime-mousemap"
+        },
+        "caption": "Mousemap – User"
     }
 ]
