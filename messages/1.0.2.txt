@@ -1,0 +1,22 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+
+* **Performance increase**
+	* This comes with a downside of performance decrease at startup, but after startup it will be much faster
+
+* **Classes auto-completion**
+	* classes do now also appear in the completions list.
+	* especially helpful in the class declaration line when you are thinking about what class to extend.
+
+* **Object-oriented go to declaration support**
+	* e.g. activating goto declaration over controller.GetPlayerViewPoint(a, b) will take you to the declaration of GetPlayerViewPoint in Controller
+	* typecasting is not yet supported.
+
+Object-oriented Auto-completion is coming soon!!!
+----------
+
+For an in detail explanation, read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki

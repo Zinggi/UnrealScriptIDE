@@ -16,9 +16,10 @@ Feautures
 	* completions feel like the great Sublime Text 2 snippets
 	* get other completions depending where you are typing (e.g. in the defaultproperties block you only want to get variables)
 
-* **Goto declaration and back again**
+* **Go to declaration and back again**
 	* use F10, alt + left click, right click menu, via 'Goto' -> 'UnrealScript Goto Declaration' or search in the command palette to go to the declaration of the currently selected word
 	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
+	* Object-oriented goto declaration (pressing it over controller.GetPlayerViewPoint(a, b) will take you to the declaration of GetPlayerViewPoint in Controller)
 
 * **Syntax highlighting**
 
@@ -49,7 +50,7 @@ Planned
 	* if you write e.g. "Controller." you'd want to see it's methods, functions and variables. Currently this doesn't work.
 
 * **Object-oriented goto declaration command**
-	* Goto declaration currently doesn't work on statements such as Controller.bIsPlayer
+	* typecasting e.g. Actor(Pawn). and super(className). are not supported yet
 
 * **Add support for enumerations, structs and CONST**
 
