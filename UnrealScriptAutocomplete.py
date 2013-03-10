@@ -383,7 +383,8 @@ class UnrealScriptAutocomplete:
 class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener):
     # ! TODO: fix startup bug: is true at the very beginning, but setting it to true,
     # therefore parsing all classes, freezes sublime at startup
-    b_first_time = True
+    # - For debugging set this to true
+    b_first_time = False
     # when the first UnrealScript file is opened, all classes will be parsed.
     # During this time, no other threads shall be created and this will be True.
     b_still_parsing_classes = True
@@ -401,11 +402,14 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
     # def on_close(self, view):
     #     pass
 
-    # ! TODO: was a fix for the startup freeze. Might still work
-    # def on_load(self, view):
-    #     sublime.set_timeout(lambda: self.activate_plugin(), 1000)
-    # def activate_plugin(self):
-    #     self.b_first_time = True
+    # ! TODO: This fixes freezing at startup.
+    #         not an elegant solution...
+    #         while debugging uncomment this, because if it is on you have to restart sublime every time you want to try something
+    def on_load(self, view):
+        sublime.set_timeout(lambda: self.activate_plugin(), 1000)
+
+    def activate_plugin(self):
+        self.b_first_time = True
 
     # gets called when a file is saved. re-parse the current file.
     def on_post_save(self, view):
