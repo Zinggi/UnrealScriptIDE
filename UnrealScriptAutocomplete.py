@@ -608,6 +608,8 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
         if os.path.exists(self.src_folder):
             with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'r') as cache_file:
                 self._classes = pickle.load(cache_file)
+            for c in self._classes:
+                c.set_collector_reference(self)
 
 
 # rebuild cache: this will simply delete the cache file so that it can then rebuild the classes.
@@ -715,7 +717,6 @@ class FunctionsCollectorThread(threading.Thread):
                 print "already parsed: ", self.filename
                 self.stop()
                 return
-
             self.save_functions(self.filename)  # parse current file
 
             parent_class_name = my_class.parent_class()
@@ -955,6 +956,9 @@ class ClassReference:
 
     def get_variables(self):
         return self._variables
+
+    def set_collector_reference(self, collector_reference):
+        self._collector_reference = collector_reference
 
     def parse_me(self, view):
         self._collector_reference.add_function_collector_thread(self._file_name)  # create a new thread to search for relevant functions for this class
