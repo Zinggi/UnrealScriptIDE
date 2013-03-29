@@ -1,7 +1,8 @@
 UnrealScript IDE Plug-in for Sublime Text 2
 ===========================
 
-UnrealScript IDE mainly adds better auto-completion features to Sublime Text 2 for UnrealScript and a goto declaration command.
+UnrealScript IDE adds many features to Sublime Text 2 that you'd expect from a good UnrealScript IDE.  
+Fully featured object-oriented auto-completion, go to declaration, syntax highlighting, build and run, snippets and some more to name a few...
 
 
 ![Pic](http://www.mediafire.com/conv/a12c7703e035e63ecb6ff1d39b8677716286a0f50c386ac5de0329f53e3e1e3d6g.jpg)
@@ -10,21 +11,23 @@ UnrealScript IDE mainly adds better auto-completion features to Sublime Text 2 f
 Feautures
 ------------
 
-* **Dynamic, intelligent auto-completion**
+* **Dynamic, intelligent auto-completions**
+	* fully object-oriented completions
+	* Context sensitive completions (e.g. in the defaultproperties block you only want to get variables)
 	* parameter hints
 	* display documentation when you need it
 	* completions feel like the great Sublime Text 2 snippets
-	* get other completions depending where you are typing (e.g. in the defaultproperties block you only want to get variables)
 
 * **Go to declaration and back again**
-	* use F10, alt + left click, right click menu, via 'Goto' -> 'UnrealScript Goto Declaration' or search in the command palette to go to the declaration of the currently selected word
-	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 	* Object-oriented goto declaration (pressing it over controller.GetPlayerViewPoint(a, b) will take you to the declaration of GetPlayerViewPoint in Controller)
+	* use F10, alt + left click, right click menu, via 'Goto' -> 'UnrealScript Goto Declaration' or search it in in the command palette to go to the declaration of the currently selected word
+	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 
 * **Syntax highlighting**
+	* For .uc files and .log files
 
 * **Build system**
-	* use Ctrl + B, F7 or search in the command palette to build your game
+	* use Ctrl + B, F7 or search for it in the command palette to build your game
 	* if the build contains errors, the error log will be opened, allowing you to navigate to your errors quickly.
 	* if the build was successful, the game will start
 
@@ -32,9 +35,10 @@ Feautures
 	* quickly open the game with your last configuration
 	* you can chose witch map to open
 	* chose between Standalone or a Server and 2 Clients
-	* you can specify additional startup settings
+	* you can specify additional startup settings [more information](https://github.com/Zinggi/UnrealScriptIDE/wiki/Getting-Started#configure)
 
 * **Various useful Snippets**
+	* predefined Snippets for Standard classes, and language features such as defaultproperties
 
 * **Add bookmarks to your comments**
 	* to add a bookmark write your comments like this: // ! text or /** ! text*/
@@ -46,13 +50,16 @@ Feautures
 Planned
 ------------
 
-* **Object-oriented auto-completions**
-	* if you write e.g. "Controller." you'd want to see it's methods, functions and variables. Currently this doesn't work.
-
-* **Object-oriented goto declaration command**
-	* typecasting e.g. Actor(Pawn). and super(className). are not supported yet
-
 * **Add support for enumerations, structs and CONST**
+	* currently structs aren't supported. e.g. if you type Actor(other).Location.* you won't get x, y, z although you would want to.
+	* same for Enumerations
+
+* **Support for local variables**
+	* local variables and function arguments should also appear in the completion list
+
+* **live parsing of the current file**
+	* if you have declared a variable such as: var Pawn MyPawn; and immediately afterwards type MyPawn.* it won't give you any suggestions.
+		To get your suggestions you have to save your file first.
 
 * **Your suggestion here?**
 	* You can suggest features, report bugs and vote for features on this site here: [UnrealScript IDE - Userecho](http://unrealscriptide.userecho.com/)
@@ -75,7 +82,7 @@ For a more in detail explanation visit the wiki: https://github.com/Zinggi/Unrea
 
 **please note:**
 ----------------
-UnrealScriptIDE will **only** work properly if you add the **Src** folder as a project. 
+UnrealScriptIDE will **only** work properly if you add the **Src** folder as a project.  
 To do so, goto 'Project' -> 'Add Folder To Project...' -> add the Src folder (/UDK/UDK-201*-**/Development/Src/)
 
 Usage
@@ -83,8 +90,8 @@ Usage
 Please refer to the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
 
 ------------
-All **credits** for various Snippets (and also for the old (now unused) Syntax highlighting file) goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!
-All **credits** for Syntax highlighting in UnrealScript files goes to **[Rokit](https://github.com/rokit)** and **[Eliot](https://github.com/EliotVU)**. Thanks!
+All **credits** for various Snippets (and also for the old (now unused) Syntax highlighting file) goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!  
+All **credits** for Syntax highlighting in UnrealScript files goes to **[Rokit](https://github.com/rokit)** and **[Eliot](https://github.com/EliotVU)**. Thanks!  
 **Credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
 
 My auto-complete settings
@@ -93,10 +100,10 @@ Here are some relevant settings for auto-completion that I've found quite helpfu
 
 	{
 		"auto_complete_with_fields": true,	//this allows auto-completion inside snippets.
-		"auto_complete_triggers":	//this activates auto-completion on '.' and '('
+		"auto_complete_triggers":	//this activates auto-completion on '.'
 		[
 			{
-				"characters": ".(",
+				"characters": ".",
 				"selector": "source.unrealscript"
 			}
 		],

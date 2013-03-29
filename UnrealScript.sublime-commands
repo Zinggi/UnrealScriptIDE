@@ -14,6 +14,10 @@
         "command": "unreal_build_project"
     },
     {
+        "caption": "UnrealScriptIDE: Rebuild Cache",
+        "command": "unreal_rebuild_cache"
+    },
+    {
         "caption": "UnrealScriptIDE: Build and Run last opened map",
         "command": "unreal_build_project",
         "args": {"b_build_and_run": true}

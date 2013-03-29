@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-class ${1:ClassName} extends ${2:Simple}Pawn;
+class ${1:ClassName} extends ${2:SimplePawn};
 
 $2
 

@@ -1,0 +1,10 @@
+{
+	"auto_complete_triggers":
+	[
+		{
+			"characters": ".",
+			"selector": "source.unrealscript"
+		}
+	],
+	"auto_complete_with_fields": true
+}

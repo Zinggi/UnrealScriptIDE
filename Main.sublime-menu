@@ -25,6 +25,20 @@
         ]
     },
     {
+        "caption": "Tools",
+        "id": "tools",
+        "children": [
+            {
+                "caption": "-"
+            },
+            {
+                "caption": "UnrealScriptIDE: Rebuild Cache",
+                "id": "unreal_script_rebuild_cache",
+                "command": "unreal_rebuild_cache"
+            }
+        ]
+    },
+    {
         "caption": "Preferences",
         "id": "preferences",
         "children": [

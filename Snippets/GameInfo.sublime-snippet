@@ -1,6 +1,6 @@
 <snippet>
 	<content><![CDATA[
-class $1 extends ${2:Simple}Game;
+class $1 extends ${2:SimpleGame};
 
 $7
 

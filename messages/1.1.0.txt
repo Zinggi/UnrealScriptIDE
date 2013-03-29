@@ -1,0 +1,40 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+
+* **Fully Object Oriented Auto-Completion**
+	* expressions such as WorldInfo.Game.* will now list you all available completions of the object Game (e.g. Broadcast)
+	* this does also work with function with a return value, e.g:
+		Trace(HitLocation, HitNormal, traceEnd).* would give you suggestions from the Actor class, because trace returns Actor
+	* typecasting is also supported: Pawn(other).* would display completions from the Pawn class.
+
+* **Fully Object Oriented Go to Declaration**
+	* Go to Declaration now also works on all expressions where auto-completion works, e.g. using Go to Declaration here:
+		WorldInfo.Game.Broadc|ast(self, "hello!") would take you to the line where Broadcast was declared
+
+* **Automatic rebuilding of the cache file**
+	* The cache file will now be rebuild automatically when necessary.
+	* The only situation where you have to rebuild the cache file manually is if you delete a class.
+		To do so go to 'Tools' -> 'UnrealScriptIDE: Rebuild Cache' or use Ctrl+Shift+P and search for it.
+	* If you modify a class in another application you need to save this file at least once in Sublime to register your changes.
+
+Plans and thoughts about future versions:
+-----------------------------------------
+
+* **Add support for Structs (high priority)**
+	* currently structs aren't supported. e.g. if you type Actor(other).Location.* you won't get x, y, z although you would want to.
+	* same for Enumerations
+
+* **Support for local variables**
+	* local variables and function arguments should also appear in the completion list
+
+* **live parsing of the current file**
+	* if you have declared a variable such as: var Pawn MyPawn; and immediately afterwards type MyPawn.* it won't give you any suggestions.
+		To get your suggestions you have to save your file first.
+
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
