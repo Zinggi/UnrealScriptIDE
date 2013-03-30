@@ -109,7 +109,7 @@
 		<!-- modifier keywords -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(abstract|native|intrinsic|noexport|nativereplication|hidecategories|public|private|transient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|extends|expands|within|reliable|server|exec|editinline|repnotify|optional|virtual|edithide|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized))\b</string>
+			<string>\b(?i:(abstract|native|intrinsic|noexport|nativereplication|hidecategories|public|private|transient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|extends|expands|within|reliable|server|exec|editinline|repnotify|optional|virtual|edithide|editinlinenew|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized))\b</string>
 			<key>name</key>
 			<string>storage.modifier.source.uc</string>
 		</dict>
