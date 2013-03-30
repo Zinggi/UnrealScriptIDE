@@ -1,4 +1,5 @@
 [
+    //Go to Declaration
     {
         "caption": "UnrealScriptIDE: Goto Declaration",
         "command": "unreal_goto_definition",
@@ -9,39 +10,55 @@
         "command": "unreal_goto_definition",
         "args": {"b_new_start_point": true}
     },
+
+    //Build and Run
     {
         "caption": "UnrealScriptIDE: Build Project",
         "command": "unreal_build_project"
-    },
-    {
-        "caption": "UnrealScriptIDE: Rebuild Cache",
-        "command": "unreal_rebuild_cache"
     },
     {
         "caption": "UnrealScriptIDE: Build and Run last opened map",
         "command": "unreal_build_project",
         "args": {"b_build_and_run": true}
     },
+
+    //Rebuild cache
+    {
+        "caption": "UnrealScriptIDE: Rebuild Cache",
+        "command": "unreal_rebuild_cache"
+    },
+
+    //Open the Wiki
+    {
+        "command": "open_url",
+        "args": {
+            "url": "https://github.com/Zinggi/UnrealScriptIDE/wiki"
+        },
+        "caption": "UnrealScriptIDE: Open Wiki"
+    },
+
+    //Open files
     {
         "command": "open_file",
         "args": {
             "file": "${packages}/UnrealScriptIDE/README.md"
         },
-        "caption": "Readme"
+        "caption": "UnrealScriptIDE: Readme"
     },
+
     {
         "command": "open_file",
         "args": {
             "file": "${packages}/UnrealScriptIDE/UnrealScriptIDE.sublime-settings"
         },
-        "caption": "Settings - Default"
+        "caption": "UnrealScriptIDE: Settings - Default"
     },
     {
         "command": "open_file",
         "args": {
             "file": "${packages}/User/UnrealScriptIDE.sublime-settings"
         },
-        "caption": "Settings - User"
+        "caption": "UnrealScriptIDE: Settings - User"
     },
 
     {
@@ -50,7 +67,7 @@
             "file": "${packages}/UnrealScriptIDE/Default (Windows).sublime-keymap",
             "platform": "Windows"
         },
-        "caption": "Keymap – Default"
+        "caption": "UnrealScriptIDE: Keymap – Default"
     },
     {
         "command": "open_file",
@@ -58,7 +75,7 @@
             "file": "${packages}/UnrealScriptIDE/Default (OSX).sublime-keymap",
             "platform": "OSX"
         },
-        "caption": "Keymap – Default"
+        "caption": "UnrealScriptIDE: Keymap – Default"
     },
     {
         "command": "open_file",
@@ -66,7 +83,7 @@
             "file": "${packages}/UnrealScriptIDE/Default (Linux).sublime-keymap",
             "platform": "Linux"
         },
-        "caption": "Keymap – Default"
+        "caption": "UnrealScriptIDE: Keymap – Default"
     },
     {
         "command": "open_file",
@@ -74,7 +91,7 @@
             "file": "${packages}/User/Default (Windows).sublime-keymap",
             "platform": "Windows"
         },
-        "caption": "Keymap – User"
+        "caption": "UnrealScriptIDE: Keymap – User"
     },
     {
         "command": "open_file",
@@ -82,7 +99,7 @@
             "file": "${packages}/User/Default (OSX).sublime-keymap",
             "platform": "OSX"
         },
-        "caption": "Keymap – User"
+        "caption": "UnrealScriptIDE: Keymap – User"
     },
     {
         "command": "open_file",
@@ -90,20 +107,21 @@
             "file": "${packages}/User/Default (Linux).sublime-keymap",
             "platform": "Linux"
         },
-        "caption": "Keymap – User"
+        "caption": "UnrealScriptIDE: Keymap – User"
     },
+
     {
         "command": "open_file",
         "args": {
             "file": "${packages}/UnrealScriptIDE/Default.sublime-mousemap"
         },
-        "caption": "Mousemap – Default"
+        "caption": "UnrealScriptIDE: Mousemap – Default"
     },
     {
         "command": "open_file",
         "args": {
             "file": "${packages}/User/Default.sublime-mousemap"
         },
-        "caption": "Mousemap – User"
+        "caption": "UnrealScriptIDE: Mousemap – User"
     }
 ]
