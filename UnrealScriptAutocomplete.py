@@ -124,7 +124,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand):
             # get line left of cursor
             line = self.view.substr(sublime.Region(self.view.line(self.view.sel()[0]).begin(), region_word.begin()))
             line = line.lstrip().lower()
-            print line
+            # print line
 
             # if the end of the line is a whitespace or a '(' (meaning it is a function argument)
             # empty left_line
@@ -133,7 +133,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand):
             else:
                 # get relevant part of the line
                 left_line = get_relevant_text(line)
-                print left_line
+                # print left_line
 
             # calculate where to go inside the main instance of my plug-in.
             # Then, call this command again with a filename and a line number.
@@ -176,6 +176,7 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand):
 
 
 # base class for adding new auto-complete suggestions
+# takes care of building up the data structure and handling it.
 class UnrealScriptAutocomplete:
     # stores all classes
     # At the beginning, search trough the whole source folder and fill this
@@ -241,13 +242,14 @@ class UnrealScriptAutocomplete:
     def get_object(self, word, out_of, b_no_classes=False, b_no_functions=False, b_no_variables=False, b_second_type=False):
         # print "get object '" + word + "'\tout of ", out_of
         # don't try to get classes out of a class
-        print b_second_type
         if not out_of:
-            return None
+            out_of = self
         if word[-1:] == ']':
             word = word.split('[')[0]
         elif b_second_type:
             b_second_type = False
+        if isinstance(out_of, Struct):
+            return out_of.get_variable(word)
         if not isinstance(out_of, ClassReference) and not b_no_classes:
             c = out_of.get_class(word)
             if c is not None:
@@ -297,7 +299,7 @@ class UnrealScriptAutocomplete:
                         o = self.get_object(obj, self, b_second_type=True)
                     if o == "parsing...":
                         return o
-                    return self.get_object_type(o)
+                    return self.get_object_type(o, from_class)
             # a single object
             else:
                 obj = line[:-1]
@@ -307,7 +309,7 @@ class UnrealScriptAutocomplete:
                     o = self.get_object(obj, self, b_no_classes=True, b_second_type=True)
                 if o == "parsing...":
                     return o
-                return self.get_object_type(o)
+                return self.get_object_type(o, from_class)
 
         # (= more than one dot)
         else:
@@ -320,8 +322,7 @@ class UnrealScriptAutocomplete:
                 return self.get_class_from_context(".".join(objs[1:]) + '.', c)
 
     # returns the objects type (its class)
-    # ! TODO: support inbuilt types (array, class)
-    def get_object_type(self, obj):
+    def get_object_type(self, obj, its_class=None):
         b_second_type = False
         if isinstance(obj, tuple):
             obj = obj[0]
@@ -337,7 +338,11 @@ class UnrealScriptAutocomplete:
             return None
         if class_name:
             print "object type: ", class_name
-            return self.get_class(class_name)
+            c = self.get_class(class_name)
+            if c:
+                return c
+            s = self.get_object(class_name, its_class)
+            return s
         return None
 
 # ==============================
@@ -346,7 +351,7 @@ class UnrealScriptAutocomplete:
 
     # returns the current suggestions for this file.
     # if from_class is given, returns the completions for the given class
-    def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None):
+    def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None, bNoStandardCompletions=False):
         autocomplete_list = []
 
         if from_class is not None:
@@ -382,13 +387,18 @@ class UnrealScriptAutocomplete:
                 if word.lower() in _class.name().lower():
                     autocomplete_list.append((_class.name() + '\t' + "Class", _class.name()))
 
-        return autocomplete_list
+        if bNoStandardCompletions:
+            return autocomplete_list, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS
+        else:
+            return autocomplete_list
 
     # returns all completions for a class and all its parent classes.
     # takes a filename as an argument or a class reference
     # return ("parsing...", "parsing...") if the class wasn't parsed before
     # ! (TODO): put functions and variables from the class first, then the ones from the parent classes
     def get_completions_from_class(self, class_file_name):
+        if isinstance(class_file_name, Struct):
+            return ([], class_file_name.get_variables())
         if isinstance(class_file_name, ClassReference):
             my_class = class_file_name
         else:
@@ -491,7 +501,6 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
     #     pass
 
     # gets called when a file is saved. re-parse the current file.
-    # ! TODO: if the class declaration was changed, rebuild cache file
     def on_post_save(self, view):
         if is_unrealscript_file():
             filename = view.file_name()
@@ -502,8 +511,6 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
     # start parsing the active file when a tab becomes active
     # at first startup, scan for all classes and save them to _classes
     # at later startups, load _classes from cache.
-    # ! TODO:   if a file was opened that is not inside _classes, parse it and save it to the cache
-    #           maybe also check if the class declaration matches the declaration in the cache. If not update it.
     def on_activated(self, view):
         if is_unrealscript_file():
             self.clear()    # empty the completions list, so that we only get the relevant ones.
@@ -550,7 +557,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
 
             # if on a class declaration line, only get classes:
             if "class" in line_contents and "extends" in line_contents:
-                return self.get_autocomplete_list(prefix, False, True, True)
+                return self.get_autocomplete_list(prefix, False, True, True, bNoStandardCompletions=True)
 
             # if is in defaultproperties, only get variables:
             line_number = 1000000
@@ -560,7 +567,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
                 (row, col) = view.rowcol(selection_region.begin())
                 if row > line_number:
                     # below defaultproperties
-                    return self.get_autocomplete_list(prefix, True, True)
+                    return self.get_autocomplete_list(prefix, True, True, bNoStandardCompletions=True)
 
             # no defaultproperties found or above defaults:
 
@@ -575,7 +582,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
                 if not c:
                     c = "type not found"
                 if c != "parsing...":
-                    return self.get_autocomplete_list(prefix, True, False, False, c)
+                    return self.get_autocomplete_list(prefix, True, False, False, c, bNoStandardCompletions=True)
                 else:
                     self.b_wanted_to_autocomplete = True
                     return [("just a moment...", "")]
@@ -885,6 +892,10 @@ class FunctionsCollectorThread(threading.Thread):
     _functions = []
     # store all variables
     _variables = []
+    # store all consts
+    _consts = []
+    _structs = []
+    _struct_variables = []
 
     def __init__(self, collector, filename, timeout_seconds):
         self.collector = collector
@@ -892,6 +903,8 @@ class FunctionsCollectorThread(threading.Thread):
         self.filename = filename
         self._functions = []
         self._variables = []
+        self._consts = []
+        self._structs = []
         threading.Thread.__init__(self)
 
     def run(self):  # gets called when the thread is created
@@ -915,7 +928,7 @@ class FunctionsCollectorThread(threading.Thread):
             if parent_file is not None:
                 self.collector.add_function_collector_thread(parent_file)   # create a new thread to parse the parent_file too
 
-            my_class.save_completions(self._functions, self._variables)
+            my_class.save_completions(self._functions, self._variables, self._consts, self._structs)
 
         self.stop()
 
@@ -940,28 +953,37 @@ class FunctionsCollectorThread(threading.Thread):
 
     # adds the function to _functions
     def add_func(self, function_modifiers, return_type, function_name, arguments, line_number, file_name, description="", is_funct=1):
-        if self.get_function(function_name) is None:
-            if function_name != "":
-                self._functions.append(Function(function_modifiers, return_type, function_name, arguments, line_number + 1, file_name, description, is_funct))
+        # if self.get_function(function_name) is None:
+        if function_name != "":
+            self._functions.append(Function(function_modifiers, return_type, function_name, arguments, line_number + 1, file_name, description, is_funct))
 
     # adds the variable to _variables
-    def add_var(self, var_modifiers, var_name, comment, line_number, file_name, description=""):
-        if self.get_variable(var_name) is None:
+    def add_var(self, var_modifiers, var_name, comment, line_number, file_name, description="", bStruct=False):
+        # if self.get_variable(var_name) is None:
+        if bStruct:
+            self._struct_variables.append(Variable(var_modifiers, var_name, comment, line_number + 1, file_name, description))
+        else:
             self._variables.append(Variable(var_modifiers, var_name, comment, line_number + 1, file_name, description))
 
+    def add_const(self, CONST_name, value, comment, line_number, file_name, description=""):
+        self._consts.append(Const(CONST_name, value, comment, line_number + 1, file_name, description))
+
+    def add_struct(self, struct_name, line, line_number, file_name, description):
+        self._structs.append(Struct(struct_name, line, line_number + 1, file_name, description))
+
     # returns the found function
-    def get_function(self, name):
-        for function in self._functions:
-            if function.function_name().lower() == name.lower():
-                return function
-        return None
+    # def get_function(self, name):
+    #     for function in self._functions:
+    #         if function.function_name().lower() == name.lower():
+    #             return function
+    #     return None
 
     # returns the found variable
-    def get_variable(self, name):
-        for variable in self._variables:
-            if variable.name().lower() == name.lower():
-                return variable
-        return None
+    # def get_variable(self, name):
+    #     for variable in self._variables:
+    #         if variable.name().lower() == name.lower():
+    #             return variable
+    #     return None
 
     # returns the filename of the given class name
     def get_file_name(self, class_name):
@@ -971,7 +993,7 @@ class FunctionsCollectorThread(threading.Thread):
         return None
 
     # extract functions, event and variables and split them into smaller groups.
-    # ! TODO:   -support STRUCTS, ENUMS, CONST
+    # ! TODO:   -support STRUCTS, ENUMS
     #           -Probably rewrite this, as it is pretty ugly
     def save_functions(self, file_name):
         with open(file_name, 'rU') as file_lines:
@@ -979,9 +1001,30 @@ class FunctionsCollectorThread(threading.Thread):
             long_line = ""
             b_function = True
             bBracesNotOnSameLine = False
+            bCppText = False
+            CppTextBracketsNum = 0
+            bStruct = False
             for i, line in enumerate(file_lines):
+                if bCppText:
+                    if '{' == line.strip():
+                        CppTextBracketsNum += 1
+                    elif '}' == line.strip():
+                        CppTextBracketsNum -= 1
+                    if CppTextBracketsNum == 0:
+                        bCppText = False
+                    continue
+
+                if bStruct:
+                    if "};" in line:
+                        bStruct = False
+                        self._structs[-1].save_variables(self._struct_variables)
+                        self._struct_variables = []
+
                 if line == "":
                     continue
+                if "cpptext" == line.lower().strip():
+                    bCppText = True
+
                 if "/**" in line:                       # start capturing documentation
                     current_documentation = line
                 elif line.lstrip() != "" and "/" == line.lstrip()[0] and current_documentation == "":
@@ -1003,6 +1046,15 @@ class FunctionsCollectorThread(threading.Thread):
                     else:
                         long_line += line
 
+                if not bStruct and "struct" in line.lower():
+                    if "struct" == line.lower().split()[0]:
+                        bStruct = True
+                        self._struct_variables = []
+                        if "extends" in line.lower():
+                            line = line.split("extends")[0]
+                        struct_name = line.split()[-1]
+                        self.add_struct(struct_name, line, i, file_name, current_documentation)
+
                 if "function" in line.lower() or "event" in line.lower():  # get possible lines containing functions / events
                     if "function" in line.lower():
                         b_function = True
@@ -1023,7 +1075,7 @@ class FunctionsCollectorThread(threading.Thread):
                             current_documentation = ""
                             continue
 
-                    else:   # epic fail of my regex, try with python:
+                    else:   # epic fail of my regex, try with python or function / event was in the comments:
                         if b_function:
                             if 'function' not in line.split('//')[0]:   # the keyword was in the comments
                                 continue
@@ -1068,7 +1120,26 @@ class FunctionsCollectorThread(threading.Thread):
                         else:
                             break
                     for name in var_names:
-                        self.add_var(var_line, name, doc_line, i, file_name, current_documentation)
+                        self.add_var(var_line, name, doc_line, i, file_name, current_documentation, bStruct)
+                    current_documentation = ""
+
+                elif "const" in line.lower():
+                    const_doc_line = line.split('//')
+                    const_line = const_doc_line[0].split()
+                    if const_line and "const" != const_line[0].lower():
+                        continue
+                    elif not const_line:
+                        continue
+
+                    if len(const_line) != 4:
+                        const_line = " ".join(const_line).replace('=', " = ")
+                        const_line = const_line.split()
+
+                    doc_line = ''
+                    if len(const_doc_line) > 1:
+                        doc_line = const_doc_line[1].rstrip()
+
+                    self.add_const(const_line[1], const_line[3].rstrip('\n\r\t ;'), doc_line, i, file_name, current_documentation)
                     current_documentation = ""
 
     # manual extraction, because I failed at regex :(
@@ -1114,6 +1185,8 @@ class FunctionsCollectorThread(threading.Thread):
 class ClassReference:
     _functions = []
     _variables = []
+    _consts = []
+    _structs = []
     _b_was_parsed = False
 
     def __init__(self, class_name, parent_class, description, file_name, collector_reference):
@@ -1141,14 +1214,18 @@ class ClassReference:
     def has_parsed(self):
         return self._b_was_parsed
 
-    def save_completions(self, functions, variables):
+    def save_completions(self, functions, variables, consts, structs):
         self._variables = variables
         self._functions = functions
+        self._consts = consts
+        self._structs = structs
         self._b_was_parsed = True
 
     def clear(self):
         self._functions = []
         self._variables = []
+        self._consts = []
+        self._structs = []
         self._b_was_parsed = False
 
     # returns all _functions that were stored inside this class. To make sure it was parsed before, use has_parsed()
@@ -1165,12 +1242,18 @@ class ClassReference:
         return None
 
     def get_variables(self):
-        return self._variables
+        return self._variables + self._consts + self._structs
 
     def get_variable(self, name):
         for v in self._variables:
             if name.lower() == v.name().lower():
                 return v
+        for s in self._structs:
+            if name.lower() == s.name().lower():
+                return s
+        for c in self._consts:
+            if name.lower() == c.name().lower():
+                return c
         p_class = self._collector_reference.get_class(self._parent_class)
         if p_class is not None:
             return p_class.get_variable(name)
@@ -1190,11 +1273,57 @@ class ClassReference:
 
     def insert_dynamic_snippet(self, view):
         self.create_dynamic_tooltip(view)
-        view.run_command("insert_snippet", {"contents": (Class_Variable % {"name": self._name})})
+        view.run_command("insert_snippet", {"contents": (Object_Name % {"name": self._name})})
 
     def create_dynamic_tooltip(self, view):
         documentation = self.description()
         print_to_panel(view, documentation)
+
+
+class Struct:
+    _variables = []
+
+    def __init__(self, struct_name, struct_line, line_number, file_name, description):
+        self._name = struct_name
+        self._description = description
+        self._file_name = file_name
+        self._struct_line = struct_line
+        self._line_number = line_number
+
+    def description(self):
+        return self._description
+
+    def name(self):
+        return self._name
+
+    def var_modifiers(self):
+        return "Struct"
+
+    def line_number(self):
+        return self._line_number
+
+    def file_name(self):
+        return self._file_name
+
+    def save_variables(self, variables):
+        self._variables = variables
+
+    def get_variables(self):
+        return self._variables
+
+    def get_variable(self, name):
+        for v in self._variables:
+            if name.lower() == v.name().lower():
+                return v
+        return None
+
+    def insert_dynamic_snippet(self, view):
+        self.create_dynamic_tooltip(view)
+        view.run_command("insert_snippet", {"contents": (Object_Name % {"name": self._name})})
+
+    def create_dynamic_tooltip(self, view):
+        documentation = self.description()
+        print_to_panel(view, documentation + self._struct_line)
 
 
 # class to store a function / event
@@ -1320,23 +1449,65 @@ class Variable:
     def description(self):
         return self._description
 
-    # ! (TODO): not properly formatted
     def insert_dynamic_snippet(self, view):
         self.create_dynamic_tooltip(view)
-        if view.rowcol(view.sel()[0].begin())[1] == 0:  # if run from the beginning of the line, assume it's a declaration
-            description, comment = "", ""
-            if self._description != "":
-                description = '${1:' + self._description + '}'
-            if self._comment != "":
-                comment = ' //' + self._comment
+        # if view.rowcol(view.sel()[0].begin())[1] == 0:  # if run from the beginning of the line, assume it's a declaration
+        #     description, comment = "", ""
+        #     if self._description != "":
+        #         description = '${1:' + self._description + '}'
+        #     if self._comment != "":
+        #         comment = ' //' + self._comment
 
-            view.run_command("insert_snippet", {"contents": (Variable_Snippet_Declaration % {"description": description, "var_modifiers": self.var_modifiers(), "name": self._name, "comment": comment})})
+        #     view.run_command("insert_snippet", {"contents": (Variable_Snippet_Declaration % {"description": description, "var_modifiers": self.var_modifiers(), "name": self._name, "comment": comment})})
 
-        else:
-            view.run_command("insert_snippet", {"contents": (Variable_Snippet_Name % {"name": self._name})})
+        # else:
+        view.run_command("insert_snippet", {"contents": (Object_Name % {"name": self._name})})
 
     def create_dynamic_tooltip(self, view):
         documentation = self.description() + self.var_modifiers() + self.name() + ";" + (" //" + self.comment() if self.comment() != "" else "")
+        print_to_panel(view, documentation)
+
+
+# stores CONST
+class Const:
+    def __init__(self, CONST_name, value, comment, line_number, file_name, description=""):
+        self._name = CONST_name
+        self._value = value
+        self._description = description
+        self._comment = comment
+        self._line_number = line_number
+        self._file_name = file_name
+
+    def type(self):
+        return None
+
+    def value(self):
+        return self._value
+
+    def var_modifiers(self):
+        return "CONST = " + self.value()
+
+    def comment(self):
+        return self._comment
+
+    def name(self):
+        return self._name.strip()
+
+    def line_number(self):
+        return self._line_number
+
+    def file_name(self):
+        return self._file_name
+
+    def description(self):
+        return self._description
+
+    def insert_dynamic_snippet(self, view):
+        self.create_dynamic_tooltip(view)
+        view.run_command("insert_snippet", {"contents": (Object_Name % {"name": self._name})})
+
+    def create_dynamic_tooltip(self, view):
+        documentation = self.description() + "CONST " + self.name() + " = " + self.value() + ";" + (" //" + self.comment() if self.comment() != "" else "")
         print_to_panel(view, documentation)
 
 
@@ -1352,16 +1523,26 @@ Function_Snippet_Declaration = \
 }"""
 
 Function_Snippet_Call = \
-"""%(function_name)s(%(arguments)s)"""  # %(end_stop)s
+"""%(function_name)s(%(arguments)s)"""
 
-Variable_Snippet_Declaration = \
-"""%(description)s%(var_modifiers)s%(name)s;%(comment)s
-"""
+# Variable_Snippet_Declaration = \
+# """%(description)s%(var_modifiers)s%(name)s;%(comment)s
+# """
 
-Variable_Snippet_Name = \
-"""%(name)s"""
+# Variable_Snippet_Name = \
+# """%(name)s"""
 
-Class_Variable = \
+# Const_Snippet_Declaration = \
+# """%(description)s%(name)s = %(value)s;%(comment)s
+# """
+
+# Const_Snippet_Name = \
+# """%(name)s"""
+
+# Class_Variable = \
+# """%(name)s"""
+
+Object_Name = \
 """%(name)s"""
 
 

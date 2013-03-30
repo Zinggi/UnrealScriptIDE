@@ -1,0 +1,24 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+
+* **Support for Structs**
+	* now typing Actor(someActor).Location.* will give you x, y, z as a hint
+	* read the NOTE
+
+* **Support for Const**
+	* const variables are now also recognized by my plugin. e.g CONST Pi = 3.1415926535897932;
+
+NOTE
+----
+
+	Again, this update requires you to rebuild your cache file:
+	This can be done using 'Tools' -> 'UnrealScript IDE: Rebuild Cache' or ctrl + shift + p -> search for 'rebuild cache' -> hit enter.
+	This may take a while, but it's a one time operation.
+
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
