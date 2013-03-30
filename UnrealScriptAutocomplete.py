@@ -238,23 +238,28 @@ class UnrealScriptAutocomplete:
         return None
 
     # returns the found object inside out_of (self, class object)
-    def get_object(self, word, out_of, b_no_classes=False, b_no_functions=False, b_no_variables=False):
+    def get_object(self, word, out_of, b_no_classes=False, b_no_functions=False, b_no_variables=False, b_second_type=False):
         # print "get object '" + word + "'\tout of ", out_of
         # don't try to get classes out of a class
+        print b_second_type
         if not out_of:
             return None
+        if word[-1:] == ']':
+            word = word.split('[')[0]
+        elif b_second_type:
+            b_second_type = False
         if not isinstance(out_of, ClassReference) and not b_no_classes:
             c = out_of.get_class(word)
             if c is not None:
-                return c
+                return c if not b_second_type else (c, True)
         if not b_no_functions:
             f = out_of.get_function(word)
             if f is not None:
-                return f
+                return f if not b_second_type else (f, True)
         if not b_no_variables:
             v = out_of.get_variable(word)
             if v is not None:
-                return v
+                return v if not b_second_type else (v, True)
         if isinstance(out_of, ClassReference):
             if not out_of.has_parsed():
                 print "class ", out_of.name(), " not parsed yet, parse class now..."
@@ -287,9 +292,9 @@ class UnrealScriptAutocomplete:
                     # or a function with return value
                     obj = line.split('(')[0]
                     if from_class:
-                        o = self.get_object(obj, from_class)
+                        o = self.get_object(obj, from_class, b_second_type=True)
                     else:
-                        o = self.get_object(obj, self)
+                        o = self.get_object(obj, self, b_second_type=True)
                     if o == "parsing...":
                         return o
                     return self.get_object_type(o)
@@ -297,9 +302,9 @@ class UnrealScriptAutocomplete:
             else:
                 obj = line[:-1]
                 if from_class:
-                    o = self.get_object(obj, from_class, True)
+                    o = self.get_object(obj, from_class, b_no_classes=True, b_second_type=True)
                 else:
-                    o = self.get_object(obj, self, True)
+                    o = self.get_object(obj, self, b_no_classes=True, b_second_type=True)
                 if o == "parsing...":
                     return o
                 return self.get_object_type(o)
@@ -317,10 +322,14 @@ class UnrealScriptAutocomplete:
     # returns the objects type (its class)
     # ! TODO: support inbuilt types (array, class)
     def get_object_type(self, obj):
+        b_second_type = False
+        if isinstance(obj, tuple):
+            obj = obj[0]
+            b_second_type = True
         if isinstance(obj, Function):
             class_name = obj.return_type()
         elif isinstance(obj, Variable):
-            class_name = obj.type()
+            class_name = obj.type() if not b_second_type else obj.secondary_type()
         elif isinstance(obj, ClassReference):
             return obj
         else:
@@ -802,6 +811,7 @@ class ClassesCollectorThread(threading.Thread):
                     else:
                         print "no cache file found, start parsing all classes"
                         self.get_classes(f, self.open_folder_arr)
+                        self.get_inbuilt_classes(self.open_folder_arr)
                     break
             self.stop()
 
@@ -821,6 +831,14 @@ class ClassesCollectorThread(threading.Thread):
             elif os.path.isdir(dirfile):
                 self.get_classes(dirfile, open_folder_arr)
 
+    def get_inbuilt_classes(self, open_folder_arr):
+        array = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\Array.uc")
+        class_class = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\Class.uc")
+        self.collector._collector_threads.append(ClassesCollectorThread(self.collector, array, 30, open_folder_arr))
+        self.collector._collector_threads[-1].start()
+        self.collector._collector_threads.append(ClassesCollectorThread(self.collector, class_class, 30, open_folder_arr))
+        self.collector._collector_threads[-1].start()
+
     # parses the filename and saves the class declaration to the _classes
     def save_classes(self):
         description = ""
@@ -835,7 +853,19 @@ class ClassesCollectorThread(threading.Thread):
                                              description,
                                              self.filename)
                     break
-                elif "class object" in line.lower():
+                elif "class object" in line.lower() and "*" not in line[:3] and "/" not in line[:3]:
+                    self.collector.add_class(os.path.basename(self.filename).split('.')[0],
+                                             "",
+                                             description,
+                                             self.filename)
+                    break
+                elif "class array" in line.lower() and "*" not in line[:3] and "/" not in line[:3]:
+                    self.collector.add_class(os.path.basename(self.filename).split('.')[0],
+                                             "",
+                                             description,
+                                             self.filename)
+                    break
+                elif "class class" in line.lower() and "*" not in line[:3] and "/" not in line[:3]:
                     self.collector.add_class(os.path.basename(self.filename).split('.')[0],
                                              "",
                                              description,
@@ -1260,7 +1290,20 @@ class Variable:
         return ' '.join(self._variable_modifiers) + ' '
 
     def type(self):
-        return self._variable_modifiers[-1].strip()
+        v_type = self._variable_modifiers[-1].strip()
+        if "class<" == v_type[:6]:
+            v_type = "class"
+        elif "array<" == v_type[:6]:
+            v_type = "array"
+        return v_type
+
+    def secondary_type(self):
+        v_type = self._variable_modifiers[-1].strip()
+        if "class<" == v_type[:6]:
+            v_type = v_type[6:-1].strip()
+        elif "array<" == v_type[:6]:
+            v_type = v_type[6:-1].strip()
+        return v_type
 
     def comment(self):
         return self._comment

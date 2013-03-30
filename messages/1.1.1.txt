@@ -1,0 +1,20 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+
+* **Support for inbuild functions and variables has been added (arrays and class)**
+	* read the note below
+
+NOTE
+----
+
+	I usually wouldn't bother you with such a small update, but to enable the support for inbuild functions you have to rebuild your cache file:
+	This can be done using 'Tools' -> 'UnrealScript IDE: Rebuild Cache' or ctrl + shift + p -> search for 'rebuild cache' -> hit enter.
+	This may take a while, but it's a one time operation.
+
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki

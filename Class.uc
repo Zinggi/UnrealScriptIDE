@@ -39,7 +39,7 @@ var const native Specifier 	Default;
 var const native Specifier 	Const;
 
 /**
- * Access a object from this class instance.
+ * Access an object from this class instance.
  */
 var const native Object 	Self;
 

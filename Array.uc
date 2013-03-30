@@ -24,7 +24,7 @@ var native int Length;
 
 
 /**
- * Adds a item to the array.
+ * Adds an item to the array.
  *
  * @param	item - The item to add.
  */
@@ -38,7 +38,7 @@ native final function AddItem( object item );
 native final function RemoveItem( object item );
 
 /**
- * Inserts a item at a specified index.
+ * Inserts an item at a specified index.
  *
  * @param	index - The index to insert the item at.
  * @param	count - The item to insert.
@@ -46,7 +46,7 @@ native final function RemoveItem( object item );
 native final function InsertItem( int index, object item );
 
 /**
- * Find and returns the found element with a specified value, if nothing is found it will return -1.
+ * Finds and returns the found element with a specified value, if nothing is found it will return -1.
  *
  * @param	value - The value to look for.
  *
@@ -55,7 +55,7 @@ native final function InsertItem( int index, object item );
 native final function int Find( object  value );
 
 /**
- * Find and returns the found element with a specified value, if nothing is found it will return -1.
+ * Finds and returns the found element with a specified value, if nothing is found it will return -1.
  *
  * @param	propertyName - The property name of within a struct to test against.
  * @param	value - The value to look for.
