@@ -1,13 +1,21 @@
 {
 	// Add additional startup settings here. A complete overview of all available startup settings can be found here: http://udn.epicgames.com/Three/CommandLineArguments.html
 	// DO NOT USE: editor, server, 127.0.0.1, yourmap.udk as those are handled internally by my plug-in.
-	// For example, use "-ResX=1920 -ResY=1080 -fullscreen" for full-screen and HD or use "-log" to display the log
-	"additional_startup_settings": "",
-
-	// If you launch a server and 2 clients, these will be used instead:
-	"additional_startup_settings_server": "-ConsolePosX=600 -ConsolePosY=600",
-	"additional_startup_settings_client1": "-log -resx=800 -resy=600 -ConsolePosX=0 -ConsolePosY=600 -posx=0 -posy=0",
-	"additional_startup_settings_client2": "-log -resx=800 -resy=600 -ConsolePosX=1250 -ConsolePosY=600 -posx=1200 -posy=0",
+	// For example, use "-ResX=1920 -ResY=1080 -fullscreen" for full-screen and HD or use "-log" to display the log.
+	// Please fallow the given structure carefully. "name": ["TYPE: -YourSettings"] Replace "TYPE: " with "CLIENT: ", "SERVER: " or "LISTEN: "
+	"startup_configurations":
+	{
+		"One Server and Two Clients":
+		[
+			"SERVER: -ConsolePosX=600 -ConsolePosY=600",
+			"CLIENT: -log -resx=800 -resy=600 -ConsolePosX=0 -ConsolePosY=600 -posx=0 -posy=0",
+			"CLIENT: -log -resx=800 -resy=600 -ConsolePosX=1250 -ConsolePosY=600 -posx=1200 -posy=0"
+		],
+		"Standalone":
+		[
+			"CLIENT: -log -ResX=1280 -ResY=720 -nomoviestartup -ConsolePosX=0 -ConsolePosY=720 -posx=0 -posy=0"
+		]
+	},
 
 
 
@@ -29,6 +37,6 @@
 	//=======================
 	// Used to save your last opened map. No need to overwrite this, as it is done automatically
 	"last_opened_map": "",
-	// Used to save if you opened a server the last time. No need to overwrite this, as it is done automatically
-	"b_multi_player": false
+	// Used to save your last used configuration.
+	"last_used_configuration": ""
 }

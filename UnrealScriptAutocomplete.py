@@ -786,13 +786,16 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
 # Resetting everything, basically starting from anew like it would be the first run.
 class UnrealRebuildCacheCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        open_folder_arr = self.view.window().folders()
-        if open_folder_arr:
-            for f in open_folder_arr:
-                if "Development\\Src" in f:
-                    # if we saved the classes to a cache before, delete it.
-                    if os.path.exists(os.path.join(f, "classes_cache.obj")):
-                        evt_m().rebuild_cache(self.view)
+        if is_unrealscript_file():
+            open_folder_arr = self.view.window().folders()
+            if open_folder_arr:
+                for f in open_folder_arr:
+                    if "Development\\Src" in f:
+                        # if we saved the classes to a cache before, delete it.
+                        if os.path.exists(os.path.join(f, "classes_cache.obj")):
+                            evt_m().rebuild_cache(self.view)
+        else:
+            print "no UnrealScript file, try again with a .uc file focused"
 
 
 # Adds the class inside (filename) to the collector.

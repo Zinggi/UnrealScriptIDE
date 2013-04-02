@@ -20,6 +20,7 @@ import os
 class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     udk_exe_path = ""
     udkLift_exe_path = ""
+    udk_maps_folder = ""
     # the building output
     _output = []
     # there were some errors
@@ -32,30 +33,26 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     b_build_and_run = False
 
-    _b_Multi_Player = False
-    # a list of additional startup settings.
-    additional_startup_settings = ""
+    # all startup configurations
+    startup_configurations = []
+    # the key of one startup configurations
+    last_used_configuration = ""
 
     # find src folder and start building
     def run(self, edit, b_build_and_run=False):
-        if self.view.file_name() is not None:   # and is_unrealscript_file(self.view.file_name()):
+        if self.view.file_name() is not None:
             self.settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
-            possible_src_folders = []
             open_folder_arr = self.view.window().folders()   # Gets all opened folders in the Sublime Text editor.
             self.b_build_and_run = b_build_and_run
 
-            # search open folders for Src directory
+            # search open folders for the Src directory
             for folder in open_folder_arr:
-                if "Src" in folder:
-                    possible_src_folders.append(folder)
-                else:
-                    possible_src_folders.append(self.search_src_in(folder))
-            # get the right one!
-            for folder in possible_src_folders:
-                if not folder:
-                    continue
                 if "\Development\Src" in folder:
                     self.udk_exe_path = folder
+                    break
+            if self.udk_exe_path == "":
+                print "Src folder not found!!!"
+                return
 
             # Removing "Development\Src" and adding the UDK.com path (this is probably not how it's done correctly):
             self.udk_exe_path = self.udk_exe_path[:-15] + "Binaries\\Win32\\UDK.com"
@@ -115,11 +112,11 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
                                 ["Always open log. Never ask again!",
                                 "You can reset your choice under:",
-                                "'Preferences' -> 'Package Settings' -> 'UnrealScriptIDE' -> 'Settings - User'"],
+                                "'Ctrl + Shift + P' -> 'UnrealScriptIDE: Settings - User'"],
 
                                 ["Always open game. Never ask for log again!",
                                 "You can reset your choice under:",
-                                "'Preferences' -> 'Package Settings' -> 'UnrealScriptIDE' -> 'Settings - User'"]]
+                                "'Ctrl + Shift + P' -> 'UnrealScriptIDE: Settings - User'"]]
                 self.view.window().show_quick_panel(input_list, self.on_done_warnings_input)
 
                 self._b_ask_if_open_output = False
@@ -160,87 +157,217 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         elif index == -1:
             pass
         else:
-            print "unhandled case!!!"
+            print "case not handled!!!"
 
     # Ask the user to enter a start map to start the game.
-    # ask if wants to open server + two clients
+    # ask which configuration to use.
     def run_game(self):
         if self._last_opened_map == "":
             self._last_opened_map = self.settings.get('last_opened_map')
-        self._b_Multi_Player = self.settings.get('b_multi_player')
+
+        self.last_used_configuration = self.settings.get('last_used_configuration')
 
         if self.b_build_and_run:
             self.on_done_run_game_input(0)
             return
 
         input_list = [["Start with last opened map",
-                        self._last_opened_map + (", Server and 2 Clients" if self._b_Multi_Player else ", Standalone")],
+                        self._last_opened_map + "\t configuration: " + self.last_used_configuration],
                         "Start with default map"]
         # add all maps found in the maps folder.
         self._map_list = self.search_mapfiles(self.udk_maps_folder)
         if not self._map_list:
+            print "No maps found!!!"
             return
         input_list += self._map_list
 
         self.view.window().show_quick_panel(input_list, self.on_done_run_game_input)
 
-    # gets called from the run game input. Opens the chosen map.
+    # gets called from the run_game input. Opens the chosen map.
     def on_done_run_game_input(self, index):
-        self.additional_startup_settings = self.settings.get('additional_startup_settings')
+        self.startup_configurations = self.settings.get('startup_configurations')
+
         # 0 = open last map, 1 = open default, else: open map index, -1 = was canceled
         if index == 0:
-            if self._b_Multi_Player:
-                # open server and 2 clients
-                subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + self.settings.get('additional_startup_settings_server')])
-                subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + self.settings.get('additional_startup_settings_client1')])
-                subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + self.settings.get('additional_startup_settings_client2')])
-            else:
-                subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + self.additional_startup_settings])
+            self.launch_game(self.last_used_configuration)
         elif index == 1:
-            subprocess.Popen([self.udkLift_exe_path, self.additional_startup_settings])
+            subprocess.Popen([self.udkLift_exe_path])
         elif index == -1:
             pass
         else:
             self._selected_map = self._map_list[index - 2][0]
 
-            input_list = [["Start Standalone game",
-                        "Your choice will be remembered, next time you can use:",
-                        "'Start with last opened map'"],
-                        ["Start a Server and connect 2 Clients",
-                        "Your choice will be remembered, next time you can use:",
-                        "'Start with last opened map'"]]
+            self.input_list =   [["Start with last used Configuration", self.last_used_configuration],
+                                ["Manage Configurations",
+                                "This allows you to add, edit or remove startup configurations.",
+                                "This can also be done in the settings:",
+                                "'Ctrl + Shift + P' -> 'UnrealScriptIDE: Settings - User'"]]
+            for config in self.startup_configurations:
+                self.input_list.append([config] + self.startup_configurations[config])
 
-            self.view.window().show_quick_panel(input_list, self.on_done_single_or_multi)
+            self.view.window().show_quick_panel(self.input_list, self.on_done_chose_configuration)
 
-    def on_done_single_or_multi(self, index):
-        # 0 = single-player, 1 = multi-player, -1 = back to run game dialog
+    def on_done_chose_configuration(self, index):
         if index == 0:
-            self._last_opened_map = self._selected_map
-            self.settings.set('last_opened_map', self._last_opened_map)
-
-            self._b_Multi_Player = False
-            self.settings.set('b_multi_player', self._b_Multi_Player)
-
-            sublime.save_settings('UnrealScriptIDE.sublime-settings')
-
-            subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + self.additional_startup_settings])
+            self.launch_game(self.last_used_configuration, self._selected_map)
         elif index == 1:
-            self._last_opened_map = self._selected_map
-            self.settings.set('last_opened_map', self._last_opened_map)
-
-            self._b_Multi_Player = True
-            self.settings.set('b_multi_player', self._b_Multi_Player)
-
-            sublime.save_settings('UnrealScriptIDE.sublime-settings')
-            # open server and 2 clients
-            subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + self.settings.get('additional_startup_settings_server')])
-            subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + self.settings.get('additional_startup_settings_client1')])
-            subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + self.settings.get('additional_startup_settings_client2')])
-
+            self.edit_configurations()
+        # escape: go back
         elif index == -1:
             self.run_game()
         else:
-            print "unhandled case!!!"
+            startup_configuration = self.input_list[index][0]
+            self.launch_game(startup_configuration, self._selected_map)
+        self.input_list = []
+
+    def launch_game(self, configuration, map_name=None):
+        if configuration in self.startup_configurations:
+            startup_configuration = self.startup_configurations[configuration]
+        else:
+            print "specified configuration not found!  ", configuration, "\nin ", self.startup_configurations
+            return
+
+        if map_name:
+            self._last_opened_map = map_name
+            self.settings.set('last_opened_map', self._last_opened_map)
+
+        self.last_used_configuration = configuration
+        self.settings.set('last_used_configuration', self.last_used_configuration)
+        sublime.save_settings('UnrealScriptIDE.sublime-settings')
+
+        b_server = False
+        for config in startup_configuration:
+            if "SERVER: " == config[:8]:
+                b_server = True
+                subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + config[8:]])
+            elif "LISTEN: " == config[:8]:
+                b_server = True
+                subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + "?listen=true" + config[8:]])
+            elif "CLIENT: " == config[:8]:
+                if b_server:
+                    subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + config[8:]])
+                else:
+                    subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + config[8:]])
+            else:
+                print "something is wrong in your settings, the startup string should start with either 'SERVER: ', 'LISTEN: ' or 'CLIENT: '"
+
+    def edit_configurations(self):
+        input_list =    [["Add a new startup configuration"],
+                        ["Edit an existing configuration",
+                        "To edit the name of a configuration, you will have to go in the settings"],
+                        ["Remove an existing configuration"]]
+
+        self.view.window().show_quick_panel(input_list, self.on_done_edit_configurations)
+
+    def on_done_edit_configurations(self, index):
+        if index == 0:
+            # ! TODO: cancel
+            self.view.window().show_input_panel("enter a name for your new configuration", "", self.on_done_enter_name, None, self.on_cancel_enter_name)
+        elif index == 1:
+            for config in self.startup_configurations:
+                self.input_list.append([config] + self.startup_configurations[config])
+            self.view.window().show_quick_panel(self.input_list, self.on_done_edit_configuration)
+        elif index == 2:
+            for config in self.startup_configurations:
+                self.input_list.append([config] + self.startup_configurations[config])
+            self.view.window().show_quick_panel(self.input_list, self.on_done_remove_configuration)
+        elif index == -1:
+            # escape, go back. -2 was used to call the else statement in on_done_run_game_input
+            self.on_done_run_game_input(-2)
+        else:
+            print "case not handled"
+
+    def on_cancel_enter_name(self):
+        self.on_done_run_game_input(-2)
+
+    def on_done_enter_name(self, name):
+        if isinstance(name, basestring):
+            self.current_configuration = []
+            self.configuration_name = name
+            input_list =    [["Start a Client"],
+                            ["Start a Server"],
+                            ["Start a Listen Server"]]
+            self.view.window().show_quick_panel(input_list, self.on_done_enter_name)
+        else:
+            if name == -1:
+                self.edit_configurations()
+            else:
+                self.configuration_client_or_server = name
+                self.view.window().show_input_panel("Add a list of startup options. Don't use: editor, server, 127.0.0.1, yourmap.udk. Example: '-ResX=1920 -ResY=1080 -fullscreen'",
+                                                    "", self.on_done_enter_configuration, None, self.on_cancel_settings_dialog)
+
+    def on_done_enter_configuration(self, config):
+        configuration = self.add_client_or_server(self.configuration_client_or_server)
+        configuration += config
+        self.current_configuration.append(configuration)
+
+        input_list =    [["Finish and Save this configuration"],
+                        ["Add a Client"],
+                        ["Cancel"]]
+        self.view.window().show_quick_panel(input_list, self.on_done_entered_configuration)
+
+    def on_done_entered_configuration(self, index):
+        if index == 0:
+            self.startup_configurations[self.configuration_name] = self.current_configuration
+            self.settings.set('startup_configurations', self.startup_configurations)
+            sublime.save_settings('UnrealScriptIDE.sublime-settings')
+            self.on_done_run_game_input(-2)
+        elif index == 1:
+            self.on_done_enter_name(0)
+        elif index == 2:
+            self.edit_configurations()
+        elif index == -1:
+            self.edit_configurations()
+
+    def on_done_remove_configuration(self, index):
+        if index == -1:
+            self.edit_configurations()
+        else:
+            config_to_remove = self.input_list[index][0]
+            del self.startup_configurations[config_to_remove]
+            self.settings.set('startup_configurations', self.startup_configurations)
+            sublime.save_settings('UnrealScriptIDE.sublime-settings')
+            self.on_done_run_game_input(-2)
+        self.input_list = []
+
+    def on_done_edit_configuration(self, index):
+        if index == -1:
+            self.edit_configurations()
+        else:
+            config_to_edit = self.input_list[index][0]
+            self.configuration_name = config_to_edit
+            config = self.startup_configurations[config_to_edit]
+            self.current_configuration = config
+            self.view.window().show_quick_panel(config, self.on_done_edit_config_item)
+        self.input_list = []
+
+    def on_done_edit_config_item(self, index):
+        if isinstance(index, int):
+            if index == -1:
+                self.edit_configurations()
+            else:
+                config = self.current_configuration[index]
+                self.current_index = index
+                if "CLIENT: " == config[:8]:
+                    self.configuration_client_or_server = 0
+                elif "SERVER: " == config[:8]:
+                    self.configuration_client_or_server = 1
+                elif "LISTEN: " == config[:8]:
+                    self.configuration_client_or_server = 2
+                self.view.window().show_input_panel("Modify the startup options for this " + config[:6],
+                                                    config[8:], self.on_done_edit_config_item, None, self.on_cancel_settings_dialog)
+        else:
+            configuration = self.add_client_or_server(self.configuration_client_or_server)
+            configuration += index
+            self.current_configuration[self.current_index] = configuration
+
+            self.startup_configurations[self.configuration_name] = self.current_configuration
+            self.settings.set('startup_configurations', self.startup_configurations)
+            sublime.save_settings('UnrealScriptIDE.sublime-settings')
+            self.on_done_run_game_input(-2)
+
+    def on_cancel_settings_dialog(self):
+        self.edit_configurations()
 
     # returns all map files in the path folder
     def search_mapfiles(self, path):
@@ -258,16 +385,15 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
         return maps
 
-    # search for the Src folder in the path. Returns the found folder.
-    def search_src_in(self, path):
-        for file in os.listdir(path):
-            dirfile = os.path.join(path, file)
-
-            if os.path.isdir(dirfile):
-                if "Src" in dirfile:
-                    return dirfile
-                else:
-                    return self.search_src_in(dirfile)
+    def add_client_or_server(self, index):
+        configuration = ""
+        if index == 0:
+            configuration = "CLIENT: "
+        elif index == 1:
+            configuration = "SERVER: "
+        elif index == 2:
+            configuration = "LISTEN: "
+        return configuration
 
     # returns the found summery in a building log file.
     def get_summery(self):
@@ -313,7 +439,3 @@ class UDKbuild(threading.Thread):
     def stop(self):
         if self.isAlive():
             self._Thread__stop()
-
-
-def is_unrealscript_file(filename):
-    return '.uc' in filename

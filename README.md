@@ -13,32 +13,32 @@ Feautures
 
 * **Dynamic, intelligent auto-completions**
 	* fully object-oriented completions
-	* Context sensitive completions (e.g. in the defaultproperties block you only want to get variables)
+	* context sensitive completions (e.g. in the defaultproperties block you only want to get variables)
 	* parameter hints
 	* display documentation when you need it
 	* completions feel like the great Sublime Text 2 snippets
 
 * **Go to declaration and back again**
-	* Object-oriented goto declaration (pressing it over controller.GetPlayerViewPoint(a, b) will take you to the declaration of GetPlayerViewPoint in Controller)
-	* use F10, alt + left click, right click menu, via 'Goto' -> 'UnrealScript Goto Declaration' or search it in in the command palette to go to the declaration of the currently selected word
+	* object-oriented go to declaration (pressing it over controller.GetPlayerViewPoint(a, b) will take you to the declaration of GetPlayerViewPoint in Controller)
+	* go to the declaration of the currently selected word via F10, alt + left click, right click menu, 'Goto' -> 'UnrealScript Goto Declaration' or search for it in in the command palette 
 	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 
 * **Syntax highlighting**
 	* For .uc files and .log files
 
 * **Build system**
-	* use Ctrl + B, F7 or search for it in the command palette to build your game
+	* to build your game use Ctrl + B, F7 or search for it in the command palette.
 	* if the build contains errors, the error log will be opened, allowing you to navigate to your errors quickly.
 	* if the build was successful, the game will start
 
 * **Launch Game**
 	* quickly open the game with your last configuration
-	* you can chose witch map to open
-	* chose between Standalone or a Server and 2 Clients
-	* you can specify additional startup settings [more information](https://github.com/Zinggi/UnrealScriptIDE/wiki/Getting-Started#configure)
+	* you can chose which map to open
+	* chose between Standalone or a Server and 2 Clients or add any other configuration you might like
+	* [more information](https://github.com/Zinggi/UnrealScriptIDE/wiki/Usage#launch-game)
 
 * **Various useful Snippets**
-	* predefined Snippets for Standard classes, and language features such as defaultproperties
+	* predefined Snippets for standard classes, and language features such as defaultproperties
 
 * **Add bookmarks to your comments**
 	* to add a bookmark write your comments like this: // ! text or /** ! text*/
@@ -50,16 +50,14 @@ Feautures
 Planned
 ------------
 
-* **Add support for enumerations, structs and CONST**
-	* currently structs aren't supported. e.g. if you type Actor(other).Location.* you won't get x, y, z although you would want to.
-	* same for Enumerations
+* **Add support for enumerations**
 
 * **Support for local variables**
 	* local variables and function arguments should also appear in the completion list
 
 * **live parsing of the current file**
 	* if you have declared a variable such as: var Pawn MyPawn; and immediately afterwards type MyPawn.* it won't give you any suggestions.
-		To get your suggestions you have to save your file first.
+	To get your suggestions you have to save your file first.
 
 * **Your suggestion here?**
 	* You can suggest features, report bugs and vote for features on this site here: [UnrealScript IDE - Userecho](http://unrealscriptide.userecho.com/)
@@ -70,7 +68,7 @@ Installation
 **Very easy with [Package Control](http://wbond.net/sublime_packages/package_control) right inside Sublime Text 2 (Package Control needs to be installed):**
 
 1.	Ctrl + shift + P
-2.  Search for "inst", hit enter
+2.  Search for "install", hit enter
 3.  Search for "UnrealScriptIDE", hit enter
 
 For a more in detail explanation visit the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki/Getting-Started
