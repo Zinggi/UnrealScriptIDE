@@ -292,7 +292,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + config[8:]])
             elif "LISTEN: " == config[:8]:
                 b_server = True
-                subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + "?listen=true" + config[8:]])
+                subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + "?listen=true" + config[8:]])      # "server " + 
             elif "CLIENT: " == config[:8]:
                 if b_server:
                     subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + config[8:]])
