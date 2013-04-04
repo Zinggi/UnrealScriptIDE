@@ -18,6 +18,7 @@ import os
 
 # Builds your udk project and gets the output.
 class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
+    udk_path = ""
     udk_exe_path = ""
     udkLift_exe_path = ""
     udk_maps_folder = ""
@@ -32,6 +33,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     _selected_map = ""
 
     b_build_and_run = False
+    b_compiled_debug = False
+
+    compile_settings = []
 
     # all startup configurations
     startup_configurations = []
@@ -39,7 +43,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     last_used_configuration = ""
 
     # find src folder and start building
-    def run(self, edit, b_build_and_run=False):
+    def run(self, edit, b_build_and_run=False, b_show_compile_options=False):
         if self.view.file_name() is not None:
             self.settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
             open_folder_arr = self.view.window().folders()   # Gets all opened folders in the Sublime Text editor.
@@ -55,10 +59,22 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 return
 
             # Removing "Development\Src" and adding the UDK.com path (this is probably not how it's done correctly):
-            self.udk_exe_path = self.udk_exe_path[:-15] + "Binaries\\Win32\\UDK.com"
-            self.udkLift_exe_path = self.udk_exe_path[:-13] + "UDKLift.exe"
-            self.udk_maps_folder = self.udk_exe_path[:-22] + "UDKGame\\Content\\Maps"
-            self.start_build()
+            self.udk_path = self.udk_exe_path[:-15]
+            self.udkLift_exe_path = self.udk_path + "Binaries\\UDKLift.exe"
+            self.udk_maps_folder = self.udk_path + "UDKGame\\Content\\Maps"
+
+            if not b_show_compile_options:
+                compile_settings_key = self.settings.get('current_compile_settings')
+                self.compile_settings = self.settings.get('compiling_configurations')[compile_settings_key]
+                self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
+                self.start_build()
+
+            else:
+                self.show_compile_options()
+
+            # self.udk_exe_path = self.udk_exe_path[:-15] + "Binaries\\Win32\\UDK.com"
+            # self.udkLift_exe_path = self.udk_exe_path[:-13] + "UDKLift.exe"
+            # self.udk_maps_folder = self.udk_exe_path[:-22] + "UDKGame\\Content\\Maps"
 
     # starts building your game. This adds a new UDKbuild thread.
     def start_build(self):
@@ -66,6 +82,35 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         self._build_thread = UDKbuild(self.udk_exe_path, self)
         self._build_thread.start()
         self.handle_thread()
+
+    def show_compile_options(self):
+        self.compile_settings = self.settings.get('compiling_configurations')
+
+        self.input_list = [["Compile with last used configuration",
+                            self.settings.get('current_compile_settings')],
+                            ["Full recompile with last used configuration",
+                            self.settings.get('current_compile_settings')]]
+
+        for config in self.compile_settings:
+            self.input_list.append([config] + self.compile_settings[config])
+
+        self.view.window().show_quick_panel(self.input_list, self.on_done_chose_compile_setting)
+
+    def on_done_chose_compile_setting(self, index):
+        if index == 0:
+            self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
+        if index == 1:
+            self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
+            self.compile_settings[1] += " -full"
+        elif index == -1:
+            return
+        else:
+            key = self.input_list[index][0]
+            self.compile_settings = self.compile_settings[key]
+            self.settings.set('current_compile_settings', key)
+            sublime.save_settings('UnrealScriptIDE.sublime-settings')
+        self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
+        self.start_build()
 
     # display a progress icon at the bottom while building.
     # Once finished, this opens the log, starts the game or ask you what to do.
@@ -126,7 +171,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 self.run_game()
 
     # shows the building error log, with summery at the top
-    def show_error_panel(self):
+    def show_error_panel(self, b_only_save_log=False):
         log_cache = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\log_cache.log")
         with open(log_cache, 'w') as log:
             log_massage = "==============\nBUILD RESULTS:\n==============\n\nNote:\nuse UnrealScript Goto Definition to navigate to errors. (by default with f10, alt + LMB, context menu or via 'Goto' -> 'UnrealScript Goto Declaration')\n----------------------------------------------\n\n"
@@ -134,9 +179,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             log_massage += "\n\n\n\n\n\n\n\n\n\n\n----------------------------------------------\nFull log:\n----------------------------------------------\n\n\n"
             log_massage += "\n".join(self._output)
             log.write(log_massage)
-
-        sublime.active_window().open_file(log_cache)
-        sublime.active_window().open_file(log_cache)
+        if not b_only_save_log:
+            sublime.active_window().open_file(log_cache)
+            sublime.active_window().open_file(log_cache)
 
     # gets called from the warning input panel
     def on_done_warnings_input(self, index):
@@ -144,6 +189,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         if index == 0:
             self.show_error_panel()
         elif index == 1:
+            self.show_error_panel(True)
             self.run_game()
         elif index == 2:
             self.settings.set('always_open_log', True)
@@ -153,6 +199,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         elif index == 3:
             self.settings.set('always_start_game', True)
             sublime.save_settings('UnrealScriptIDE.sublime-settings')
+            self.show_error_panel(True)
             self.run_game()
         elif index == -1:
             pass
@@ -195,6 +242,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         elif index == -1:
             pass
         else:
+            self.last_index = index
             self._selected_map = self._map_list[index - 2][0]
 
             self.input_list =   [["Start with last used Configuration", self.last_used_configuration],
@@ -203,6 +251,8 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                                 "This can also be done in the settings:",
                                 "'Ctrl + Shift + P' -> 'UnrealScriptIDE: Settings - User'"]]
             for config in self.startup_configurations:
+                if "debug" in config.lower() and not self.b_compiled_debug:
+                    continue
                 self.input_list.append([config] + self.startup_configurations[config])
 
             self.view.window().show_quick_panel(self.input_list, self.on_done_chose_configuration)
@@ -261,7 +311,6 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     def on_done_edit_configurations(self, index):
         if index == 0:
-            # ! TODO: cancel
             self.view.window().show_input_panel("enter a name for your new configuration", "", self.on_done_enter_name, None, self.on_cancel_enter_name)
         elif index == 1:
             for config in self.startup_configurations:
@@ -272,13 +321,13 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 self.input_list.append([config] + self.startup_configurations[config])
             self.view.window().show_quick_panel(self.input_list, self.on_done_remove_configuration)
         elif index == -1:
-            # escape, go back. -2 was used to call the else statement in on_done_run_game_input
-            self.on_done_run_game_input(-2)
+            # escape, go back.
+            self.on_done_run_game_input(self.last_index)
         else:
             print "case not handled"
 
     def on_cancel_enter_name(self):
-        self.on_done_run_game_input(-2)
+        self.on_done_run_game_input(self.last_index)
 
     def on_done_enter_name(self, name):
         if isinstance(name, basestring):
@@ -311,7 +360,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             self.startup_configurations[self.configuration_name] = self.current_configuration
             self.settings.set('startup_configurations', self.startup_configurations)
             sublime.save_settings('UnrealScriptIDE.sublime-settings')
-            self.on_done_run_game_input(-2)
+            self.on_done_run_game_input(self.last_index)
         elif index == 1:
             self.on_done_enter_name(0)
         elif index == 2:
@@ -327,7 +376,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             del self.startup_configurations[config_to_remove]
             self.settings.set('startup_configurations', self.startup_configurations)
             sublime.save_settings('UnrealScriptIDE.sublime-settings')
-            self.on_done_run_game_input(-2)
+            self.on_done_run_game_input(self.last_index)
         self.input_list = []
 
     def on_done_edit_configuration(self, index):
@@ -364,7 +413,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             self.startup_configurations[self.configuration_name] = self.current_configuration
             self.settings.set('startup_configurations', self.startup_configurations)
             sublime.save_settings('UnrealScriptIDE.sublime-settings')
-            self.on_done_run_game_input(-2)
+            self.on_done_run_game_input(self.last_index)
 
     def on_cancel_settings_dialog(self):
         self.edit_configurations()
@@ -408,14 +457,22 @@ class UDKbuild(threading.Thread):
     def __init__(self, exe_path, collector):
         self.exe_path = exe_path
         self._collector = collector
+        self._collector.b_compiled_debug = False
         threading.Thread.__init__(self)
 
     def run(self):  # gets called when the thread is created
         if not os.path.exists(self.exe_path):
-            print "UDK.exe not found!!!"
+            print self._collector.compile_settings[0] + " not found!!!"
             self.stop()
             return
-        pipe = subprocess.Popen([self.exe_path, "make"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print "compiling with: " + self._collector.compile_settings[0] + " and " + self._collector.compile_settings[1]
+        args = "make " + self._collector.compile_settings[1]
+        args = " /C " + self.exe_path + " " + args + " -unattended"
+        print args
+        if "-debug" in args:
+            self._collector.b_compiled_debug = True
+        # pipe = subprocess.Popen([self.exe_path, args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
+        pipe = subprocess.Popen(["cmd", args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         # saves output lines
         while True:
             line = pipe.stdout.readline()

@@ -3,6 +3,7 @@
 	// DO NOT USE: editor, server, 127.0.0.1, yourmap.udk as those are handled internally by my plug-in.
 	// For example, use "-ResX=1920 -ResY=1080 -fullscreen" for full-screen and HD or use "-log" to display the log.
 	// Please fallow the given structure carefully. "name": ["TYPE: -YourSettings"] Replace "TYPE: " with "CLIENT: ", "SERVER: " or "LISTEN: "
+	// If your name contains debug, it will only be shown if you compile in debug mode.
 	"startup_configurations":
 	{
 		"One Server and Two Clients":
@@ -14,6 +15,38 @@
 		"Standalone":
 		[
 			"CLIENT: -log -ResX=1280 -ResY=720 -nomoviestartup -ConsolePosX=0 -ConsolePosY=720 -posx=0 -posy=0"
+		],
+		"Standalone Debug":
+		[
+			"CLIENT: -autodebug -log -ResX=1280 -ResY=720 -nomoviestartup -ConsolePosX=0 -ConsolePosY=720 -posx=0 -posy=0"
+		]
+	},
+
+
+	// This is similar to the "startup_configurations".
+	// Here you can specify different compile options.
+	// Please fallow the given structure carefully. "name": ["Path", "-YourSettings"]
+	"compiling_configurations":
+	{
+		"Standard 32bit":
+		[
+			"Win32\\UDK.com",
+			""
+		],
+		"Standard 64bit":
+		[
+			"Win64\\UDK.com",
+			""
+		],
+		"Debug 32bit":
+		[
+			"Win32\\UDK.com",
+			"-debug"
+		],
+		"Debug 64bit":
+		[
+			"Win64\\UDK.com",
+			"-debug"
 		]
 	},
 
@@ -38,5 +71,7 @@
 	// Used to save your last opened map. No need to overwrite this, as it is done automatically
 	"last_opened_map": "",
 	// Used to save your last used configuration.
-	"last_used_configuration": ""
+	"last_used_configuration": "",
+	// Used to save your current compile configuration.
+	"current_compile_settings": "Standard 32bit"
 }

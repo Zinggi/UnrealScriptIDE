@@ -34,7 +34,28 @@
             {
                 "caption": "UnrealScriptIDE: Rebuild Cache",
                 "id": "unreal_script_rebuild_cache",
+                "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
                 "command": "unreal_rebuild_cache"
+            },
+            {
+                "caption": "UnrealScriptIDE: Build Project",
+                "id": "unreal_script_build_project",
+                "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+                "command": "unreal_build_project"
+            },
+            {
+                "caption": "UnrealScriptIDE: Build and Run last opened map",
+                "id": "unreal_script_build_project_run",
+                "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+                "args": {"b_build_and_run": true},
+                "command": "unreal_build_project"
+            },
+            {
+                "caption": "UnrealScriptIDE: Show Compile Options and Build Project",
+                "id": "unreal_script_build_project_configure",
+                "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+                "args": {"b_show_compile_options": true},
+                "command": "unreal_build_project"
             }
         ]
     },

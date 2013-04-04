@@ -3,28 +3,39 @@
     {
         "caption": "UnrealScriptIDE: Goto Declaration",
         "command": "unreal_goto_definition",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
         "args": {"b_new_start_point": false}
     },
     {
         "caption": "UnrealScriptIDE: Goto Declaration (New starting point)",
         "command": "unreal_goto_definition",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
         "args": {"b_new_start_point": true}
     },
 
     //Build and Run
     {
         "caption": "UnrealScriptIDE: Build Project",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
         "command": "unreal_build_project"
     },
     {
         "caption": "UnrealScriptIDE: Build and Run last opened map",
         "command": "unreal_build_project",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
         "args": {"b_build_and_run": true}
+    },
+    {
+        "caption": "UnrealScriptIDE: Show Compile Options and Build Project",
+        "command": "unreal_build_project",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "args": {"b_show_compile_options": true}
     },
 
     //Rebuild cache
     {
         "caption": "UnrealScriptIDE: Rebuild Cache",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
         "command": "unreal_rebuild_cache"
     },
 
