@@ -1,6 +1,6 @@
 {
 	// Add additional startup settings here. A complete overview of all available startup settings can be found here: http://udn.epicgames.com/Three/CommandLineArguments.html
-	// DO NOT USE: editor, server, 127.0.0.1, yourmap.udk as those are handled internally by my plug-in.
+	// DO NOT USE: server, 127.0.0.1, yourmap.udk as those are handled internally by my plug-in.
 	// For example, use "-ResX=1920 -ResY=1080 -fullscreen" for full-screen and HD or use "-log" to display the log.
 	// Please fallow the given structure carefully. "name": ["TYPE: -YourSettings"] Replace "TYPE: " with "CLIENT: ", "SERVER: " or "LISTEN: "
 	// If your name contains debug, it will only be shown if you compile in debug mode.
@@ -19,6 +19,10 @@
 		"Standalone Debug":
 		[
 			"CLIENT: -autodebug -log -ResX=1280 -ResY=720 -nomoviestartup -ConsolePosX=0 -ConsolePosY=720 -posx=0 -posy=0"
+		],
+		"Open Editor":
+		[
+			"EDITOR: "
 		]
 	},
 

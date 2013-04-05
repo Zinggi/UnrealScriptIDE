@@ -99,9 +99,13 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     def on_done_chose_compile_setting(self, index):
         if index == 0:
             self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
+            self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
+            self.start_build()
         if index == 1:
             self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
             self.compile_settings[1] += " -full"
+            self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
+            self.start_build()
         elif index == -1:
             return
         else:
@@ -109,8 +113,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             self.compile_settings = self.compile_settings[key]
             self.settings.set('current_compile_settings', key)
             sublime.save_settings('UnrealScriptIDE.sublime-settings')
-        self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
-        self.start_build()
+            self.show_compile_options()
 
     # display a progress icon at the bottom while building.
     # Once finished, this opens the log, starts the game or ask you what to do.
@@ -292,12 +295,14 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + config[8:]])
             elif "LISTEN: " == config[:8]:
                 b_server = True
-                subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + "?listen=true" + config[8:]])      # "server " + 
+                subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + "?listen=true" + config[8:]])
             elif "CLIENT: " == config[:8]:
                 if b_server:
                     subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + config[8:]])
                 else:
                     subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + config[8:]])
+            elif "EDITOR: ":
+                subprocess.Popen([self.udkLift_exe_path, "editor " + self._last_opened_map + config[8:]])
             else:
                 print "something is wrong in your settings, the startup string should start with either 'SERVER: ', 'LISTEN: ' or 'CLIENT: '"
 
