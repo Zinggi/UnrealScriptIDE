@@ -180,7 +180,6 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand):
 class UnrealScriptAutocomplete:
     # stores all classes
     # At the beginning, search trough the whole source folder and fill this
-    # ! TODO: also add inbuilt functions of array and class
     # These classes also contain their functions and variables if they were already parsed.
     _classes = []
 
@@ -208,6 +207,8 @@ class UnrealScriptAutocomplete:
     # returns the found function in _functions
     def get_function(self, name):
         for function in self._functions:
+            if isinstance(function, basestring):
+                continue
             if function.function_name().lower() == name.lower():
                 return function
         return None
@@ -215,6 +216,8 @@ class UnrealScriptAutocomplete:
     # returns the found variable in _variables
     def get_variable(self, name):
         for variable in self._variables:
+            if isinstance(variable, basestring):
+                continue
             if variable.name().lower() == name.lower():
                 return variable
         return None
@@ -352,6 +355,8 @@ class UnrealScriptAutocomplete:
     # returns the current suggestions for this file.
     # if from_class is given, returns the completions for the given class
     def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None, bNoStandardCompletions=False):
+        unsorted_autocomplete_list = []
+        current_list = -1
         autocomplete_list = []
 
         if from_class is not None:
@@ -370,17 +375,28 @@ class UnrealScriptAutocomplete:
             variables = self._variables
 
         # filter relevant items:
-        # ! (TODO): sort, so that completions for the current file come first
         if not b_no_variables:
             for variable in variables:
-                if word.lower() in variable.name().lower():
-                    autocomplete_list.append((variable.name() + '\t' + variable.var_modifiers(), variable.name()))
+                if isinstance(variable, basestring):
+                    current_list += 1
+                    unsorted_autocomplete_list.append([(variable, "")])
+                elif word.lower() in variable.name().lower():
+                    unsorted_autocomplete_list[current_list].append((variable.name() + '\t' + variable.var_modifiers(), variable.name()))
+                    # autocomplete_list.append((variable.name() + '\t' + variable.var_modifiers(), variable.name()))
 
         if not b_no_functions:
             for function in functions:
-                if word.lower() in function.function_name().lower():
+                if isinstance(function, basestring):
+                    current_list += 1
+                    unsorted_autocomplete_list.append([(function, "")])
+                elif word.lower() in function.function_name().lower():
                     function_str = function.function_name() + '\t(' + function.arguments() + ')'    # add arguments
-                    autocomplete_list.append((function_str, function.function_name()))
+                    unsorted_autocomplete_list[current_list].append((function_str, function.function_name()))
+                    # autocomplete_list.append((function_str, function.function_name()))
+
+        # sort
+        for i in range(0, len(unsorted_autocomplete_list)/2):
+            autocomplete_list += unsorted_autocomplete_list[i] + unsorted_autocomplete_list[i + len(unsorted_autocomplete_list)/2]
 
         if not b_no_classes:
             for _class in self._classes:
@@ -395,7 +411,6 @@ class UnrealScriptAutocomplete:
     # returns all completions for a class and all its parent classes.
     # takes a filename as an argument or a class reference
     # return ("parsing...", "parsing...") if the class wasn't parsed before
-    # ! (TODO): put functions and variables from the class first, then the ones from the parent classes
     def get_completions_from_class(self, class_file_name):
         if isinstance(class_file_name, Struct):
             return ([], class_file_name.get_variables())
@@ -412,6 +427,7 @@ class UnrealScriptAutocomplete:
     # returns all functions from the given class and all its parent classes
     def get_functions_from_class(self, my_class):
         functions = []
+        functions.append("### " + my_class.name() + "\t-    Functions ###")
         functions += my_class.get_functions()
 
         parent_file = self.get_class(my_class.parent_class())
@@ -424,6 +440,7 @@ class UnrealScriptAutocomplete:
     # returns all variables from the given class and all its parent classes
     def get_variables_from_class(self, my_class):
         variables = []
+        variables.append("### " + my_class.name() + "\t-    Variables ###")
         variables += my_class.get_variables()
 
         parent_file = self.get_class(my_class.parent_class())
@@ -572,7 +589,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
             # no defaultproperties found or above defaults:
 
             # check if wants object oriented completions
-            if line_contents[-1] == '.':    # I was probably thinking something here, but I don't remember: or ' ' not in line_contents.split('.')[-1]
+            if len(line_contents) > 0 and line_contents[-1] == '.':    # I was probably thinking something here, but I don't remember: or ' ' not in line_contents.split('.')[-1]
                 left_line = get_relevant_text(line_contents)
                 if '.' != left_line[-1]:
                     left_line = ".".join(left_line.split('.')[:-1]) + '.'
@@ -958,21 +975,21 @@ class FunctionsCollectorThread(threading.Thread):
     def add_func(self, function_modifiers, return_type, function_name, arguments, line_number, file_name, description="", is_funct=1):
         # if self.get_function(function_name) is None:
         if function_name != "":
-            self._functions.append(Function(function_modifiers, return_type, function_name, arguments, line_number + 1, file_name, description, is_funct))
+            self._functions.append(Function(function_modifiers, return_type.strip(), function_name.strip(), arguments, line_number + 1, file_name, description, is_funct))
 
     # adds the variable to _variables
     def add_var(self, var_modifiers, var_name, comment, line_number, file_name, description="", bStruct=False):
         # if self.get_variable(var_name) is None:
         if bStruct:
-            self._struct_variables.append(Variable(var_modifiers, var_name, comment, line_number + 1, file_name, description))
+            self._struct_variables.append(Variable(var_modifiers, var_name.strip(), comment, line_number + 1, file_name, description))
         else:
-            self._variables.append(Variable(var_modifiers, var_name, comment, line_number + 1, file_name, description))
+            self._variables.append(Variable(var_modifiers, var_name.strip(), comment, line_number + 1, file_name, description))
 
     def add_const(self, CONST_name, value, comment, line_number, file_name, description=""):
-        self._consts.append(Const(CONST_name, value, comment, line_number + 1, file_name, description))
+        self._consts.append(Const(CONST_name.strip(), value, comment, line_number + 1, file_name, description))
 
     def add_struct(self, struct_name, line, line_number, file_name, description):
-        self._structs.append(Struct(struct_name, line, line_number + 1, file_name, description))
+        self._structs.append(Struct(struct_name.strip(), line, line_number + 1, file_name, description))
 
     # returns the found function
     # def get_function(self, name):
@@ -996,7 +1013,7 @@ class FunctionsCollectorThread(threading.Thread):
         return None
 
     # extract functions, event and variables and split them into smaller groups.
-    # ! TODO:   -support STRUCTS, ENUMS
+    # ! TODO:   -support ENUMS
     #           -Probably rewrite this, as it is pretty ugly
     def save_functions(self, file_name):
         with open(file_name, 'rU') as file_lines:
@@ -1345,10 +1362,10 @@ class Function:
         return self._function_modifiers
 
     def return_type(self):
-        return self._return_type.strip()
+        return self._return_type
 
     def function_name(self):
-        return self._function_name.strip()
+        return self._function_name
 
     def arguments(self):
         return self._arguments
@@ -1366,22 +1383,22 @@ class Function:
     #   Better: save it properly, e.g. modify the save_functions method
     def insert_dynamic_snippet(self, view):
         self.create_dynamic_tooltip(view)
-        less_arguments = ""
-
-        if self._arguments != "":
-            less_args = self._arguments.split(' ')
-            less_arguments = ""
-
-            for i, arg in enumerate(less_args):
-                if (i + 1) % 2 == 0:
-                    less_arguments += arg + " "
-
-            less_arguments, t = less_arguments[:-1], less_arguments[-1]
 
         if view.rowcol(view.sel()[0].begin())[1] == 0:  # if run from the beginning of the line, assume it's a declaration
+            # get arguments without the type
+            less_arguments = ""
+            if self._arguments != "":
+                less_args = self._arguments.split(',')
+
+                for arg in less_args:
+                    less_arguments += arg.split()[-1] + ", "
+                less_arguments = less_arguments[:-2]
+
+            # add a tabstop for description
             description = ""
             if self._description != "":
                 description = '${1:' + self._description + '}'
+
             view.run_command("insert_snippet",
                             {"contents": (Function_Snippet_Declaration % {  "function_modifiers": self._function_modifiers,
                                                                             "return_type": self._return_type,
@@ -1441,7 +1458,7 @@ class Variable:
         return self._comment
 
     def name(self):
-        return self._name.strip()
+        return self._name
 
     def line_number(self):
         return self._line_number

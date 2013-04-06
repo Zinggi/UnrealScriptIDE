@@ -92,6 +92,9 @@ All **credits** for various Snippets (and also for the old (now unused) Syntax h
 All **credits** for Syntax highlighting in UnrealScript files goes to **[Rokit](https://github.com/rokit)** and **[Eliot](https://github.com/EliotVU)**. Thanks!  
 **Credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
 
+I think I've earned a bear for my effort :wink:  
+[![Donate](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XT5LYESK99ESA)
+
 My auto-complete settings
 ------------
 Here are some relevant settings for auto-completion that I've found quite helpful:

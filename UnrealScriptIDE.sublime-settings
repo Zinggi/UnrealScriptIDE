@@ -18,7 +18,7 @@
 		],
 		"Standalone Debug":
 		[
-			"CLIENT: -autodebug -log -ResX=1280 -ResY=720 -nomoviestartup -ConsolePosX=0 -ConsolePosY=720 -posx=0 -posy=0"
+			"CLIENT: -autodebug -log -ResX=1280 -ResY=720 -nomoviestartup -ConsolePosX=0 -ConsolePosY=720 -posx=0 -posy=0 -wxwindows"
 		],
 		"Open Editor":
 		[
