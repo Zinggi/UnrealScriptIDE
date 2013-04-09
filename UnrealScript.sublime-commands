@@ -39,6 +39,25 @@
         "command": "unreal_rebuild_cache"
     },
 
+    //Uninstall debugger
+    {
+        "caption": "UnrealScriptIDE: Uninstall UnrealDebugger (and restore your old)",
+        "command": "unreal_uninstall_debugger"
+    },
+
+    //Breakpoints
+    {
+        "caption": "UnrealScriptIDE: Toggle Breakpoint",
+        "command": "unreal_toggle_breakpoint",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+    },
+    {
+        "caption": "UnrealScriptIDE: Deactivate Breakpoint",
+        "command": "unreal_toggle_breakpoint",
+        "args": {"b_deactivate": true},
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+    },
+
     //Open the Wiki
     {
         "command": "open_url",

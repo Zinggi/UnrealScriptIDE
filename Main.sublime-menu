@@ -32,12 +32,6 @@
                 "caption": "-"
             },
             {
-                "caption": "UnrealScriptIDE: Rebuild Cache",
-                "id": "unreal_script_rebuild_cache",
-                "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
-                "command": "unreal_rebuild_cache"
-            },
-            {
                 "caption": "UnrealScriptIDE: Build Project",
                 "id": "unreal_script_build_project",
                 "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
@@ -56,6 +50,20 @@
                 "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
                 "args": {"b_show_compile_options": true},
                 "command": "unreal_build_project"
+            },
+            {
+                "caption": "-"
+            },
+            {
+                "caption": "UnrealScriptIDE: Rebuild Cache",
+                "id": "unreal_script_rebuild_cache",
+                "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+                "command": "unreal_rebuild_cache"
+            },
+            {
+                "caption": "UnrealScriptIDE: Uninstall UnrealDebugger (and restore your old)",
+                "id": "unreal_script_uninstall_debugger",
+                "command": "unreal_uninstall_debugger"
             }
         ]
     },

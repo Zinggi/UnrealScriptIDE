@@ -225,7 +225,14 @@ class UnrealScriptAutocomplete:
     # adds the class to _classes
     def add_class(self, class_name, parent_class, description, file_name):
         if self.get_class(class_name) is None:
-            self._classes.append(ClassReference(class_name, parent_class, description, file_name, self))
+            c = ClassReference(class_name, parent_class, description, file_name, self)
+            self._classes.append(c)
+            return c
+
+    # links all classes together
+    def link_classes(self):
+        for c in self._classes:
+            c.link_to_parent()
 
     # returns the class with the given name:
     def get_class(self, name):
@@ -286,7 +293,8 @@ class UnrealScriptAutocomplete:
 
             if line[-6:] == "super.":
                 active_file = sublime.active_window().active_view().file_name()
-                return self.get_class(self.get_class_from_filename(active_file).parent_class())
+                # return self.get_class(self.get_class_from_filename(active_file).parent_class())
+                return self.get_class_from_filename(active_file).get_parent()
 
             # something like 'super(Actor).' or 'Actor(controller).'
             if line[-2:] == ").":
@@ -359,7 +367,7 @@ class UnrealScriptAutocomplete:
         current_list = -1
         autocomplete_list = []
 
-        if from_class is not None:
+        if from_class:
             if from_class == "type not found":
                 sublime.active_window().run_command("hide_auto_complete")
                 return None
@@ -371,6 +379,7 @@ class UnrealScriptAutocomplete:
             self.completion_class = from_class
 
         else:
+            # ! TODO: add local variables
             functions = self._functions
             variables = self._variables
 
@@ -430,7 +439,8 @@ class UnrealScriptAutocomplete:
         functions.append("### " + my_class.name() + "\t-    Functions ###")
         functions += my_class.get_functions()
 
-        parent_file = self.get_class(my_class.parent_class())
+        # parent_file = self.get_class(my_class.parent_class())
+        parent_file = my_class.get_parent()
         if parent_file is None:
             return functions
 
@@ -443,7 +453,8 @@ class UnrealScriptAutocomplete:
         variables.append("### " + my_class.name() + "\t-    Variables ###")
         variables += my_class.get_variables()
 
-        parent_file = self.get_class(my_class.parent_class())
+        # parent_file = self.get_class(my_class.parent_class())
+        parent_file = my_class.get_parent()
         if parent_file is None:
             return variables
 
@@ -531,6 +542,9 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
     def on_activated(self, view):
         if is_unrealscript_file():
             self.clear()    # empty the completions list, so that we only get the relevant ones.
+            # load breakpoints
+            if view.window():
+                view.window().run_command("unreal_load_breakpoints")
 
             # at startup, save all classes
             if self.b_first_time:
@@ -670,7 +684,8 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
             if not self.get_and_open_object(word, self, window, b_new_start_point, False, True, True):
                 # open parent declaration
                 active_file = window.active_view().file_name()
-                c = self.get_class(self.get_class_from_filename(active_file).parent_class())
+                c = self.get_class_from_filename(active_file).get_parent()
+                # c = self.get_class(self.get_class_from_filename(active_file).parent_class())
                 self.get_and_open_object(word, c, window, b_new_start_point, True)
 
         # just a single object or self.
@@ -750,6 +765,7 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
                 print "finished parsing classes, start parsing current file"
                 self.b_still_parsing_classes = False
                 # self.save_classes_to_cache()
+                self.link_classes()
                 self.on_activated(view)
             else:
                 if self.b_wanted_to_go_to_definition:
@@ -965,10 +981,11 @@ class FunctionsCollectorThread(threading.Thread):
                         if my_class.parent_class() != parent_class_name or my_class.description() != description:
                             my_class.update_class(parent_class_name, description)
                     else:
-                        self.collector.add_class(os.path.basename(self.filename).split('.')[0],
-                                                 parent_class_name,
-                                                 description,
-                                                 self.filename)
+                        c = self.collector.add_class(os.path.basename(self.filename).split('.')[0],
+                                                     parent_class_name,
+                                                     description,
+                                                     self.filename)
+                        c.link_to_parent()
                     break
 
     # adds the function to _functions
@@ -1208,12 +1225,14 @@ class ClassReference:
     _consts = []
     _structs = []
     _b_was_parsed = False
+    _parent_class = None
+    _child_classes = []
 
     def __init__(self, class_name, parent_class, description, file_name, collector_reference):
         self._name = class_name
         self._description = description
         self._file_name = file_name
-        self._parent_class = parent_class
+        self._parent_class_name = parent_class
         self._collector_reference = collector_reference
 
     def description(self):
@@ -1228,8 +1247,25 @@ class ClassReference:
     def file_name(self):
         return self._file_name
 
-    def parent_class(self):
+    def link_to_parent(self):
+        self._parent_class = self._collector_reference.get_class(self._parent_class_name)
+        if self._parent_class:
+            self._parent_class.set_child(self)
+
+    def set_child(self, child):
+        self._child_classes.append(child)
+
+    def remove_child(self, child):
+        self._child_classes.remove(child)
+
+    def children(self):
+        return self._child_classes
+
+    def get_parent(self):
         return self._parent_class
+
+    def parent_class(self):
+        return self._parent_class_name
 
     def has_parsed(self):
         return self._b_was_parsed
@@ -1256,7 +1292,7 @@ class ClassReference:
         for f in self._functions:
             if name.lower() == f.function_name().lower():
                 return f
-        p_class = self._collector_reference.get_class(self._parent_class)
+        p_class = self._collector_reference.get_class(self._parent_class_name)
         if p_class is not None:
             return p_class.get_function(name)
         return None
@@ -1274,7 +1310,7 @@ class ClassReference:
         for c in self._consts:
             if name.lower() == c.name().lower():
                 return c
-        p_class = self._collector_reference.get_class(self._parent_class)
+        p_class = self._collector_reference.get_class(self._parent_class_name)
         if p_class is not None:
             return p_class.get_variable(name)
         return None
@@ -1283,8 +1319,10 @@ class ClassReference:
         self._collector_reference = collector_reference
 
     def update_class(self, parent_class_name, description):
-        self._parent_class = parent_class_name
+        self.get_parent().remove_child(self)
+        self._parent_class_name = parent_class_name
         self._description = description
+        self.link_to_parent()
 
     def parse_me(self):
         view = sublime.active_window().active_view()

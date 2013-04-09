@@ -42,6 +42,18 @@
 		"args": {"b_show_compile_options": true},
 		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
 	},
+	// Breakpoints
+	{
+		"keys": ["ctrl+."],
+		"command": "unreal_toggle_breakpoint",
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+	},
+	{
+		"keys": ["ctrl+shift+."],
+		"command": "unreal_toggle_breakpoint",
+		"args": {"b_deactivate": true},
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+	},
 
 	// Add event right before auto-completion to insert a dynamic snippet
 	{

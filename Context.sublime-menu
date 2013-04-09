@@ -1,14 +1,25 @@
 [
-   { "caption": "-" },
-   {
+	{ "caption": "-" },
+	{
 		"caption": "UnrealScript Go to Definition \t (new start point, alt + LMB)",
 		"command": "unreal_goto_definition",
 		"args": {"b_new_start_point": true}
 	},
-    {
+	{
 		"caption": "UnrealScript Go to Definition",
 		"command": "unreal_goto_definition",
 		"args": {"b_new_start_point": false}
 	},
-   { "caption": "-" }
+	{
+		"caption": "UnrealScript IDE: Toggle Breakpoint",
+		"command": "unreal_toggle_breakpoint",
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+	},
+	{
+		"caption": "UnrealScript IDE: Deactivate Breakpoint",
+		"command": "unreal_toggle_breakpoint",
+		"args": {"b_deactivate": true},
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+	},
+	{ "caption": "-" }
 ]

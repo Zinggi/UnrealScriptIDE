@@ -1,0 +1,27 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+* **Read the NOTE below**
+
+* **UnrealDebugger integration**
+	* UnrealDebugger will now be automatically installed when you build your game in debug mode.
+	To do so, press ctrl+alt+b or alt+f7. If you had another debugger (such as NFringe) installed before, it will preserve the shared dll.
+	You can uninstall UnrealDebugger through the command palette (ctrl+shift+p) by searching for "UnrealScriptIDE: Uninstall UnrealDebugger". This will restore the dll of your old debugger.
+	* To use it, start your game with a debug configuration
+	* You can set breakpoints directly inside Sublime Text 2 by either using the right click menu or with the shortcut ctrl+. to toggle a breakpoint or ctrl+shift+. to deactivate a breakpoint.
+
+* **Optimazations to the parser**
+	* You probably don't even notice anything, however you still need to rebuild your cache, otherwise nothing will work anymore.
+
+NOTE
+----
+
+	Again, this update requires you to rebuild your cache file:
+	This can be done using 'Tools' -> 'UnrealScript IDE: Rebuild Cache' or ctrl + shift + p -> search for 'rebuild cache' -> hit enter.
+
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki

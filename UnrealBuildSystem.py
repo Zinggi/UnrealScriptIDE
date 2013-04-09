@@ -86,9 +86,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     def show_compile_options(self):
         self.compile_settings = self.settings.get('compiling_configurations')
 
-        self.input_list = [["Compile with last used configuration",
-                            self.settings.get('current_compile_settings')],
-                            ["Full recompile with last used configuration",
+        self.input_list = [["Full recompile with last used configuration",          # ["Compile with last used configuration", self.settings.get('current_compile_settings')],
                             self.settings.get('current_compile_settings')]]
 
         for config in self.compile_settings:
@@ -97,11 +95,11 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         self.view.window().show_quick_panel(self.input_list, self.on_done_chose_compile_setting)
 
     def on_done_chose_compile_setting(self, index):
+        # if index == 0:
+        #     self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
+        #     self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
+        #     self.start_build()
         if index == 0:
-            self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
-            self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
-            self.start_build()
-        if index == 1:
             self.compile_settings = self.compile_settings[self.settings.get('current_compile_settings')]
             self.compile_settings[1] += " -full"
             self.udk_exe_path = self.udk_path + "Binaries\\" + self.compile_settings[0]
@@ -287,22 +285,22 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         self.last_used_configuration = configuration
         self.settings.set('last_used_configuration', self.last_used_configuration)
         sublime.save_settings('UnrealScriptIDE.sublime-settings')
-
+        exe_path = self.udk_exe_path[:-3] + "exe"
         b_server = False
         for config in startup_configuration:
             if "SERVER: " == config[:8]:
                 b_server = True
-                subprocess.Popen([self.udkLift_exe_path, "server " + self._last_opened_map + config[8:]])
+                subprocess.Popen([exe_path, "server " + self._last_opened_map + config[8:]])
             elif "LISTEN: " == config[:8]:
                 b_server = True
-                subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + "?listen=true" + config[8:]])
+                subprocess.Popen([exe_path, self._last_opened_map + "?listen=true" + config[8:]])
             elif "CLIENT: " == config[:8]:
                 if b_server:
-                    subprocess.Popen([self.udkLift_exe_path, "127.0.0.1 " + config[8:]])
+                    subprocess.Popen([exe_path, "127.0.0.1 " + config[8:]])
                 else:
-                    subprocess.Popen([self.udkLift_exe_path, self._last_opened_map + config[8:]])
+                    subprocess.Popen([exe_path, self._last_opened_map + config[8:]])
             elif "EDITOR: ":
-                subprocess.Popen([self.udkLift_exe_path, "editor " + self._last_opened_map + config[8:]])
+                subprocess.Popen([exe_path, "editor " + self._last_opened_map + config[8:]])
             else:
                 print "something is wrong in your settings, the startup string should start with either 'SERVER: ', 'LISTEN: ' or 'CLIENT: '"
 
@@ -476,6 +474,7 @@ class UDKbuild(threading.Thread):
         print args
         if "-debug" in args:
             self._collector.b_compiled_debug = True
+            sublime.set_timeout(lambda: self._collector.view.run_command("unreal_install_debugger", {"b_64bit": "Win64" == self._collector.compile_settings[0][:5]}), 0)
         # pipe = subprocess.Popen([self.exe_path, args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         pipe = subprocess.Popen(["cmd", args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         # saves output lines

@@ -23,6 +23,11 @@ Feautures
 	* go to the declaration of the currently selected word via F10, alt + left click, right click menu, 'Goto' -> 'UnrealScript Goto Declaration' or search for it in in the command palette 
 	* when browsing in the declarations you can always return to your starting position by using one of the above keys when nothing is under your cursor.
 
+* **Debugger**
+	* UnrealScript IDE comes with [UnrealDebugger](https://code.google.com/p/unreal-debugger/) integrated.
+	* You can set breakpoints directly inside Sublime Text 2
+	* [more information](https://github.com/Zinggi/UnrealScriptIDE/wiki/Usage#debugger)
+
 * **Syntax highlighting**
 	* For .uc files and .log files
 
@@ -88,6 +93,7 @@ Usage
 Please refer to the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
 
 ------------
+All **credits** for [UnrealDebugger](https://code.google.com/p/unreal-debugger/) goes to **[Carlos Lopez](https://code.google.com/u/105243014413414365723/)**. Huge Thanks!  
 All **credits** for various Snippets (and also for the old (now unused) Syntax highlighting file) goes to **[Michael Alexander](https://github.com/beefsack)**. Thanks!  
 All **credits** for Syntax highlighting in UnrealScript files goes to **[Rokit](https://github.com/rokit)** and **[Eliot](https://github.com/EliotVU)**. Thanks!  
 **Credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
@@ -116,7 +122,7 @@ Here are some relevant settings for auto-completion that I've found quite helpfu
 * * *
 License
 ------------
-UnrealScript Auto-complete Plug-in for Sublime Text 2
+UnrealScript IDE Plug-in for Sublime Text 2
 Copyright (C) 2013 Florian Zinggeler
 
 This program is free software: you can redistribute it and/or modify
