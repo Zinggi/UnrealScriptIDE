@@ -290,7 +290,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         for config in startup_configuration:
             if "SERVER: " == config[:8]:
                 b_server = True
-                subprocess.Popen([exe_path, "server " + self._last_opened_map + config[8:]])
+                args = " /C " + exe_path + " server " + self._last_opened_map + config[8:]
+                subprocess.Popen(["cmd", args], creationflags=0x08000000)
+                # subprocess.Popen([exe_path, "server " + self._last_opened_map + config[8:]])
             elif "LISTEN: " == config[:8]:
                 b_server = True
                 subprocess.Popen([exe_path, self._last_opened_map + "?listen=true" + config[8:]])
@@ -300,7 +302,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 else:
                     subprocess.Popen([exe_path, self._last_opened_map + config[8:]])
             elif "EDITOR: ":
-                subprocess.Popen([exe_path, "editor " + self._last_opened_map + config[8:]])
+                args = " /C " + exe_path + " editor " + self._last_opened_map + config[8:]
+                subprocess.Popen(["cmd", args], creationflags=0x08000000)
+                # subprocess.Popen([exe_path, "editor " + self._last_opened_map + config[8:]])
             else:
                 print "something is wrong in your settings, the startup string should start with either 'SERVER: ', 'LISTEN: ' or 'CLIENT: '"
 

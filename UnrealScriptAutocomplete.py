@@ -620,7 +620,9 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
 
             # get standard completions
             else:
-                return self.get_autocomplete_list(prefix)
+                compl_default = [view.extract_completions(prefix)]
+                compl_default = [(item + "\tDefault", item) for sublist in compl_default for item in sublist]       # format
+                return compl_default + self.get_autocomplete_list(prefix)
 
     # called right before auto completion.
     def on_query_context(self, view, key, operator, operand, match_all):
