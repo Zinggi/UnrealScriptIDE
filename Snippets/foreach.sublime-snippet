@@ -8,4 +8,5 @@ foreach ${1:Array/Iterator Function}(${2:Class}, ${3:OutActor})
 	<tabTrigger>foreach</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
+	<description>Snippet</description>
 </snippet>

@@ -621,8 +621,9 @@ class FunctionsCollector(UnrealScriptAutocomplete, sublime_plugin.EventListener)
             # get standard completions
             else:
                 compl_default = [view.extract_completions(prefix)]
-                compl_default = [(item + "\tDefault", item) for sublist in compl_default for item in sublist]       # format
-                return compl_default + self.get_autocomplete_list(prefix)
+                compl_default = [(item + "\tbuffer", item) for sublist in compl_default for item in sublist]       # format
+                keywords = [(item + "\tkeyword", item) for item in unreal_keywords]
+                return self.get_autocomplete_list(prefix) + keywords + compl_default
 
     # called right before auto completion.
     def on_query_context(self, view, key, operator, operand, match_all):
@@ -1009,20 +1010,6 @@ class FunctionsCollectorThread(threading.Thread):
 
     def add_struct(self, struct_name, line, line_number, file_name, description):
         self._structs.append(Struct(struct_name.strip(), line, line_number + 1, file_name, description))
-
-    # returns the found function
-    # def get_function(self, name):
-    #     for function in self._functions:
-    #         if function.function_name().lower() == name.lower():
-    #             return function
-    #     return None
-
-    # returns the found variable
-    # def get_variable(self, name):
-    #     for variable in self._variables:
-    #         if variable.name().lower() == name.lower():
-    #             return variable
-    #     return None
 
     # returns the filename of the given class name
     def get_file_name(self, class_name):
@@ -1511,16 +1498,6 @@ class Variable:
 
     def insert_dynamic_snippet(self, view):
         self.create_dynamic_tooltip(view)
-        # if view.rowcol(view.sel()[0].begin())[1] == 0:  # if run from the beginning of the line, assume it's a declaration
-        #     description, comment = "", ""
-        #     if self._description != "":
-        #         description = '${1:' + self._description + '}'
-        #     if self._comment != "":
-        #         comment = ' //' + self._comment
-
-        #     view.run_command("insert_snippet", {"contents": (Variable_Snippet_Declaration % {"description": description, "var_modifiers": self.var_modifiers(), "name": self._name, "comment": comment})})
-
-        # else:
         view.run_command("insert_snippet", {"contents": (Object_Name % {"name": self._name})})
 
     def create_dynamic_tooltip(self, view):
@@ -1585,23 +1562,6 @@ Function_Snippet_Declaration = \
 Function_Snippet_Call = \
 """%(function_name)s(%(arguments)s)"""
 
-# Variable_Snippet_Declaration = \
-# """%(description)s%(var_modifiers)s%(name)s;%(comment)s
-# """
-
-# Variable_Snippet_Name = \
-# """%(name)s"""
-
-# Const_Snippet_Declaration = \
-# """%(description)s%(name)s = %(value)s;%(comment)s
-# """
-
-# Const_Snippet_Name = \
-# """%(name)s"""
-
-# Class_Variable = \
-# """%(name)s"""
-
 Object_Name = \
 """%(name)s"""
 
@@ -1650,3 +1610,18 @@ class EventManager():
 #     print arg
 
 # evt_m().parsing_finished += self.on_parsing_finished
+
+unreal_keywords = ["abstract", "array", "arraycount", "assert", "auto", "automated", "bool", "break", "button",
+                   "byte", "coerce", "collapsecategories", "config", "const", "continue", "default", "delegate",
+                   "dependson", "deprecated", "dontcollapsecategories", "edfindable", "editconst", "editconstarray",
+                   "editinline", "editinlinenew", "editinlinenotify", "editinlineuse", "enumcount", "event", "exec",
+                   "expands", "export", "exportstructs", "extends", "final", "float", "global", "globalconfig",
+                   "goto", "guid", "hidecategories", "ignores", "import", "init", "input", "insert", "instanced",
+                   "int", "intrinsic", "iterator", "latent", "length", "local", "localized", "name", "new", "noexport",
+                   "none", "noteditinlinenew", "notplaceable", "nousercreate", "operator", "optional", "out",
+                   "perobjectconfig", "placeable", "pointer", "postoperator", "preoperator", "private", "protected",
+                   "reliable", "remove", "return", "rot", "safereplace", "self", "showcategories", "simulated", "singular",
+                   "state", "static", "string", "super", "transient", "travel", "unreliable", "var", "vect", "Repnotify", "Client",
+                   "Server", "AutoExpandCategories", "implements", "Inherits", "NonTransient", "StructDefaultProperties",
+                   "if", "else", "class", "DefaultProperties", "do", "until", "enum", "for", "false", "true", "foreach",
+                   "function", "struct", "switch", "while"]

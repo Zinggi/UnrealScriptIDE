@@ -8,4 +8,5 @@ simulated event $1($2)
 	<tabTrigger>s-event</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
+	<description>Snippet</description>
 </snippet>

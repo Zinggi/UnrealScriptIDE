@@ -8,4 +8,5 @@ simulated function $1($2)
 	<tabTrigger>s-function</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
+	<description>Snippet</description>
 </snippet>

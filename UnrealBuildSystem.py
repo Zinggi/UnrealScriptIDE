@@ -21,7 +21,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     udk_path = ""
     udk_exe_path = ""
     udkLift_exe_path = ""
-    udk_maps_folder = ""
+    udk_maps_folder = []
     # the building output
     _output = []
     # there were some errors
@@ -61,7 +61,13 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             # Removing "Development\Src" and adding the UDK.com path (this is probably not how it's done correctly):
             self.udk_path = self.udk_exe_path[:-15]
             self.udkLift_exe_path = self.udk_path + "Binaries\\UDKLift.exe"
-            self.udk_maps_folder = self.udk_path + "UDKGame\\Content\\Maps"
+            map_folders = self.settings.get('map_folders')
+            for f in map_folders:
+                if f[1] != ':':
+                    self.udk_maps_folder.append(self.udk_path + f)
+                else:
+                    self.udk_maps_folder.append(f)
+            # self.udk_maps_folder = self.udk_path + "UDKGame\\Content\\Maps"
 
             if not b_show_compile_options:
                 compile_settings_key = self.settings.get('current_compile_settings')
@@ -426,18 +432,20 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         self.edit_configurations()
 
     # returns all map files in the path folder
-    def search_mapfiles(self, path):
+    def search_mapfiles(self, paths):
+        print paths
         maps = []
-        if not os.path.exists(path):
-            print "maps not found"
-            return
-        for file in os.listdir(path):
-            dirfile = os.path.join(path, file)
+        for path in paths:
+            if not os.path.exists(path):
+                print "maps not found in ", path
+                continue
+            for file in os.listdir(path):
+                dirfile = os.path.join(path, file)
 
-            if os.path.isdir(dirfile):
-                maps += self.search_mapfiles(dirfile)
-            elif ".udk" in dirfile:
-                maps.append([file, dirfile])
+                if os.path.isdir(dirfile):
+                    maps += self.search_mapfiles([dirfile])
+                elif ".udk" in dirfile:
+                    maps.append([file, dirfile])
 
         return maps
 

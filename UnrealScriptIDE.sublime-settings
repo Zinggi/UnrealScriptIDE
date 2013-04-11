@@ -26,6 +26,12 @@
 		]
 	},
 
+	// You can add your own map folders here. If a relative path is given it will search inside the udk directory.
+	// You can also use absolute paths (e.g. "map_folders":["UDKGame\\Content\\Maps","C:\\UDK\\MyMaps"]).
+	"map_folders":
+	[
+		"UDKGame\\Content\\Maps"
+	],
 
 	// This is similar to the "startup_configurations".
 	// Here you can specify different compile options.

@@ -14,4 +14,5 @@ defaultproperties
 	<tabTrigger>gameinfo</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.unrealscript</scope>
+	<description>Snippet</description>
 </snippet>
