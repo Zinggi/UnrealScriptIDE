@@ -433,7 +433,6 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     # returns all map files in the path folder
     def search_mapfiles(self, paths):
-        print paths
         maps = []
         for path in paths:
             if not os.path.exists(path):
