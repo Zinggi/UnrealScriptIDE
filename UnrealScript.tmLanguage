@@ -90,10 +90,39 @@
 			</array>
 		</dict>
 
-		<!-- declaration keywords -->
+		<!-- preprocessor dict -->
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.language.source.uc</string>
+				</dict>
+
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>constant.language.source.uc</string>
+				</dict>
+			</dict>
+
+			<key>match</key>
+			<string>(`)(?i:(if|else|endif|define|undefine|include|isdefined|notdefined|log|logd|warn|assert))?(.*{0})</string>
+		</dict>
+
+		<!-- Although these are modifiers, it's nice to keep them in sync with class, interface, struct, and state -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(class|interface|event|function|state|ignores|const|var|local|struct|enum|operator|preoperator|postoperator))\b</string>
+			<string>\b(?i:(extends|expands|within))\b</string>
+			<key>name</key>
+			<string>keyword.language.source.uc</string>
+		</dict>
+
+		<!-- declaration keywords(var is defined else where) -->
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(class|interface|event|function|state|ignores|const|local|struct|enum|operator|preoperator|postoperator))\b</string>
 			<key>name</key>
 			<string>keyword.language.source.uc</string>
 		</dict>
@@ -106,10 +135,90 @@
 			<string>keyword.language.source.uc</string>
 		</dict>
 
-		<!-- modifier keywords -->
+		<!--
+			Parses the following(FIXME: except for test4):
+
+			var() bool test1;
+			var(a) bool test2;
+			var(b, c) bool test3;
+			var(d, e, f) bool test4;
+		-->
+		<dict>
+			<key>captures</key>
+			<dict>
+				<!-- var -->
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.language.source.uc</string>
+				</dict>
+				
+				<!-- (, ) -->
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.language.source.uc</string>
+				</dict>
+
+				<!-- first NAME -->
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>string.quoted.single.unrealscript</string>
+				</dict>
+
+				<!-- second NAME -->
+				<key>4</key>
+				<dict>
+					<key>name</key>
+					<string>string.quoted.single.unrealscript</string>
+				</dict>
+			</dict>
+
+			<key>match</key>
+			<string>\b(?i:(var))\b(\s*?\(\s*?([a-z-A-Z_]*?[0-9]*?)\s*?,?\s*?([a-z-A-Z_]*?[0-9]*?)\s*?\))?</string>
+		</dict>
+
+		<!--
+			Parses the following:
+
+			config
+			config(NAME)
+			dllbind(NAME) FIXME: also dllbind 
+		-->
+		<dict>
+			<key>captures</key>
+			<dict>
+				<!-- config|dllbind -->
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>storage.type.source.uc</string>
+				</dict>
+				
+				<!-- ( ) -->
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.language.source.uc</string>
+				</dict>
+				
+				<!-- NAME -->
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>string.quoted.single.unrealscript</string>
+				</dict>
+			</dict>
+
+			<key>match</key>
+			<string>\b(?i:(config|dllbind))\b(\s*?\(\s*?([a-z-A-Z_]*?[0-9]*?)\s*?\))?</string>
+		</dict>
+
+		<!-- modifier keywords (config is defined else where)-->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(abstract|native|intrinsic|noexport|nativereplication|hidecategories|public|private|transient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|config|protected|auto|notplaceable|placeable|dependson|implements|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|extends|expands|within|reliable|server|exec|editinline|repnotify|optional|virtual|edithide|editinlinenew|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized))\b</string>
+			<string>\b(?i:(abstract|native|intrinsic|noexport|nativereplication|hidecategories|public|private|transient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|protected|auto|notplaceable|placeable|dependson|implements|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|reliable|server|exec|editinline|repnotify|optional|virtual|edithide|editinlinenew|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized))\b</string>
 			<key>name</key>
 			<string>storage.modifier.source.uc</string>
 		</dict>
@@ -293,6 +402,7 @@
 			</array>
 		</dict>
 	</array>
+
 	<key>repository</key>
 	<dict>
 		<key>access</key>
@@ -302,14 +412,18 @@
 			<key>name</key>
 			<string>variable.other.dot-access.c</string>
 		</dict>
+
 		<key>block</key>
 		<dict>
 			<key>begin</key>
 			<string>\{</string>
+
 			<key>end</key>
 			<string>\}</string>
+
 			<key>name</key>
 			<string>meta.block.c</string>
+
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -318,30 +432,11 @@
 				</dict>
 			</array>
 		</dict>
+
 		<key>block_innards</key>
 		<dict>
 			<key>patterns</key>
 			<array>
-				<dict>
-					<key>include</key>
-					<string>#preprocessor-rule-enabled-block</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#preprocessor-rule-disabled-block</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#preprocessor-rule-other-block</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#sizeof</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#access</string>
-				</dict>
 				<dict>
 					<key>captures</key>
 					<dict>
@@ -426,6 +521,7 @@
 				</dict>
 			</array>
 		</dict>
+
 		<key>cpptext</key>
 		<dict>
 			<key>begin</key>
@@ -459,29 +555,7 @@
 				</dict>
 			</array>
 		</dict>
-		<key>disabled</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*#\s*if(n?def)?\b.*$</string>
 
-			<key>comment</key>
-			<string>eat nested preprocessor if(def)s</string>
-
-			<key>end</key>
-			<string>^\s*#\s*endif\b.*$</string>
-
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>#disabled</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#pragma-mark</string>
-				</dict>
-			</array>
-		</dict>
 		<key>parens</key>
 		<dict>
 			<key>begin</key>
@@ -498,384 +572,7 @@
 				</dict>
 			</array>
 		</dict>
-		<key>pragma-mark</key>
-		<dict>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.pragma.c</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>meta.toc-list.pragma-mark.c</string>
-				</dict>
-			</dict>
-			<key>match</key>
-			<string>^\s*(#\s*(pragma\s+mark)\s+(.*))</string>
-			<key>name</key>
-			<string>meta.section</string>
-		</dict>
-		<key>preprocessor-rule-disabled</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*(#(if)\s+(0)\b).*</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.if.c</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>constant.numeric.preprocessor.c</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>^\s*(#\s*(endif)\b)</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>begin</key>
-					<string>^\s*(#\s*(else)\b)</string>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>meta.preprocessor.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.control.import.else.c</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=^\s*#\s*endif\b.*$)</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>$base</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string></string>
-					<key>end</key>
-					<string>(?=^\s*#\s*(else|endif)\b.*$)</string>
-					<key>name</key>
-					<string>comment.block.preprocessor.if-branch</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#disabled</string>
-						</dict>
-						<dict>
-							<key>include</key>
-							<string>#pragma-mark</string>
-						</dict>
-					</array>
-				</dict>
-			</array>
-		</dict>
-		<key>preprocessor-rule-disabled-block</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*(#(if)\s+(0)\b).*</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.if.c</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>constant.numeric.preprocessor.c</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>^\s*(#\s*(endif)\b)</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>begin</key>
-					<string>^\s*(#\s*(else)\b)</string>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>meta.preprocessor.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.control.import.else.c</string>
-						</dict>
-					</dict>
-					<key>end</key>
-					<string>(?=^\s*#\s*endif\b.*$)</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#block_innards</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string></string>
-					<key>end</key>
-					<string>(?=^\s*#\s*(else|endif)\b.*$)</string>
-					<key>name</key>
-					<string>comment.block.preprocessor.if-branch.in-block</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#disabled</string>
-						</dict>
-						<dict>
-							<key>include</key>
-							<string>#pragma-mark</string>
-						</dict>
-					</array>
-				</dict>
-			</array>
-		</dict>
-		<key>preprocessor-rule-enabled</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*(#(if)\s+(0*1)\b)</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.if.c</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>constant.numeric.preprocessor.c</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>^\s*(#\s*(endif)\b)</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>begin</key>
-					<string>^\s*(#\s*(else)\b).*</string>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>meta.preprocessor.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.control.import.else.c</string>
-						</dict>
-					</dict>
-					<key>contentName</key>
-					<string>comment.block.preprocessor.else-branch</string>
-					<key>end</key>
-					<string>(?=^\s*#\s*endif\b.*$)</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#disabled</string>
-						</dict>
-						<dict>
-							<key>include</key>
-							<string>#pragma-mark</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string></string>
-					<key>end</key>
-					<string>(?=^\s*#\s*(else|endif)\b.*$)</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>$base</string>
-						</dict>
-					</array>
-				</dict>
-			</array>
-		</dict>
-		<key>preprocessor-rule-enabled-block</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*(#(if)\s+(0*1)\b)</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.if.c</string>
-				</dict>
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>constant.numeric.preprocessor.c</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>^\s*(#\s*(endif)\b)</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>begin</key>
-					<string>^\s*(#\s*(else)\b).*</string>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>meta.preprocessor.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.control.import.else.c</string>
-						</dict>
-					</dict>
-					<key>contentName</key>
-					<string>comment.block.preprocessor.else-branch.in-block</string>
-					<key>end</key>
-					<string>(?=^\s*#\s*endif\b.*$)</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#disabled</string>
-						</dict>
-						<dict>
-							<key>include</key>
-							<string>#pragma-mark</string>
-						</dict>
-					</array>
-				</dict>
-				<dict>
-					<key>begin</key>
-					<string></string>
-					<key>end</key>
-					<string>(?=^\s*#\s*(else|endif)\b.*$)</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>#block_innards</string>
-						</dict>
-					</array>
-				</dict>
-			</array>
-		</dict>
-		<key>preprocessor-rule-other</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*(#\s*(if(n?def)?)\b.*?(?:(?=(?://|/\*))|$))</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.c</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>^\s*(#\s*(endif)\b).*$</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>$base</string>
-				</dict>
-			</array>
-		</dict>
-		<key>preprocessor-rule-other-block</key>
-		<dict>
-			<key>begin</key>
-			<string>^\s*(#\s*(if(n?def)?)\b.*?(?:(?=(?://|/\*))|$))</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>meta.preprocessor.c</string>
-				</dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.control.import.c</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>^\s*(#\s*(endif)\b).*$</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>include</key>
-					<string>#block_innards</string>
-				</dict>
-			</array>
-		</dict>
-		<key>sizeof</key>
-		<dict>
-			<key>match</key>
-			<string>\b(sizeof)\b</string>
-			<key>name</key>
-			<string>keyword.operator.sizeof.c</string>
-		</dict>
+
 		<key>string_escaped_char</key>
 		<dict>
 			<key>patterns</key>
