@@ -193,7 +193,7 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>storage.type.source.uc</string>
+					<string>storage.modifier.source.uc</string>
 				</dict>
 				
 				<!-- ( ) -->
