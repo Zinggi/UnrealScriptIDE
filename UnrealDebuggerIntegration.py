@@ -5,7 +5,6 @@
 #   -installs the debugger automatically when you build with a debug configuration. Preserves other installed debugger.
 #   -adds a command to uninstall the debugger and restore your old debugger.
 #   -set breakpoint inside Sublime:
-#       TODO: store and sync breakpoints between Sublime and UnrealDebugger
 #
 #   (TODO):
 #       sync opened files
@@ -15,6 +14,7 @@
 import sublime
 import sublime_plugin
 import os
+import threading
 import shutil
 from xml.etree import ElementTree
 
@@ -102,21 +102,29 @@ class UnrealUninstallDebuggerCommand(sublime_plugin.TextCommand):
 
 class UnrealLoadBreakpointsCommand(sublime_plugin.TextCommand):
     def run(self, edit, b_set_breakpoints=False):
-        open_folder_arr = self.view.window().folders()
-        install_dir_64, src_dir = get_paths(open_folder_arr, True)
-        install_dir_32, src_dir = get_paths(open_folder_arr, False)
-        self.breakpoints_xml = install_dir_64[:-6] + "UScriptIDE_Breakpoints.xml"
+        self.filename = self.view.file_name()
+        if self.filename:
+            open_folder_arr = self.view.window().folders()
+            install_dir_64, src_dir = get_paths(open_folder_arr, True)
+            install_dir_32, src_dir = get_paths(open_folder_arr, False)
+            self.breakpoints_xml = install_dir_64[:-6] + "UScriptIDE_Breakpoints.xml"
 
-        if os.path.exists(self.breakpoints_xml):
-            xml_tree = ElementTree.parse(self.breakpoints_xml)
-            breakpoints = xml_tree.find("Breakpoints")
-            if b_set_breakpoints:
-                print "set breakpoints"
-                self.set_breakpoints(breakpoints, install_dir_32 + "UnrealDebugger.project")
-                self.set_breakpoints(breakpoints, install_dir_64 + "UnrealDebugger.project")
-            else:
-                print "load breakpoints"
-                self.load_breakpoints(breakpoints)
+            if os.path.exists(self.breakpoints_xml):
+                xml_tree = ElementTree.parse(self.breakpoints_xml)
+                breakpoints = xml_tree.find("Breakpoints")
+                if b_set_breakpoints:
+                    print "set breakpoints"
+                    self.set_breakpoints(breakpoints, install_dir_32 + "UnrealDebugger.project")
+                    self.set_breakpoints(breakpoints, install_dir_64 + "UnrealDebugger.project")
+                else:
+                    print "load breakpoints"
+                    LoadBreakpoints(breakpoints, self).start()
+                    # self.load_breakpoints(breakpoints)
+
+    def call_toggle_breakpoint(self, b):
+        p = self.view.text_point(int(b.find("LineNo").text)-1, 0)
+        point = self.view.line(p)
+        self.view.window().run_command("unreal_toggle_breakpoint", {"b_deactivate": b.find("Enabled").text != "true", "breakpoint_a": point.a, "breakpoint_b": point.b})
 
     # copies the breakpoints from the master file to The Debugger files
     def set_breakpoints(self, breakpoints, debugger_file):
@@ -132,22 +140,37 @@ class UnrealLoadBreakpointsCommand(sublime_plugin.TextCommand):
         else:
             shutil.copy(self.breakpoints_xml, debugger_file)
 
+
+class LoadBreakpoints(threading.Thread):
+    def __init__(self, breakpoints, main_thread):
+        self.breakpoints = breakpoints
+        self.main_thread = main_thread
+        threading.Thread.__init__(self)
+
+    def run(self):  # gets called when the thread is created
+        self.load_breakpoints(self.breakpoints)
+        self.stop()
+
+    def stop(self):
+        if self.isAlive():
+            self._Thread__stop()
+
     # loads the saved breakpoints from the master file to the current view
     def load_breakpoints(self, breakpoints):
         dic = breakpoints.find("Dictionary")
-        if self.view.file_name():
-            current_file = self.view.file_name().split('\\')[-1].split('.')[0].lower()
-            for item in dic:
-                k = item.find("key")
-                s = k.find("string")
-                if s.text.split('.')[-1].lower() == current_file:
-                    print "load breakpoints for file ", current_file
-                    v = item.find("value")
-                    arr = v.find("ArrayOfBreakpoint")
-                    for b in arr:
-                        p = self.view.text_point(int(b.find("LineNo").text)-1, 0)
-                        point = self.view.line(p)
-                        self.view.window().run_command("unreal_toggle_breakpoint", {"b_deactivate": b.find("Enabled").text != "true", "breakpoint_a": point.a, "breakpoint_b": point.b})
+        current_file = self.main_thread.filename.split('\\')[-1].split('.')[0].lower()
+        for item in dic:
+            k = item.find("key")
+            s = k.find("string")
+            if s.text.split('.')[-1].lower() == current_file:
+                print "load breakpoints for file ", current_file
+                v = item.find("value")
+                arr = v.find("ArrayOfBreakpoint")
+                for b in arr:
+                    # p = self.main_thread.view.text_point(int(b.find("LineNo").text)-1, 0)
+                    # point = self.main_thread.view.line(p)
+                    print ElementTree.tostring(b)
+                    sublime.set_timeout(lambda: self.main_thread.call_toggle_breakpoint(b), 1000)
 
 
 # Toggles a breakpoint visually. Also saves the breakpoints to the master file.

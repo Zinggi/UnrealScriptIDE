@@ -1,0 +1,29 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+* **Read the NOTE below - rebuild cache!**
+
+* **Bug fixes and minor Improvements**
+	*	fixed the "just a moment..." issue.
+		(see: http://forums.epicgames.com/threads/940192-UnrealScript-IDE-for-Sublime-Text-2-NEW-Debugger?p=31317709&viewfull=1#post31317709)
+		Not completely fixed, but fixed in most cases.
+	*	Added some missing functions (such as spawn)
+	*	Added more inbuilt functions (like vect())
+
+* **Code Organization and Optimizations**
+	*	As the code grew larger and larger I decided to split it up into several logical parts.
+	*	The quite ugly function "save_functions" was rewritten using regular expressions developed by a friend of mine.
+		Check out his web-page:		http://deserving-better.com/	He'd appreciate some users.
+
+NOTE
+----
+
+	Again, this update requires you to rebuild your cache file:
+	This can be done using 'Tools' -> 'UnrealScript IDE: Rebuild Cache' or ctrl + shift + p -> search for 'rebuild cache' -> hit enter.
+
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
