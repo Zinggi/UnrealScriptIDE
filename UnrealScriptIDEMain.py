@@ -159,7 +159,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 if len(line_contents.split()) >= 3 and "extends" == line_contents.split()[2]:
                     return self.get_autocomplete_list(prefix, False, True, True, bNoStandardCompletions=True)
                 # only keywords
-                return [(item + "\tkeyword", item) for item in unreal_keywords]
+                return [(item + "\tkeyword", item) for item in self.get_keywords()]
 
             # if is in defaultproperties, only get variables:
             line_number = 1000000
@@ -194,7 +194,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             else:
                 compl_default = [view.extract_completions(prefix)]
                 compl_default = [(item + "\tbuffer", item) for sublist in compl_default for item in sublist]       # format
-                keywords = [(item + "\tkeyword", item) for item in unreal_keywords]
+                keywords = [(item + "\tkeyword", item) for item in self.get_keywords()]
                 return self.get_autocomplete_list(prefix) + keywords + compl_default
 
     # called right before auto completion.
@@ -387,6 +387,10 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
         print "rebuild cache"
         self.clear_all(view)
 
+    def get_keywords(self):
+        settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
+        return settings.get('unreal_keywords')
+
 
 # this deletes the cache file and clears every completion, so that it can then rebuild the classes.
 # Resetting everything, basically starting from anew like it would be the first run.
@@ -449,17 +453,3 @@ class EventManager():
 #     print arg
 
 # evt_m().parsing_finished += self.on_parsing_finished
-unreal_keywords = ["abstract", "array", "arraycount", "assert", "auto", "automated", "bool", "break", "button",
-                   "byte", "coerce", "collapsecategories", "config", "const", "continue", "default", "delegate",
-                   "dependson", "deprecated", "dontcollapsecategories", "edfindable", "editconst", "editconstarray",
-                   "editinline", "editinlinenew", "editinlinenotify", "editinlineuse", "enumcount", "event", "exec",
-                   "expands", "export", "exportstructs", "extends", "final", "float", "global", "globalconfig",
-                   "goto", "guid", "hidecategories", "ignores", "import", "init", "input", "insert", "instanced",
-                   "int", "intrinsic", "iterator", "latent", "length", "local", "localized", "name", "new", "noexport",
-                   "none", "noteditinlinenew", "notplaceable", "nousercreate", "operator", "optional", "out",
-                   "perobjectconfig", "placeable", "pointer", "postoperator", "preoperator", "private", "protected",
-                   "reliable", "remove", "return", "rot", "safereplace", "self", "showcategories", "simulated", "singular",
-                   "state", "static", "string", "super", "transient", "travel", "unreliable", "var", "vect", "Repnotify", "Client",
-                   "Server", "AutoExpandCategories", "implements", "Inherits", "NonTransient", "StructDefaultProperties",
-                   "if", "else", "class", "DefaultProperties", "do", "until", "enum", "for", "false", "true", "foreach",
-                   "function", "struct", "switch", "while"]

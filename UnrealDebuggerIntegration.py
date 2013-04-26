@@ -100,6 +100,7 @@ class UnrealUninstallDebuggerCommand(sublime_plugin.TextCommand):
                 os.rename(backup, backup[:-15])
 
 
+# loads breakpoints from the master file
 class UnrealLoadBreakpointsCommand(sublime_plugin.TextCommand):
     def run(self, edit, b_set_breakpoints=False):
         self.filename = self.view.file_name()
@@ -130,17 +131,27 @@ class UnrealLoadBreakpointsCommand(sublime_plugin.TextCommand):
     def set_breakpoints(self, breakpoints, debugger_file):
         if os.path.exists(debugger_file):
             debugger_tree = ElementTree.parse(debugger_file)
+
+            break_on_first_line = debugger_tree.find("BreakOnFirstLine")
+            if break_on_first_line is not None:
+                s = sublime.load_settings('UnrealScriptIDE.sublime-settings')
+                break_on_first_line.text = "false" if not s.get('break_on_first_line') else "true"
+            else:
+                print "not found!!, ", break_on_first_line
+
             debugger_breakpoints = debugger_tree.find("Breakpoints")
             dic = breakpoints.find("Dictionary")
             dic_debug = debugger_breakpoints.find("Dictionary")
             dic_debug.clear()
             for item in dic:
                 dic_debug.append(item)
+
             debugger_tree.write(debugger_file)
         else:
             shutil.copy(self.breakpoints_xml, debugger_file)
 
 
+# a separate thread for loading breakpoints, as this can take a moment.
 class LoadBreakpoints(threading.Thread):
     def __init__(self, breakpoints, main_thread):
         self.breakpoints = breakpoints
@@ -235,10 +246,12 @@ class UnrealToggleBreakpointCommand(sublime_plugin.TextCommand):
             if not b_found_item:
                 arr = self.add_item_to_dictionary(d)
                 self.add_breakpoints_to_array(breakpoints_formatted, arr)
+
             xml_tree.write(breakpoints_xml)
         else:
             print "create new xml with breakpoints"
             root = ElementTree.Element('Project')
+
             bs = ElementTree.SubElement(root, "Breakpoints")
             d = ElementTree.SubElement(bs, "Dictionary")
             arr = self.add_item_to_dictionary(d)

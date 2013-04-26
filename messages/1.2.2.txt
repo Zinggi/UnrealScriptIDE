@@ -1,0 +1,32 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+* **Read the NOTE below - rebuild cache!**
+
+* **UnrealDebugger Improvements**
+	*	UnrealDebugger got a small update, allowing you to deactivate the first "invisible" breakpoint.
+		This will be used as the default setting from now on.
+		You can change that in the settings if you like.
+
+* **More Settings exposed**
+	*	You can now add additional map extensions
+	*	You can now specify your own keywords to use for auto-completion
+
+* **Added live build output**
+	*	Its a little bit buggy, but it works.
+
+* **some bug fixing (one of them requires you to rebuild the cache file)**
+	* I tried to fix the "just a moment..." bug again, hope I was lucky this time ;-)
+
+NOTE
+----
+
+	Again, this update requires you to rebuild your cache file:
+	This can be done using 'Tools' -> 'UnrealScript IDE: Rebuild Cache' or ctrl + shift + p -> search for 'rebuild cache' -> hit enter.
+
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki
