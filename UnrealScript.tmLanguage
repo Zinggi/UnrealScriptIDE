@@ -130,9 +130,33 @@
 		<!-- block keywords -->
 		<dict>
 			<key>match</key>
-			<string>((?i:\b(((structdefaultproperties|defaultproperties|cpptext|structcpptext|cppstruct|replication))|)\b)(i:[\s\n]*\{)?)|((?i:\b(begin\s+object)|(end\s+object))\b)</string>
+			<string>((?i:\b(((structdefaultproperties|defaultproperties|cpptext|structcpptext|cppstruct|replication))|)\b)(i:[\s\n]*\{)?)|((?i:\b(?m:begin\s+object)|(?m:end\s+object))\b)</string>
 			<key>name</key>
 			<string>keyword.language.source.uc</string>
+		</dict>
+
+		<!-- Any modifier with multiple CLASS type parameters such as DependsOn -Eliot -->
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key><dict><key>name</key><string>storage.modifier.source.uc</string></dict>
+				<key>2</key><dict><key>name</key><string>punctuation.language.source.uc</string></dict>
+				<key>3</key><dict><key>name</key><string>storage.type.source.uc</string></dict>
+			</dict>
+			<key>match</key>
+			<string>(?i:(dependson|implements|classgroup))(\s*?\((?'CLASS_NAME'\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?)\g'CLASS_NAME'*\s*?\))</string>
+		</dict>
+
+		<!-- Any modifier with multiple NAME parameters such as HideCategories(Don't put Var(...) in here because that's an declaration!) -Eliot -->
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key><dict><key>name</key><string>storage.modifier.source.uc</string></dict>
+				<key>2</key><dict><key>name</key><string>punctuation.language.source.uc</string></dict>
+				<key>3</key><dict><key>name</key><string>string.quoted.single.uc</string></dict>
+			</dict>
+			<key>match</key>
+			<string>(?i:(hidecategories|showcategories|autocollapsecategories|dontautocollapsecategories|autoexpandcategories|dontsortcategories))(\s*?\((?'CLASS_NAME'\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?)\g'CLASS_NAME'*\s*?\))</string>
 		</dict>
 
 		<!--
@@ -164,61 +188,37 @@
 				<key>3</key>
 				<dict>
 					<key>name</key>
-					<string>string.quoted.single.unrealscript</string>
+					<string>string.quoted.single.uc</string>
 				</dict>
 
 				<!-- second NAME -->
 				<key>4</key>
 				<dict>
 					<key>name</key>
-					<string>string.quoted.single.unrealscript</string>
+					<string>string.quoted.single.uc</string>
 				</dict>
 			</dict>
 
 			<key>match</key>
-			<string>\b(?i:(var))\b(\s*?\(\s*?([a-z-A-Z_]*?[0-9]*?)\s*?,?\s*?([a-z-A-Z_]*?[0-9]*?)\s*?\))?</string>
+			<string>\b(?i:(var))\b(\s*?\(\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?\))?</string>
 		</dict>
 
-		<!--
-			Parses the following:
-
-			config
-			config(NAME)
-			dllbind(NAME) FIXME: also dllbind 
-		-->
+		<!-- Any modifier with a single NAME parameter such as dllbind|config|classgroup -Eliot -->
 		<dict>
 			<key>captures</key>
 			<dict>
-				<!-- config|dllbind -->
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>storage.modifier.source.uc</string>
-				</dict>
-				
-				<!-- ( ) -->
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.language.source.uc</string>
-				</dict>
-				
-				<!-- NAME -->
-				<key>3</key>
-				<dict>
-					<key>name</key>
-					<string>string.quoted.single.unrealscript</string>
-				</dict>
+				<key>1</key><dict><key>name</key><string>storage.modifier.source.uc</string></dict>
+				<key>2</key><dict><key>name</key><string>punctuation.language.source.uc</string></dict>
+				<key>3</key><dict><key>name</key><string>string.quoted.single.uc</string></dict>
 			</dict>
-
 			<key>match</key>
-			<string>\b(?i:(config|dllbind))\b(\s*?\(\s*?([a-z-A-Z_]*?[0-9]*?)\s*?\))?</string>
+			<string>\b(?i:(config|dllbind|native|inherits))\b(\s*?\(\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?\))?</string>
 		</dict>
 
 		<!-- modifier keywords (config is defined else where)-->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(abstract|native|intrinsic|noexport|nativereplication|hidecategories|public|private|transient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|protected|auto|notplaceable|placeable|dependson|implements|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|reliable|server|exec|editinline|repnotify|optional|virtual|edithide|editinlinenew|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized))\b</string>
+			<string>\b(?i:(nativeonly|abstract|intrinsic|exportstructs|export|noexport|noexportheader|nativereplication|public|private|transient|nontransient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|protected|auto|nousercreate|notplaceable|placeable|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|reliable|unreliable|server|client||exec|editinline|editinlinenotify|editinlineuse|editinlinenew|noteditinlinenew|repnotify|optional|virtual|edithide|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized|init|hidedropdown|collapsecategories|dontcollapsecategories|safereplace|parseconfig|instanced|databinding|duplicatetransient|input|travel|edfindable|editconstarray|editfixedsize|editortextbox|nontransactional|serializetext|notforconsole|repretry|archetype|crosslevelactive|crosslevelpassive|long|strictconfig|k2call|k2override|k2pure|singular|demorecording|dllimport|latent))\b</string>
 			<key>name</key>
 			<string>storage.modifier.source.uc</string>
 		</dict>
@@ -291,7 +291,7 @@
 		<!-- Common constants defined in Object and Actor that serve a purpose in subclasses -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(MaxInt|RadToDeg|DegToRad|UnrRotToRad|RadToUnrRot|DegToUnrRot|UnrRotToDeg|INDEX_NONE|Pi|AspectRatio4x3|AspectRatio5x4|AspectRatio16x9|InvAspectRatio4x3|InvAspectRatio5x4|InvAspectRatio16x9|MINFLOORZ|ACTORMAXSTEPHEIGHT|TRACEFLAG_Bullet|TRACEFLAG_PhysicsVolumes|TRACEFLAG_SkipMovers|TRACEFLAG_Blocking))\b</string>
+			<string>\b(?i:(MaxInt|RadToDeg|DegToRad|UnrRotToRad|RadToUnrRot|DegToUnrRot|UnrRotToDeg|INDEX_NONE|Pi|AspectRatio4x3|AspectRatio5x4|AspectRatio16x9|InvAspectRatio4x3|InvAspectRatio5x4|InvAspectRatio16x9|MINFLOORZ|ACTORMAXSTEPHEIGHT|TRACEFLAG_Bullet|TRACEFLAG_PhysicsVolumes|TRACEFLAG_SkipMovers|TRACEFLAG_Blocking|TRACEFLAG_ForceController))\b</string>
 			<key>name</key>
 			<string>storage.constant.source.uc</string>
 		</dict>
@@ -320,17 +320,17 @@
 			<string>constant.numeric.source.uc</string>
 		</dict>
 
-		<!-- Matches any puncation and known named operators -->
+		<!-- Matches any operator punctuations and known named operators -->
 		<dict>
 			<key>match</key>
-			<string>([?+\-/%*=&lt;&gt;^+~!|&amp;$@]+)|(\b(?i:(Dot|Cross|ClockwiseFrom|New)?)\b)</string>
+			<string>([?:+\-/%*=&lt;&gt;^+~!|&amp;$@]+)|(\b(?i:(Dot|Cross|ClockwiseFrom|New)?)\b)</string>
 			<key>name</key>
 			<string>keyword.operator.source.uc</string>
 		</dict>
 
 		<dict>
 			<key>match</key>
-			<string>([?,.;()\[\]{}]+)</string>
+			<string>([,.;()\[\{}]]+)</string>
 			<key>name</key>
 			<string>punctuation.language.source.uc</string>
 		</dict>
@@ -343,7 +343,7 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.string.begin.c</string>
+					<string>punctuation.definition.string.begin.uc</string>
 				</dict>
 			</dict>
 			<key>end</key>
@@ -353,11 +353,11 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.string.end.c</string>
+					<string>punctuation.definition.string.end.uc</string>
 				</dict>
 			</dict>
 			<key>name</key>
-			<string>string.quoted.double.unrealscript</string>
+			<string>string.quoted.double.uc</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -378,7 +378,7 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.string.begin.c</string>
+					<string>punctuation.definition.string.begin.uc</string>
 				</dict>
 			</dict>
 			<key>end</key>
@@ -388,11 +388,11 @@
 				<key>0</key>
 				<dict>
 					<key>name</key>
-					<string>punctuation.definition.string.end.c</string>
+					<string>punctuation.definition.string.end.uc</string>
 				</dict>
 			</dict>
 			<key>name</key>
-			<string>string.quoted.single.unrealscript</string>
+			<string>string.quoted.single.uc</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -410,9 +410,10 @@
 			<key>match</key>
 			<string>\.[a-zA-Z_][a-zA-Z_0-9]*\b(?!\s*\()</string>
 			<key>name</key>
-			<string>variable.other.dot-access.c</string>
+			<string>variable.other.dot-access.uc</string>
 		</dict>
 
+		<!-- Syntax that's only valid within braces { ... } -->
 		<key>block</key>
 		<dict>
 			<key>begin</key>
@@ -422,7 +423,7 @@
 			<string>\}</string>
 
 			<key>name</key>
-			<string>meta.block.c</string>
+			<string>meta.block.uc</string>
 
 			<key>patterns</key>
 			<array>
@@ -433,126 +434,11 @@
 			</array>
 		</dict>
 
+		<!-- Syntax that's only valid within braces { ... } -->
 		<key>block_innards</key>
 		<dict>
 			<key>patterns</key>
 			<array>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.whitespace.support.function.leading.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>support.function.C99.c</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>(\s*)\b(hypot(f|l)?|s(scanf|ystem|nprintf|ca(nf|lb(n(f|l)?|ln(f|l)?))|i(n(h(f|l)?|f|l)?|gn(al|bit))|tr(s(tr|pn)|nc(py|at|mp)|c(spn|hr|oll|py|at|mp)|to(imax|d|u(l(l)?|max)|k|f|l(d|l)?)|error|pbrk|ftime|len|rchr|xfrm)|printf|et(jmp|vbuf|locale|buf)|qrt(f|l)?|w(scanf|printf)|rand)|n(e(arbyint(f|l)?|xt(toward(f|l)?|after(f|l)?))|an(f|l)?)|c(s(in(h(f|l)?|f|l)?|qrt(f|l)?)|cos(h(f)?|f|l)?|imag(f|l)?|t(ime|an(h(f|l)?|f|l)?)|o(s(h(f|l)?|f|l)?|nj(f|l)?|pysign(f|l)?)|p(ow(f|l)?|roj(f|l)?)|e(il(f|l)?|xp(f|l)?)|l(o(ck|g(f|l)?)|earerr)|a(sin(h(f|l)?|f|l)?|cos(h(f|l)?|f|l)?|tan(h(f|l)?|f|l)?|lloc|rg(f|l)?|bs(f|l)?)|real(f|l)?|brt(f|l)?)|t(ime|o(upper|lower)|an(h(f|l)?|f|l)?|runc(f|l)?|gamma(f|l)?|mp(nam|file))|i(s(space|n(ormal|an)|cntrl|inf|digit|u(nordered|pper)|p(unct|rint)|finite|w(space|c(ntrl|type)|digit|upper|p(unct|rint)|lower|al(num|pha)|graph|xdigit|blank)|l(ower|ess(equal|greater)?)|al(num|pha)|gr(eater(equal)?|aph)|xdigit|blank)|logb(f|l)?|max(div|abs))|di(v|fftime)|_Exit|unget(c|wc)|p(ow(f|l)?|ut(s|c(har)?|wc(har)?)|error|rintf)|e(rf(c(f|l)?|f|l)?|x(it|p(2(f|l)?|f|l|m1(f|l)?)?))|v(s(scanf|nprintf|canf|printf|w(scanf|printf))|printf|f(scanf|printf|w(scanf|printf))|w(scanf|printf)|a_(start|copy|end|arg))|qsort|f(s(canf|e(tpos|ek))|close|tell|open|dim(f|l)?|p(classify|ut(s|c|w(s|c))|rintf)|e(holdexcept|set(e(nv|xceptflag)|round)|clearexcept|testexcept|of|updateenv|r(aiseexcept|ror)|get(e(nv|xceptflag)|round))|flush|w(scanf|ide|printf|rite)|loor(f|l)?|abs(f|l)?|get(s|c|pos|w(s|c))|re(open|e|ad|xp(f|l)?)|m(in(f|l)?|od(f|l)?|a(f|l|x(f|l)?)?))|l(d(iv|exp(f|l)?)|o(ngjmp|cal(time|econv)|g(1(p(f|l)?|0(f|l)?)|2(f|l)?|f|l|b(f|l)?)?)|abs|l(div|abs|r(int(f|l)?|ound(f|l)?))|r(int(f|l)?|ound(f|l)?)|gamma(f|l)?)|w(scanf|c(s(s(tr|pn)|nc(py|at|mp)|c(spn|hr|oll|py|at|mp)|to(imax|d|u(l(l)?|max)|k|f|l(d|l)?|mbs)|pbrk|ftime|len|r(chr|tombs)|xfrm)|to(b|mb)|rtomb)|printf|mem(set|c(hr|py|mp)|move))|a(s(sert|ctime|in(h(f|l)?|f|l)?)|cos(h(f|l)?|f|l)?|t(o(i|f|l(l)?)|exit|an(h(f|l)?|2(f|l)?|f|l)?)|b(s|ort))|g(et(s|c(har)?|env|wc(har)?)|mtime)|r(int(f|l)?|ound(f|l)?|e(name|alloc|wind|m(ove|quo(f|l)?|ainder(f|l)?))|a(nd|ise))|b(search|towc)|m(odf(f|l)?|em(set|c(hr|py|mp)|move)|ktime|alloc|b(s(init|towcs|rtowcs)|towc|len|r(towc|len))))\b</string>
-				</dict>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.whitespace.function-call.leading.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>support.function.any-method.c</string>
-						</dict>
-						<key>3</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.definition.parameters.c</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>(?x) (?: (?= \s )  (?:(?&lt;=else|new|return) | (?&lt;!\w)) (\s+))?
-			(\b 
-				(?!(while|for|do|if|else|switch|catch|enumerate|return|r?iterate)\s*\()(?:(?!NS)[A-Za-z_][A-Za-z0-9_]*+\b | :: )++                  # actual name
-			)
-			 \s*(\()</string>
-					<key>name</key>
-					<string>meta.function-call.c</string>
-				</dict>
-				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>variable.other.c</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.definition.parameters.c</string>
-						</dict>
-					</dict>
-					<key>match</key>
-					<string>(?x)
-			        (?x)
-			(?:  
-			     (?: (?= \s )           (?&lt;!else|new|return) (?&lt;=\w)\s+      #  or word + space before name
-			     )
-			)
-			(
-				(?: [A-Za-z_][A-Za-z0-9_]*+ | :: )++    |              # actual name
-				(?: (?&lt;=operator) (?: [-*&amp;&lt;&gt;=+!]+ | \(\) | \[\] ) )?  # if it is a C++ operator
-			)
-			 \s*(\()</string>
-					<key>name</key>
-					<string>meta.initialization.c</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>#block</string>
-				</dict>
-				<dict>
-					<key>include</key>
-					<string>$base</string>
-				</dict>
-			</array>
-		</dict>
-
-		<key>cpptext</key>
-		<dict>
-			<key>begin</key>
-			<string>\b(?i:(cpptext))\b</string>
-			<key>captures</key>
-			<dict>
-				<key>1</key>
-				<dict>
-					<key>name</key>
-					<string>keyword.embedded.c++.unrealscript</string>
-				</dict>
-			</dict>
-			<key>end</key>
-			<string>(?&lt;=\})</string>
-			<key>name</key>
-			<string>source.embedded.c++.unrealscript</string>
-			<key>patterns</key>
-			<array>
-				<dict>
-					<key>begin</key>
-					<string>\{</string>
-					<key>end</key>
-					<string>\}</string>
-					<key>patterns</key>
-					<array>
-						<dict>
-							<key>include</key>
-							<string>source.c++</string>
-						</dict>
-					</array>
-				</dict>
 			</array>
 		</dict>
 
@@ -563,7 +449,7 @@
 			<key>end</key>
 			<string>\)</string>
 			<key>name</key>
-			<string>meta.parens.c</string>
+			<string>meta.parens.uc</string>
 			<key>patterns</key>
 			<array>
 				<dict>
@@ -619,7 +505,7 @@
 		</dict>
 	</dict>
 	<key>scopeName</key>
-	<string>source.unrealscript</string>
+	<string>source.uc</string>
 	<key>uuid</key>
 	<string>077E5343-191C-4618-BB9F-FED76FAD1B8C</string>
 </dict>
