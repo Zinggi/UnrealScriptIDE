@@ -5,7 +5,7 @@
         "press_command": "drag_select",
         "press_args": {"by": "words"},
         "command": "unreal_goto_definition",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "args": {"b_new_start_point": true}
     }
 ]

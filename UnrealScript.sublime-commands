@@ -3,39 +3,39 @@
     {
         "caption": "UnrealScriptIDE: Goto Declaration",
         "command": "unreal_goto_definition",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "args": {"b_new_start_point": false}
     },
     {
         "caption": "UnrealScriptIDE: Goto Declaration (New starting point)",
         "command": "unreal_goto_definition",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "args": {"b_new_start_point": true}
     },
 
     //Build and Run
     {
         "caption": "UnrealScriptIDE: Build Project",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "command": "unreal_build_project"
     },
     {
         "caption": "UnrealScriptIDE: Build and Run last opened map",
         "command": "unreal_build_project",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "args": {"b_build_and_run": true}
     },
     {
         "caption": "UnrealScriptIDE: Show Compile Options and Build Project",
         "command": "unreal_build_project",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "args": {"b_show_compile_options": true}
     },
 
     //Rebuild cache
     {
         "caption": "UnrealScriptIDE: Rebuild Cache",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }],
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
         "command": "unreal_rebuild_cache"
     },
 
@@ -49,13 +49,13 @@
     {
         "caption": "UnrealScriptIDE: Toggle Breakpoint",
         "command": "unreal_toggle_breakpoint",
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
     },
     {
         "caption": "UnrealScriptIDE: Deactivate Breakpoint",
         "command": "unreal_toggle_breakpoint",
         "args": {"b_deactivate": true},
-        "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
     },
 
     //Class Browser

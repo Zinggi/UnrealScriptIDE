@@ -9,50 +9,50 @@
 	{
 		"keys": ["f7"],
 		"command": "unreal_build_project",
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	{
 		"keys": ["ctrl+b"],
 		"command": "unreal_build_project",
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	// build and run
 	{
 		"keys": ["shift+f7"],
 		"command": "unreal_build_project",
 		"args": {"b_build_and_run": true},
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	{
 		"keys": ["ctrl+shift+b"],
 		"command": "unreal_build_project",
 		"args": {"b_build_and_run": true},
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	// configure build options and build
 	{
 		"keys": ["alt+f7"],
 		"command": "unreal_build_project",
 		"args": {"b_show_compile_options": true},
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	{
 		"keys": ["ctrl+alt+b"],
 		"command": "unreal_build_project",
 		"args": {"b_show_compile_options": true},
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	// Breakpoints
 	{
 		"keys": ["ctrl+."],
 		"command": "unreal_toggle_breakpoint",
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 	{
 		"keys": ["ctrl+shift+."],
 		"command": "unreal_toggle_breakpoint",
 		"args": {"b_deactivate": true},
-		"context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
+		"context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
 	},
 
 	// Add event right before auto-completion to insert a dynamic snippet

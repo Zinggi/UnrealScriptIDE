@@ -3,7 +3,7 @@
 	[
 		{
 			"characters": ".",
-			"selector": "source.unrealscript"
+			"selector": "source.uc"
 		}
 	],
 	"auto_complete_with_fields": true
