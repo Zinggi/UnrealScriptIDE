@@ -61,7 +61,6 @@ def get_relevant_text(text):
 ####################################################
 
 
-
 # Creates threads (ParserThread) for collecting any function, event or variable
 # Handles all events
 # Also, this is the main instance of my plug-in.
@@ -74,7 +73,8 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
 
     # active threads
     _collector_threads = []
-
+    # will be true when the parsing happened to parse the current file.
+    b_built_for_current_file = False
     # will be set to true just after auto-completion
     b_did_autocomplete = False
     # if it needs to parse first before going to the declaration, this will be true.
@@ -109,6 +109,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
     def on_activated(self, view):
         if is_unrealscript_file():
             self.clear()    # empty the completions list, so that we only get the relevant ones.
+            self.b_built_for_current_file = True
             # load breakpoints
             if view.window():
                 view.window().run_command("unreal_load_breakpoints")
@@ -121,6 +122,8 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 event_manager = EventManager()
                 evt_m().go_to_definition += self.on_go_to_definition
                 evt_m().rebuild_cache += self.on_rebuild_cache
+                evt_m().get_class_reference += self.on_get_classes_reference
+                evt_m().get_and_open_object += self.get_and_open_object
 
                 view.set_status('UnrealScriptAutocomplete', "startup: start parsing classes...")
                 print "startup: start parsing classes..."
@@ -352,9 +355,11 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     sublime.set_timeout(lambda: view.run_command("auto_complete"), 0)
                 else:
                     # finished and keep functions for later use
-                    self._functions, self._variables = self.get_completions_from_class(view.file_name())
-                    self.save_completions_to_file(view.file_name())
-                    view.erase_status('UnrealScriptAutocomplete')
+                    if self.b_built_for_current_file:
+                        self.b_built_for_current_file = False
+                        self._functions, self._variables = self.get_completions_from_class(view.file_name())
+                        self.save_completions_to_file(view.file_name())
+                    evt_m().parsing_finished()
 
     # reset all and start from anew
     def clear_all(self, view):
@@ -387,6 +392,9 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
         print "rebuild cache"
         self.clear_all(view)
 
+    def on_get_classes_reference(self, callback):
+        callback(self.get_object("Object", self, b_no_functions=True, b_no_variables=True))
+
 
 # this deletes the cache file and clears every completion, so that it can then rebuild the classes.
 # Resetting everything, basically starting from anew like it would be the first run.
@@ -402,7 +410,6 @@ class UnrealRebuildCacheCommand(sublime_plugin.TextCommand):
                             evt_m().rebuild_cache(self.view)
         else:
             print "no UnrealScript file, try again with a .uc file focused"
-
 
 
 ########################################################
@@ -440,9 +447,11 @@ class Event:
 
 class EventManager():
     def __init__(self):
-        # self.parsing_finished = Event()
+        self.parsing_finished = Event()
         self.go_to_definition = Event()
         self.rebuild_cache = Event()
+        self.get_class_reference = Event()
+        self.get_and_open_object = Event()
 
 
 # def on_parsing_finished(self, arg):

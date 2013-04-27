@@ -385,6 +385,7 @@ class ClassReference:
         self._file_name = file_name
         self._parent_class_name = parent_class
         self._collector_reference = collector_reference
+        self._child_classes = []
 
     def description(self):
         return self._description
@@ -404,6 +405,7 @@ class ClassReference:
             self._parent_class.set_child(self)
 
     def set_child(self, child):
+        # print "link: ", child.name(), "  to: ", self.name()
         self._child_classes.append(child)
 
     def remove_child(self, child):
@@ -502,6 +504,9 @@ class Struct:
     def description(self):
         return self._description
 
+    def declaration(self):
+        return self._struct_line
+
     def name(self):
         return self._name
 
@@ -560,6 +565,9 @@ class Function:
     def function_name(self):
         return self._function_name
 
+    def declaration(self):
+        return self.function_modifiers() + ("function" if self._b_is_function == 1 else "event") + self.return_type() + self.function_name() + "(" + self.arguments() + ")"
+
     def arguments(self):
         return self._arguments
 
@@ -570,6 +578,8 @@ class Function:
         return self._file_name
 
     def description(self):
+        if self._description == "":
+            return self.declaration()
         return self._description
 
     def documentation(self):
@@ -660,6 +670,9 @@ class Variable:
     def name(self):
         return self._name
 
+    def declaration(self):
+        return self.var_modifiers() + self.name() + ";" + (" //" + self.comment() if self.comment() != "" else "")
+
     def line_number(self):
         return self._line_number
 
@@ -676,7 +689,7 @@ class Variable:
     def create_dynamic_tooltip(self, view):
         documentation = self.description()
         if documentation.strip() == "":
-            documentation = self.var_modifiers() + self.name() + ";" + (" //" + self.comment() if self.comment() != "" else "")
+            documentation = self.declaration()
         print_to_panel(view, documentation)
 
 
@@ -704,6 +717,9 @@ class Const:
 
     def name(self):
         return self._name.strip()
+
+    def declaration(self):
+        return self.description()
 
     def line_number(self):
         return self._line_number

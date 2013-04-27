@@ -58,6 +58,12 @@
         "context":[{ "key": "selector", "operator": "equal", "operand": "source.unrealscript" }]
     },
 
+    //Class Browser
+    {
+        "caption": "UnrealScriptIDE: Class Browser (experimental)",
+        "command": "unreal_class_browser"
+    },
+
     //Open the Wiki
     {
         "command": "open_url",
