@@ -14,6 +14,7 @@ import sublime_plugin
 import subprocess
 import threading
 import os
+from UnrealScriptIDEData import print_to_panel
 
 
 # Builds your udk project and gets the output.
@@ -443,7 +444,8 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
                 if os.path.isdir(dirfile):
                     maps += self.search_mapfiles([dirfile])
-                elif ".udk" in dirfile:
+                elif any(word in dirfile for word in self.settings.get('additional_map_extensions')):
+                # elif ".udk" in dirfile:
                     maps.append([file, dirfile])
 
         return maps
@@ -460,7 +462,11 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     # returns the found summery in a building log file.
     def get_summery(self):
-        i = self._output.index("Warning/Error Summary")
+        try:
+            i = self._output.index("Warning/Error Summary")
+        except ValueError, e:
+            print "error: couldn't find 'Warning/Error Summary'. ", e
+            return ""
         return "\n".join(self._output[i:])
 
 
@@ -481,7 +487,7 @@ class UDKbuild(threading.Thread):
             return
         print "compiling with: " + self._collector.compile_settings[0] + " and " + self._collector.compile_settings[1]
         args = "make " + self._collector.compile_settings[1]
-        args = " /C " + self.exe_path + " " + args + " -unattended"
+        args = " /C " + self.exe_path + " " + args  # + " -unattended"
         print args
         if "-debug" in args:
             self._collector.b_compiled_debug = True
@@ -489,11 +495,17 @@ class UDKbuild(threading.Thread):
         # pipe = subprocess.Popen([self.exe_path, args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         pipe = subprocess.Popen(["cmd", args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         # saves output lines
+        bfirst = True
         while True:
             line = pipe.stdout.readline()
             if not line:
                 break
             self._collector._output.append(line.rstrip())
+            if bfirst:
+                bfirst = False
+                sublime.set_timeout(lambda: print_to_panel(self._collector.view, line), 0)
+            else:
+                sublime.set_timeout(lambda: print_to_panel(self._collector.view, line, False), 0)
 
         output_text = "".join(self._collector._output)
         if "Warning/Error Summary" in output_text:

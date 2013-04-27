@@ -32,7 +32,11 @@
 	[
 		"UDKGame\\Content\\Maps"
 	],
-
+	// add your own map extensions here:
+	"additional_map_extensions":
+	[
+		".udk"
+	],
 	// This is similar to the "startup_configurations".
 	// Here you can specify different compile options.
 	// Please fallow the given structure carefully. "name": ["Path", "-YourSettings"]
@@ -41,24 +45,28 @@
 		"Standard 32bit":
 		[
 			"Win32\\UDK.com",
-			""
+			"-unattended"
 		],
 		"Standard 64bit":
 		[
 			"Win64\\UDK.com",
-			""
+			"-unattended"
 		],
 		"Debug 32bit":
 		[
 			"Win32\\UDK.com",
-			"-debug"
+			"-debug -unattended"
 		],
 		"Debug 64bit":
 		[
 			"Win64\\UDK.com",
-			"-debug"
+			"-debug -unattended"
 		]
 	},
+
+
+	// set this to true if you want that the debugger breaks at the first line of code that gets executed.
+	"break_on_first_line": false,
 
 
 
@@ -83,5 +91,22 @@
 	// Used to save your last used configuration.
 	"last_used_configuration": "",
 	// Used to save your current compile configuration.
-	"current_compile_settings": "Standard 32bit"
+	"current_compile_settings": "Standard 32bit",
+
+
+	// keywords to use for auto-completion.
+	"unreal_keywords": ["abstract", "array", "arraycount", "assert", "auto", "automated", "bool", "break", "button",
+	                   "byte", "coerce", "collapsecategories", "config", "const", "continue", "default", "delegate",
+	                   "dependson", "deprecated", "dontcollapsecategories", "edfindable", "editconst", "editconstarray",
+	                   "editinline", "editinlinenew", "editinlinenotify", "editinlineuse", "enumcount", "event", "exec",
+	                   "expands", "export", "exportstructs", "extends", "final", "float", "global", "globalconfig",
+	                   "goto", "guid", "hidecategories", "ignores", "import", "init", "input", "insert", "instanced",
+	                   "int", "intrinsic", "iterator", "latent", "length", "local", "localized", "name", "new", "noexport",
+	                   "none", "noteditinlinenew", "notplaceable", "nousercreate", "operator", "optional", "out",
+	                   "perobjectconfig", "placeable", "pointer", "postoperator", "preoperator", "private", "protected",
+	                   "reliable", "remove", "return", "rot", "safereplace", "self", "showcategories", "simulated", "singular",
+	                   "state", "static", "string", "super", "transient", "travel", "unreliable", "var", "vect", "Repnotify", "Client",
+	                   "Server", "AutoExpandCategories", "implements", "Inherits", "NonTransient", "StructDefaultProperties",
+	                   "if", "else", "class", "DefaultProperties", "do", "until", "enum", "for", "false", "true", "foreach",
+	                   "function", "struct", "switch", "while"]
 }
