@@ -4,6 +4,6 @@ WorldInfo.Game.Broadcast(${1:self}, ${2:Your message});]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>broadcast</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
-	<scope>source.unrealscript</scope>
+	<scope>source.uc</scope>
 	<description>Snippet</description>
 </snippet>

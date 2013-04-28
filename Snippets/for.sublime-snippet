@@ -7,6 +7,6 @@ for (${1:i = 0}; $2; ${3:i++})
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>for</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
-	<scope>source.unrealscript</scope>
+	<scope>source.uc</scope>
 	<description>Snippet</description>
 </snippet>

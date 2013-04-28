@@ -15,6 +15,6 @@ switch (${1:expression})
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>switch</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
-	<scope>source.unrealscript</scope>
+	<scope>source.uc</scope>
   <description>Snippet</description>
 </snippet>
