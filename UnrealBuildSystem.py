@@ -13,6 +13,7 @@ import sublime
 import sublime_plugin
 import subprocess
 import threading
+import time
 import os
 from UnrealScriptIDEData import print_to_panel
 
@@ -506,6 +507,7 @@ class UDKbuild(threading.Thread):
                 sublime.set_timeout(lambda: print_to_panel(self._collector.view, line), 0)
             else:
                 sublime.set_timeout(lambda: print_to_panel(self._collector.view, line, False), 0)
+            time.sleep(0.001)
 
         output_text = "".join(self._collector._output)
         if "Warning/Error Summary" in output_text:
