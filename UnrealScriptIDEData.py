@@ -614,16 +614,16 @@ class Function:
                 less_arguments = less_arguments[:-2]
 
             # add a tabstop for description
-            description = ""
-            if self.documentation() != "":
-                description = '${1:' + self.documentation() + '}'
+            # description = ""
+            # if self.documentation() != "":
+            #     description = '${1:' + self.documentation() + '}'
 
             view.run_command("insert_snippet",
                             {"contents": (Function_Snippet_Declaration % {  "function_modifiers": self.function_modifiers(),
                                                                             "return_type": self.return_type(True),
                                                                             "function_name": self._function_name,
                                                                             "arguments": self._arguments,
-                                                                            "description": description,
+                                                                            # "description": description,
                                                                             "funct": "function" if self._b_is_function == 1 else "event",
                                                                             "less_arguments": less_arguments})})
         else:
@@ -745,8 +745,8 @@ class Const:
 
     def create_dynamic_tooltip(self, view):
         documentation = self.description()
-		 # ! TODO: test if displays correct.
-         # + "CONST " + self.name() + " = " + self.value() + ";" + (" //" + self.comment() if self.comment() != "" else "")
+        # ! TODO: test if displays correct.
+        # + "CONST " + self.name() + " = " + self.value() + ";" + (" //" + self.comment() if self.comment() != "" else "")
         print_to_panel(view, documentation)
 
 
@@ -755,7 +755,7 @@ class Const:
 # ----------------
 
 Function_Snippet_Declaration = \
-"""%(description)s%(function_modifiers)s%(funct)s%(return_type)s %(function_name)s(%(arguments)s)
+"""%(function_modifiers)s%(funct)s%(return_type)s %(function_name)s(%(arguments)s)
 {
     ${2:super.%(function_name)s(%(less_arguments)s);}
     ${3://}
