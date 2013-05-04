@@ -50,7 +50,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
             self.settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
             open_folder_arr = self.view.window().folders()   # Gets all opened folders in the Sublime Text editor.
             self.b_build_and_run = b_build_and_run
-
+            self.udk_maps_folder = []
             # search open folders for the Src directory
             for folder in open_folder_arr:
                 if "\Development\Src" in folder:
@@ -507,7 +507,7 @@ class UDKbuild(threading.Thread):
                 sublime.set_timeout(lambda: print_to_panel(self._collector.view, line), 0)
             else:
                 sublime.set_timeout(lambda: print_to_panel(self._collector.view, line, False), 0)
-            time.sleep(0.001)
+            time.sleep(0.002)
 
         output_text = "".join(self._collector._output)
         if "Warning/Error Summary" in output_text:
