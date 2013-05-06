@@ -97,13 +97,13 @@
 				<key>1</key>
 				<dict>
 					<key>name</key>
-					<string>keyword.language.source.uc</string>
+					<string>keyword.language.preprocessor.source.uc</string>
 				</dict>
 
 				<key>2</key>
 				<dict>
 					<key>name</key>
-					<string>constant.language.source.uc</string>
+					<string>constant.language.preprocessor.source.uc</string>
 				</dict>
 			</dict>
 
@@ -140,7 +140,6 @@
 			<key>captures</key>
 			<dict>
 				<key>1</key><dict><key>name</key><string>storage.modifier.source.uc</string></dict>
-				<key>2</key><dict><key>name</key><string>punctuation.language.source.uc</string></dict>
 				<key>3</key><dict><key>name</key><string>storage.type.source.uc</string></dict>
 			</dict>
 			<key>match</key>
@@ -152,7 +151,6 @@
 			<key>captures</key>
 			<dict>
 				<key>1</key><dict><key>name</key><string>storage.modifier.source.uc</string></dict>
-				<key>2</key><dict><key>name</key><string>punctuation.language.source.uc</string></dict>
 				<key>3</key><dict><key>name</key><string>string.quoted.single.uc</string></dict>
 			</dict>
 			<key>match</key>
@@ -175,13 +173,6 @@
 				<dict>
 					<key>name</key>
 					<string>keyword.language.source.uc</string>
-				</dict>
-				
-				<!-- (, ) -->
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.language.source.uc</string>
 				</dict>
 
 				<!-- first NAME -->
@@ -208,7 +199,6 @@
 			<key>captures</key>
 			<dict>
 				<key>1</key><dict><key>name</key><string>storage.modifier.source.uc</string></dict>
-				<key>2</key><dict><key>name</key><string>punctuation.language.source.uc</string></dict>
 				<key>3</key><dict><key>name</key><string>string.quoted.single.uc</string></dict>
 			</dict>
 			<key>match</key>
@@ -218,7 +208,7 @@
 		<!-- modifier keywords (config is defined else where)-->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(nativeonly|abstract|intrinsic|exportstructs|export|noexport|noexportheader|nativereplication|public|private|transient|nontransient|deprecated|editconst|static|final|simulated|out|localized|globalconfig|protected|auto|nousercreate|notplaceable|placeable|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|reliable|unreliable|server|client||exec|editinline|editinlinenotify|editinlineuse|editinlinenew|noteditinlinenew|repnotify|optional|virtual|edithide|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized|init|hidedropdown|collapsecategories|dontcollapsecategories|safereplace|parseconfig|instanced|databinding|duplicatetransient|input|travel|edfindable|editconstarray|editfixedsize|editortextbox|nontransactional|serializetext|notforconsole|repretry|archetype|crosslevelactive|crosslevelpassive|long|strictconfig|k2call|k2override|k2pure|singular|demorecording|dllimport|latent))\b</string>
+			<string>\b(?i:(nativeonly|abstract|intrinsic|exportstructs|export|noexport|noexportheader|nativereplication|public|private|transient|nontransient|deprecated|editconst|final|simulated|out|localized|globalconfig|protected|auto|nousercreate|notplaceable|placeable|skip|coerce|iterator|immutable|immutablewhencooked|atomic|atomicwhencooked|interp|editoronly|reliable|unreliable|server|client||exec|editinline|editinlinenotify|editinlineuse|editinlinenew|noteditinlinenew|repnotify|optional|virtual|edithide|automated|cache|cacheexempt|noimport|noclear|protectedwrite|privatewrite|forcescriptorder|perobjectconfig|perobjectlocalized|init|hidedropdown|collapsecategories|dontcollapsecategories|safereplace|parseconfig|instanced|databinding|duplicatetransient|input|travel|edfindable|editconstarray|editfixedsize|editortextbox|nontransactional|serializetext|notforconsole|repretry|archetype|crosslevelactive|crosslevelpassive|long|strictconfig|k2call|k2override|k2pure|singular|demorecording|dllimport|latent))\b</string>
 			<key>name</key>
 			<string>storage.modifier.source.uc</string>
 		</dict>
@@ -323,16 +313,31 @@
 		<!-- Matches any operator punctuations and known named operators -->
 		<dict>
 			<key>match</key>
-			<string>([?:+\-/%*=&lt;&gt;^+~!|&amp;$@]+)|(\b(?i:(Dot|Cross|ClockwiseFrom|New)?)\b)</string>
+			<string>([?:+\-/%*=&lt;&gt;^+~!|&amp;$@]+)|(\b(?i:(Dot|Cross|ClockwiseFrom)?)\b)</string>
 			<key>name</key>
 			<string>keyword.operator.source.uc</string>
+		</dict>
+		<dict>
+			<key>match</key>
+			<string>\b(?i:(New))\b</string>
+			<key>name</key>
+			<string>keyword.control.source.uc</string>
 		</dict>
 
 		<dict>
 			<key>match</key>
-			<string>([,.;()\[\{}]]+)</string>
+			<string>([,.;\(\)\[\{}]]+)</string>
 			<key>name</key>
 			<string>punctuation.language.source.uc</string>
+		</dict>
+
+		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key><dict><key>name</key><string>entity.name.function.source.uc</string></dict>
+			</dict>
+			<key>match</key>
+			<string>([a-z-A-Z_][a-z-A-Z_0-9]*)\s*?(\()</string>
 		</dict>
 
 		<dict>
