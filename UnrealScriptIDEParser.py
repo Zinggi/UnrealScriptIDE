@@ -205,8 +205,10 @@ class ParserThread(threading.Thread):
             bCppText = False
             CppTextBracketsNum = 0
             bStruct = False
-            regex_f = re.compile(r"([a-zA-Z0-9()\s]*?)[Ff]unction[\s]+([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)[\s]*\((.*?)\)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
-            regex_e = re.compile(r"([a-zA-Z0-9()\s]*?)[Ee]vent[\s]+([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)[\s]*\((.*?)\)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
+            regex_f = re.compile(r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
+            regex_e = re.compile(r"([a-zA-Z0-9()\s]*?)event[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
+            # regex_f = re.compile(r"([a-zA-Z0-9()\s]*?)[Ff]unction[\s]+([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)[\s]*\((.*?)\)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
+            # regex_e = re.compile(r"([a-zA-Z0-9()\s]*?)[Ee]vent[\s]+([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)[\s]*\((.*?)\)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
             regex_c = re.compile(r"const[\s]+([a-zA-Z0-9_]+)[\s]*=[\s]*([a-zA-Z0-9\"'!_\-.]+);")
 
             for i, line in enumerate(file_lines):
@@ -335,7 +337,7 @@ class ParserThread(threading.Thread):
 
         matches = regex.search(line.strip())    # search for:  1: modifiers, 2: return type, 3: name, 4: arguments, 5: const, 6: comment
         if matches is not None:
-            self.add_func(matches.group(1), matches.group(2), matches.group(3), matches.group(4), i, file_name, current_documentation, b_function)
+            self.add_func(matches.group(1), matches.group(4), matches.group(5), matches.group(7), i, file_name, current_documentation, b_function)
             return True
 
     def extract_comlicated_function(self, line, left_line, i, file_name, current_documentation, regex_f, regex_e):
