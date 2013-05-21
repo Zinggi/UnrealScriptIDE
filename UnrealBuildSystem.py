@@ -48,12 +48,19 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
     def run(self, edit, b_build_and_run=False, b_show_compile_options=False):
         if self.view.file_name() is not None:
             self.settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
-            open_folder_arr = self.view.window().folders()   # Gets all opened folders in the Sublime Text editor.
             self.b_build_and_run = b_build_and_run
             self.udk_maps_folder = []
+            project_folders = self.view.window().folders()   # Gets all opened folders in the Sublime Text editor.
+            all_folders = []
+
+            # sub_folders also contains the parent folder, no worries.
+            for folder in project_folders:
+                sub_folders = [x[0] for x in os.walk(folder)]
+                all_folders += sub_folders
+
             # search open folders for the Src directory
-            for folder in open_folder_arr:
-                if "\Development\Src" in folder:
+            for folder in all_folders:
+                if folder.endswith("\Development\Src"):
                     self.udk_exe_path = folder
                     break
             if self.udk_exe_path == "":
