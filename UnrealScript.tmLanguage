@@ -36,19 +36,41 @@
 				</dict>
 			</dict>
 
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>captures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>constant.language.comment.source.uc</string>
+						</dict>
+
+						<key>2</key>
+						<dict>
+							<key>name</key> <!-- TODO: add variable entity highlighting -->
+							<string>entity.name.function.source.uc</string>
+						</dict>
+
+						<key>3</key>
+						<dict>
+							<key>name</key>
+							<string>constant.language.comment.source.uc</string>
+						</dict>
+					</dict>
+
+					<key>match</key>
+					<string>(?i:(@parameter|@param)\s*|@)([a-z-A-Z_][a-z-A-Z_0-9]+)|(?i:(TODO|HACK|FIXME|WARNING|NOTE|INFO|HELP)):</string>
+				</dict>
+			</array>
+
 			<key>end</key>
 			<string>\*/</string>
 
 			<key>name</key>
 			<string>comment.block.source.uc</string>
 		</dict>
-
-		<!--<dict>
-			<key>match</key>
-			<string>\b(?i:(@(TODO|HACK|FIXME|PARAM|RETURN)))\b</string>
-			<key>name</key>
-			<string>comment.block.source.uc</string>
-		</dict>-->
 
 		<!-- ... */ ... \n -->
 		<dict>
@@ -64,14 +86,6 @@
 			<key>begin</key>
 			<string>//</string>
 
-			<key>beginCaptures</key>
-			<dict>
-				<key>0</key>
-				<dict>
-					<key>name</key>
-					<string>punctuation.definition.comment.source.uc</string>
-				</dict>
-			</dict>
 
 			<key>end</key>
 			<string>$\n?</string>
@@ -82,10 +96,29 @@
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>captures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>constant.language.comment.source.uc</string>
+						</dict>
+
+						<key>2</key>
+						<dict>
+							<key>name</key> <!-- TODO: add variable entity highlighting -->
+							<string>entity.name.function.source.uc</string>
+						</dict>
+
+						<key>3</key>
+						<dict>
+							<key>name</key>
+							<string>constant.language.comment.source.uc</string>
+						</dict>
+					</dict>
+
 					<key>match</key>
-					<string>(?&gt;\\\s*\n)</string>
-					<key>name</key>
-					<string>punctuation.separator.continuation.source.uc</string>
+					<string>(?i:(@parameter|@param)\s*|@)([a-z-A-Z_][a-z-A-Z_0-9]+)|(?i:(TODO|HACK|FIXME|WARNING|NOTE|INFO|HELP)):</string>
 				</dict>
 			</array>
 		</dict>
@@ -248,16 +281,28 @@
 
 		<!-- Metafields(http://wiki.beyondunreal.com/Metadata ... An article I wrote on metadata - Eliot) -->
 		<dict>
+			<key>captures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.meta.source.uc</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>constant.language.meta.source.uc</string>
+				</dict>
+			</dict>
+
 			<key>match</key>
-			<string>\b(?i:(AllowAbstract|ArrayClamp|AutoComment|bShowOnlyWhenTrue|ClampMax|ClampMin|DisplayName|DMCOnly|EditCondition|FixedIncrement|FullyExpand|MaxPropertyDepth|MultilineWithMaxRows|Multiple|OrderIndex|RealTime|ScriptOrder|ToolTip|UIMax|UIMin))=\b</string>
-			<key>name</key>
-			<string>keyword.type.source.uc</string>
+			<string>\b(?i:(AllowAbstract|ArrayClamp|AutoComment|bShowOnlyWhenTrue|ClampMax|ClampMin|DisplayName|DMCOnly|EditCondition|FixedIncrement|FullyExpand|MaxPropertyDepth|MultilineWithMaxRows|Multiple|OrderIndex|RealTime|ScriptOrder|ToolTip|UIMax|UIMin)\s*=([^|>]*))\b</string>
 		</dict>
 
 		<!-- Common objects -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(Actor|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|SequenceEvent|Sequence|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|Components|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|PlayerOwner|Material|WidgetBindings|Instigator))\b</string>
+			<string>\b(?i:(Actor|ActorComponent|Component|Pawn|WorldInfo|PhysicalMaterial|SoundCue|ParticleSystem|SkeletalMeshComponent|Controller|PlayerController|DamageType|StaticMeshComponent|PlayerReplicationInfo|Canvas|HUD|Volume|PhysicsVolume|FluidSurfaceActor|Object|SpriteComponent|Inventory|PrimitiveComponent|ParticleSystemComponent|LightEnvironmentComponent|ForceFeedbackWaveform|AudioComponent|DynamicLightEnvironmentComponent|LightEnvironment|StaticMesh|MaterialInterface|LadderVolume|PlayerStart|CylinderComponent|InventoryManager|Weapon|Mesh|PlayerInput|GFxClikWidget|GFxObject|Material|WidgetBindings|AnimNodeSequence|MaterialInstanceConstant|Property|Teleporter|LocalMessage|Projectile|InterpGroup|FaceFXAnimSet|SkelControlBase|RB_BodyInstance|SequenceOp|SequenceAction|SequenceCondition|SequenceEvent|SequenceFrame|SequenceObject|SequenceOp|SequenceVariable|SequenceFrameWrapped|SequenceObjectHelper|AnimSequence))\b</string>
 			<key>name</key>
 			<string>storage.type.source.uc</string>
 		</dict>
@@ -265,7 +310,7 @@
 		<!-- Common data structures -->
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(rotator|vector|scale|quat|qword|double|color|pointer|linearcolor|vector2d|vector4|twovectors|plane|intpoint|guid|box|boxspherebounds|matrix|cylinder|BoneAtom))\b</string>
+			<string>\b(?i:(rotator|vector|scale|quat|qword|double|color|pointer|linearcolor|vector2d|vector4|twovectors|plane|intpoint|guid|box|boxspherebounds|matrix|cylinder|BoneAtom|TraceHitInfo|ImpactInfo|AnimSlotInfo|AnimSlotDesc|PhysEffectInfo|ActorReference|NavReference|BasedPosition|CollisionImpactData))\b</string>
 			<key>name</key>
 			<string>storage.struct.source.uc</string>
 		</dict>
