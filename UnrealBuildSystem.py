@@ -159,7 +159,7 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 self._b_open_output = False
 
             # == there were only warnings, ask what to do
-            elif self._b_ask_if_open_output:
+            elif self._b_ask_if_open_output and not self.b_build_and_run:
                 if self.settings.get('always_open_log'):
                     self.show_error_panel()
                     return
