@@ -46,6 +46,8 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     # find src folder and start building
     def run(self, edit, b_build_and_run=False, b_show_compile_options=False):
+        self._b_open_output = False
+        self._b_ask_if_open_output = False
         if self.view.file_name() is not None:
             self.settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
             self.b_build_and_run = b_build_and_run
