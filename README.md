@@ -8,7 +8,7 @@ Fully featured object-oriented auto-completion, go to declaration, syntax highli
 ![Pic](http://www.mediafire.com/conv/a12c7703e035e63ecb6ff1d39b8677716286a0f50c386ac5de0329f53e3e1e3d6g.jpg)
 
 
-Feautures
+Features
 ------------
 
 * **Dynamic, intelligent auto-completions**
