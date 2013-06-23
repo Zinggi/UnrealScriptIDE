@@ -95,10 +95,20 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
 
     # starts building your game. This adds a new UDKbuild thread.
     def start_build(self):
+        if self.settings.get( 'save_all_on_build' ) == True:
+            self.save_all_scripts()
+        
         self._output = []
         self._build_thread = UDKbuild(self.udk_exe_path, self)
         self._build_thread.start()
         self.handle_thread()
+
+    def save_all_scripts(self):
+        for view in self.view.window().views():
+            if view.is_dirty() and not view.is_read_only():
+                is_script = view.settings().get('syntax').endswith( "UnrealScriptIDE/UnrealScript.tmLanguage" )
+                if is_script:
+                    view.run_command( 'save' )
 
     def show_compile_options(self):
         self.compile_settings = self.settings.get('compiling_configurations')

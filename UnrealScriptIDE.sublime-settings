@@ -68,6 +68,9 @@
 	// set this to true if you want that the debugger breaks at the first line of code that gets executed.
 	"break_on_first_line": false,
 
+	// save all unreal script files before starting build
+	"save_all_on_build": false,
+
 
 
 	// --------------------------------------
