@@ -69,7 +69,7 @@
 	"break_on_first_line": false,
 
 	// save all unreal script files before starting build
-	"save_all_on_build": false,
+	"save_all_on_build": true,
 
 
 
