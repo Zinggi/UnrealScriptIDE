@@ -8,5 +8,5 @@ event $1($2)
 	<tabTrigger>event</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.uc</scope>
-	<description>Snippet</description>
+	<description>Snippet - event</description>
 </snippet>

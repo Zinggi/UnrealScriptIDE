@@ -8,5 +8,5 @@ struct $1
 	<tabTrigger>struct</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.uc</scope>
-	<description>Snippet</description>
+	<description>Snippet - struct</description>
 </snippet>

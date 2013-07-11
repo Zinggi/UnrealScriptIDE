@@ -12,5 +12,5 @@ defaultproperties
 	<tabTrigger>pawn</tabTrigger>
 	<!-- Optional: Set a scope to limit where the snippet will trigger -->
 	<scope>source.uc</scope>
-	<description>Snippet</description>
+	<description>Snippet - pawn</description>
 </snippet>
