@@ -314,7 +314,7 @@ class ParserThread(threading.Thread):
                         else:
                             break
                     for name in var_names:
-                        self.add_var(var_line, name, doc_line, i, file_name, current_documentation, bStruct)
+                        self.add_var(var_line, name.split('<')[0], doc_line, i, file_name, current_documentation, bStruct)
                     current_documentation = ""
 
                 elif "const" in left_line:
