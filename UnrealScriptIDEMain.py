@@ -179,8 +179,10 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
 
             # on a variable declaration line:
             if "var" == line_contents.split()[0] or "var(" in line_contents.split()[0]:
-                if any(line_contents[-1] == c for c in ["<", "|"]):
-                    return [(item + "\tmetadata tag", item) for item in self.get_metadata_tags()]
+                # not an array
+                if len(line_contents.split()) > 1 and not "array" in line_contents.split()[1].lower():
+                    if any(line_contents[-1] == c for c in ["<", "|"]):
+                        return [(item + "\tmetadata tag", item) for item in self.get_metadata_tags()]
 
             # check if wants object oriented completions
             if len(line_contents) > 0 and line_contents[-1] == '.':
