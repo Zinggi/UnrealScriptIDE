@@ -111,5 +111,20 @@
 	                   "state", "static", "string", "super", "transient", "travel", "unreliable", "var", "vect", "Repnotify", "Client",
 	                   "Server", "AutoExpandCategories", "implements", "Inherits", "NonTransient", "StructDefaultProperties",
 	                   "if", "else", "class", "DefaultProperties", "do", "until", "enum", "for", "false", "true", "foreach",
-	                   "function", "struct", "switch", "while"]
+	                   "function", "struct", "switch", "while"],
+
+	// Tags that can be used in MetaData. Triggered with '<'
+	"metadata_tags" :	["ToolTip=",
+						"DisplayName=",
+						"ClampMin=",
+						"ClampMax=",
+						"UIMin=",
+						"UIMax=",
+						"ArrayClamp=",
+						"EditCondition=",
+						"MultilineWithMaxRows=",
+						"bShowOnlyWhenTrue=",
+						"FriendlyName=",
+						"AllowAbstract",
+						"AutoComment="]
 }

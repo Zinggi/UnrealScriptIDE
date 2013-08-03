@@ -2,7 +2,7 @@
 	"auto_complete_triggers":
 	[
 		{
-			"characters": ".",
+			"characters": ".<|",
 			"selector": "source.uc"
 		}
 	],

@@ -177,6 +177,11 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
 
             # no defaultproperties found or above defaults:
 
+            # on a variable declaration line:
+            if "var" == line_contents.split()[0] or "var(" in line_contents.split()[0]:
+                if any(line_contents[-1] == c for c in ["<", "|"]):
+                    return [(item + "\tmetadata tag", item) for item in self.get_metadata_tags()]
+
             # check if wants object oriented completions
             if len(line_contents) > 0 and line_contents[-1] == '.':
                 left_line = get_relevant_text(line_contents)
@@ -398,6 +403,10 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
     def get_keywords(self):
         settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
         return settings.get('unreal_keywords')
+
+    def get_metadata_tags(self):
+        settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
+        return settings.get('metadata_tags')
 
 
 # this deletes the cache file and clears every completion, so that it can then rebuild the classes.
