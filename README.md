@@ -99,7 +99,7 @@ All **credits** for Syntax highlighting in UnrealScript files goes to **[Rokit](
 **Credits** for Syntax highlighting in Log files goes to **[Rokit](https://github.com/rokit)**. Thanks!
 
 I think I've earned a bear for my effort :wink:  
-[![Donate](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XT5LYESK99ESA)
+[![Donate](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_SM.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XT5LYESK99ESA) <iframe style="border: 0; margin: 0; padding: 0;" src="https://www.gittip.com/Zinggi/widget.html" width="48pt" height="22pt"> </iframe>
 
 My auto-complete settings
 ------------
