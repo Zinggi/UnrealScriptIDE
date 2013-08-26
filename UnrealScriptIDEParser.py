@@ -28,6 +28,7 @@ class ClassesCollectorThread(threading.Thread):
         self.filename = filename
         self.open_folder_arr = open_folder_arr
         self.b_first = b_first
+        self.inbuild_classes = ["Array", "Class", "HiddenFunctions"]
         threading.Thread.__init__(self)
 
     def run(self):  # gets called when the thread is created
@@ -41,8 +42,8 @@ class ClassesCollectorThread(threading.Thread):
                         self.collector.load_classes_from_cache()
                     else:
                         print "no cache file found, start parsing all classes"
-                        self.get_classes(f, self.open_folder_arr)
-                        self.get_inbuilt_classes(self.open_folder_arr)
+                        self.get_classes(f)
+                        self.get_inbuilt_classes()
                     break
             self.stop()
 
@@ -52,26 +53,21 @@ class ClassesCollectorThread(threading.Thread):
                 self.stop()
 
     # creates a new thread for every file in the src directory
-    def get_classes(self, path, open_folder_arr):
+    def get_classes(self, path):
         for file in os.listdir(path):
             dirfile = os.path.join(path, file)
             if os.path.isfile(dirfile) and dirfile.endswith(".uc"):
-                    self.collector._collector_threads.append(ClassesCollectorThread(self.collector, dirfile, 30, open_folder_arr))
+                    self.collector._collector_threads.append(ClassesCollectorThread(self.collector, dirfile, 30, self.open_folder_arr))
                     self.collector._collector_threads[-1].start()
 
             elif os.path.isdir(dirfile):
-                self.get_classes(dirfile, open_folder_arr)
+                self.get_classes(dirfile)
 
-    def get_inbuilt_classes(self, open_folder_arr):
-        array = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\InbuiltClasses\\Array.uc")
-        class_class = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\InbuiltClasses\\Class.uc")
-        hidden = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\InbuiltClasses\\HiddenFunctions.uc")
-        self.collector._collector_threads.append(ClassesCollectorThread(self.collector, array, 30, open_folder_arr))
-        self.collector._collector_threads[-1].start()
-        self.collector._collector_threads.append(ClassesCollectorThread(self.collector, class_class, 30, open_folder_arr))
-        self.collector._collector_threads[-1].start()
-        self.collector._collector_threads.append(ClassesCollectorThread(self.collector, hidden, 30, open_folder_arr))
-        self.collector._collector_threads[-1].start()
+    def get_inbuilt_classes(self):
+        for f in self.inbuild_classes:
+            path = os.path.join(sublime.packages_path(), "UnrealScriptIDE\\InbuiltClasses\\" + f + ".uc")
+            self.collector._collector_threads.append(ClassesCollectorThread(self.collector, path, 30, self.open_folder_arr))
+            self.collector._collector_threads[-1].start()
 
     # parses the filename and saves the class declaration to the _classes
     def save_classes(self):
@@ -88,7 +84,7 @@ class ClassesCollectorThread(threading.Thread):
                                              self.filename)
                     break
                 elif "*" not in line[:3] and "/" not in line[:3]:
-                    if "class object" in line.lower() or "class array" in line.lower() or "class hiddenfunctions" in line.lower():
+                    if any(["class " + cls.lower() in line.lower() for cls in self.inbuild_classes] + ["class object" in line.lower()]):
                         self.collector.add_class(os.path.basename(self.filename).split('.')[0],
                                                  "",
                                                  description,
@@ -207,8 +203,6 @@ class ParserThread(threading.Thread):
             bStruct = False
             regex_f = re.compile(r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
             regex_e = re.compile(r"([a-zA-Z0-9()\s]*?)event[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
-            # regex_f = re.compile(r"([a-zA-Z0-9()\s]*?)[Ff]unction[\s]+([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)[\s]*\((.*?)\)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
-            # regex_e = re.compile(r"([a-zA-Z0-9()\s]*?)[Ee]vent[\s]+([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)[\s]*\((.*?)\)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
             regex_c = re.compile(r"const[\s]+([a-zA-Z0-9_]+)[\s]*=[\s]*([a-zA-Z0-9\"'!_\-.]+);")
 
             for i, line in enumerate(file_lines):

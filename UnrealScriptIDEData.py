@@ -11,6 +11,7 @@
 # (c) Florian Zinggeler
 #-----------------------------------------------------------------------------------
 import sublime
+import re
 
 # if the helper panel is displayed, this is true
 # ! (TODO): use an event instead
@@ -113,6 +114,24 @@ class UnrealData:
                 print "class ", out_of.name(), " not parsed yet, parse class now..."
                 out_of.parse_me()
                 return "parsing..."
+
+        # Nothing found, search in the current view
+        view = sublime.active_window().active_view()
+        regex_var = r"(var|local)(\(\w*\))?\s([^\s]+)\s" + word
+        regex_func = r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*("+word+r")([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?"
+        var = view.find(regex_var, 0, sublime.IGNORECASE)
+        if var:
+            var_lines = view.substr(var).split()[:-1]
+            row, col = view.rowcol(var.a)
+            return Variable(var_lines, word, "", row + 1, sublime.active_window().active_view().file_name(), "")
+        func = view.find(regex_func, 0, sublime.IGNORECASE)
+        if func:
+            line = view.substr(func)
+            row, col = view.rowcol(func.a)
+            print line
+            matches = re.search(regex_func, line)    # search for:  1: modifiers, 2: coerce, 3: ?, 4: return type, 5: name, ..,  7: arguments ...
+            if matches:
+                return Function(matches.group(1).strip(), matches.group(4).strip(), word, matches.group(7).strip(), row + 1, sublime.active_window().active_view().file_name(), "", True)
         return None
 
     # returns the type (class) of the object before the dot
