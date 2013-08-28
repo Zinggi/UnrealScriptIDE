@@ -41,9 +41,9 @@ def get_paths(open_folder_arr, b_64bit=False):
     return [install_dir, source_dir]
 
 
-class UnrealMenageBreakpointsCommand(sublime_plugin.TextCommand):
+class UnrealManageBreakpointsCommand(sublime_plugin.TextCommand):
     """
-    Opens a dialog to menage all breakpoints.
+    Opens a dialog to manage all breakpoints.
     """
     def run(self, edit):
         open_folder_arr = self.view.window().folders()
