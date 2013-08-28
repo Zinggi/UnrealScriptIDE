@@ -178,7 +178,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             # no defaultproperties found or above defaults:
 
             # on a variable declaration line:
-            if "var" == line_contents.split()[0] or "var(" in line_contents.split()[0]:
+            if len(line_contents.split()) >= 1 and ("var" == line_contents.split()[0] or "var(" in line_contents.split()[0]):
                 # not an array
                 if len(line_contents.split()) > 1 and not "array" in line_contents.split()[1].lower():
                     if any(line_contents[-1] == c for c in ["<", "|"]):
