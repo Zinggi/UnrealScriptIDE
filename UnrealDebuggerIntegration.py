@@ -8,6 +8,7 @@
 #
 #   (TODO):
 #       sync opened files
+#       sync breakpoints: current_compile_settings
 #
 # (c) Florian Zinggeler
 #------------------------------------------------------------------------------
@@ -38,6 +39,94 @@ def get_paths(open_folder_arr, b_64bit=False):
         install_dir = udk_path + "Binaries\\Win32\\"
         source_dir = sublime.packages_path() + "\\UnrealScriptIDE\\Debugger\\UnrealDebugger 32 bits"
     return [install_dir, source_dir]
+
+
+class UnrealMenageBreakpointsCommand(sublime_plugin.TextCommand):
+    """
+    Opens a dialog to menage all breakpoints.
+    """
+    def run(self, edit):
+        open_folder_arr = self.view.window().folders()
+        install_dir_64, src_dir = get_paths(open_folder_arr, True)
+        self.breakpoints_xml = install_dir_64[:-6] + "UScriptIDE_Breakpoints.xml"
+
+        if os.path.exists(self.breakpoints_xml):
+            self.xml_tree = ElementTree.parse(self.breakpoints_xml)
+            self.breakpoints = self.xml_tree.find("Breakpoints")
+            points = self.get_breakpoints(self.breakpoints)
+
+            self.display_points(points)
+
+    def get_breakpoints(self, breakpoints):
+        dic = breakpoints.find("Dictionary")
+        points, self.points = [], []
+        for item in dic:
+            k = item.find("key")
+            s = k.find("string")
+            points.append([s.text.title(), "   |"])
+            current_file = s.text.title().replace(".", "\\Classes\\") + ".uc"
+            self.points.append(current_file + ":0:0")
+            v = item.find("value")
+            arr = v.find("ArrayOfBreakpoint")
+            for b in arr:
+                l = b.find("LineNo").text
+                e = b.find("Enabled").text
+                points.append(("    [o]" if e == "true" else "    [x]") + "\tLine number " + l)
+                self.points.append(current_file + ":" + l + ":0")
+            if len(arr) == 0:
+                points.pop()
+                self.points.pop()
+        return points
+
+    def display_points(self, points):
+        points = ["Deactivate all Breakpoints", "Activate all Breakpoints",
+                 ["Remove all Breakpoints", "______________________________________________________________________"]] + points
+        self.view.window().show_quick_panel(points, self.on_click_point)
+
+    def on_click_point(self, num):
+        if num == -1:
+            pass
+        elif num == 0:
+            # deactivate all
+            d = self.breakpoints.find('Dictionary')
+            for item in d:
+                for p in item[1][0]:
+                    p[2].text, p[3].text = "false", "false"
+            self.xml_tree.write(self.breakpoints_xml)
+            for view in sublime.active_window().views():
+                active = view.get_regions("breakpoint_enabled")
+                deactivated = view.get_regions("breakpoint_deactivated")
+                view.add_regions("breakpoint_deactivated", active + deactivated, "breakpoint", "dirty_circle_light", sublime.HIDDEN | sublime.PERSISTENT)
+                view.add_regions("breakpoint_enabled", [], "breakpoint", "circle", sublime.HIDDEN | sublime.PERSISTENT)
+        elif num == 1:
+            # activate all
+            d = self.breakpoints.find('Dictionary')
+            for item in d:
+                for p in item[1][0]:
+                    p[2].text, p[3].text = "true", "true"
+            self.xml_tree.write(self.breakpoints_xml)
+            for view in sublime.active_window().views():
+                active = view.get_regions("breakpoint_enabled")
+                deactivated = view.get_regions("breakpoint_deactivated")
+                view.add_regions("breakpoint_deactivated", [], "breakpoint", "dirty_circle_light", sublime.HIDDEN | sublime.PERSISTENT)
+                view.add_regions("breakpoint_enabled", active + deactivated, "breakpoint", "circle", sublime.HIDDEN | sublime.PERSISTENT)
+        elif num == 2:
+            # delete all
+            d = self.breakpoints.find('Dictionary')
+            for item in d:
+                item[1][0].clear()
+            self.xml_tree.write(self.breakpoints_xml)
+            for view in sublime.active_window().views():
+                view.add_regions("breakpoint_deactivated", [], "breakpoint", "dirty_circle_light", sublime.HIDDEN | sublime.PERSISTENT)
+                view.add_regions("breakpoint_enabled", [], "breakpoint", "circle", sublime.HIDDEN | sublime.PERSISTENT)
+        else:
+            print self.points
+            open_folder_arr = self.view.window().folders()
+            inst_dir, source_dir = get_paths(open_folder_arr, True)
+            file_name = inst_dir[:-15] + "Development\\Src\\" + self.points[num - 3]
+            window = sublime.active_window()
+            window.open_file(file_name, sublime.ENCODED_POSITION | sublime.TRANSIENT)
+            window.open_file(file_name, sublime.ENCODED_POSITION | sublime.TRANSIENT)
 
 
 # Installs the debugger. if there is already a debugger installed, creates a backup

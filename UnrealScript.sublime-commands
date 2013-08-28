@@ -57,6 +57,12 @@
         "args": {"b_deactivate": true},
         "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }]
     },
+    //Menage Breakpoints
+    {
+        "caption": "UnrealScriptIDE: Menage Breakpoints",
+        "context":[{ "key": "selector", "operator": "equal", "operand": "source.uc" }],
+        "command": "unreal_menage_breakpoints"
+    },
 
     //Class Browser
     {
