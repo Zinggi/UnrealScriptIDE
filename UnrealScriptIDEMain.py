@@ -26,12 +26,11 @@ event_manager = None
 
 def is_unrealscript_file():
     window = sublime.active_window()
-    if window is None:
-        return False
-    view = window.active_view()
-    if view is None:
-        return False
-    return "UnrealScriptIDE/UnrealScript.tmLanguage" in view.settings().get('syntax')
+    if window:
+        view = window.active_view()
+        if view:
+            return "UnrealScriptIDE/UnrealScript.tmLanguage" in view.settings().get('syntax')
+    return False
 
 
 # returns the code fragment that is actually relevant for auto-completion / go to declaration.
@@ -99,7 +98,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
     def on_post_save(self, view):
         if is_unrealscript_file():
             filename = view.file_name()
-            if filename is not None:
+            if filename:
                 self.remove_file(filename)
                 self.on_activated(view)
 
@@ -110,9 +109,11 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
         if is_unrealscript_file():
             self.clear()    # empty the completions list, so that we only get the relevant ones.
             self.b_built_for_current_file = True
+
+            window = view.window()
             # load breakpoints
-            if view.window():
-                view.window().run_command("unreal_load_breakpoints")
+            if window:
+                window.run_command("unreal_load_breakpoints")
 
             # at startup, save all classes
             if self.b_first_time:
@@ -127,7 +128,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
 
                 view.set_status('UnrealScriptAutocomplete', "startup: start parsing classes...")
                 print "startup: start parsing classes..."
-                open_folder_arr = view.window().folders()   # Gets all opened folders in the Sublime Text editor.
+                open_folder_arr = window.folders()   # Gets all opened folders in the Sublime Text editor.
                 self._collector_threads.append(Parser.ClassesCollectorThread(self, "", 30, open_folder_arr, True))
                 self._collector_threads[-1].start()
                 self.handle_threads(self._collector_threads, view)  # display progress bar
@@ -154,12 +155,14 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             selection_region = view.sel()[0]
             line = view.line(selection_region)
             left_line_region = sublime.Region(line.begin(), selection_region.end())
+
             line_contents = view.substr(left_line_region)
+            split_lines = line_contents.split()
 
             # if on a class declaration line
-            if line_contents != "" and len(line_contents.split()) >= 1 and "class" == line_contents.split()[0]:
+            if len(split_lines) >= 1 and "class" == split_lines[0].lower():
                 # only get classes:
-                if len(line_contents.split()) >= 3 and "extends" == line_contents.split()[2]:
+                if len(split_lines) >= 3 and "extends" == split_lines[2].lower():
                     return self.get_autocomplete_list(prefix, False, True, True, bNoStandardCompletions=True)
                 # only keywords
                 return [(item + "\tkeyword", item) for item in self.get_keywords()]
@@ -168,8 +171,8 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             line_number = 1000000
             defaultproperties_region = view.find('defaultproperties', 0, sublime.IGNORECASE)
             if defaultproperties_region:
-                (line_number, col) = view.rowcol(defaultproperties_region.a)
-                (row, col) = view.rowcol(selection_region.begin())
+                line_number, col = view.rowcol(defaultproperties_region.a)
+                row, col = view.rowcol(selection_region.begin())
                 if row > line_number:
                     # below defaultproperties
                     # ! TODO: add check if in begin object block and use object oriented completions there.
@@ -178,9 +181,13 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             # no defaultproperties found or above defaults:
 
             # on a variable declaration line:
+<<<<<<< HEAD
             if len(line_contents.split()) >= 1 and ("var" == line_contents.split()[0] or "var(" in line_contents.split()[0]):
+=======
+            if len(split_lines) > 0 and ("var" == split_lines[0].lower() or "var(" in split_lines[0].lower()):
+>>>>>>> minor improvements
                 # not an array
-                if len(line_contents.split()) > 1 and not "array" in line_contents.split()[1].lower():
+                if len(split_lines) > 1 and not "array" in split_lines[1].lower():
                     if any(line_contents[-1] == c for c in ["<", "|"]):
                         return [(item + "\tmetadata tag", item) for item in self.get_metadata_tags()]
 
@@ -194,6 +201,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 c = self.get_class_from_context(left_line)
                 if not c:
                     c = "type not found"
+                    print "nothing found for: ", left_line
                 if c != "parsing...":
                     return self.get_autocomplete_list(prefix, True, False, False, c, bNoStandardCompletions=True)
                 else:
@@ -248,7 +256,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             else:
                 o = self.get_object(word, self)
 
-            if o is not None:
+            if o:
                 edit = view.begin_edit('UnrealScriptAutocomplete')
                 view.replace(edit, region_word, "")     # remove last word
                 view.end_edit(edit)

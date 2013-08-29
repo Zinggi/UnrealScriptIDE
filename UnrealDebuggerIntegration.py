@@ -22,13 +22,13 @@ from xml.etree import ElementTree
 
 def get_paths(open_folder_arr, b_64bit=False):
     # search open folders for the Src directory
+    udk_exe_path = ""
     for folder in open_folder_arr:
         if "\Development\Src" in folder:
             udk_exe_path = folder
             break
     if udk_exe_path == "":
-        print "Src folder not found!!!"
-        return
+        raise Exception("Src folder not found! Add the Src folder as a project.")
 
     # Removing "Development\Src" (this is probably not how it's done correctly):
     udk_path = udk_exe_path[:-15]
@@ -269,8 +269,7 @@ class LoadBreakpoints(threading.Thread):
                 for b in arr:
                     # p = self.main_thread.view.text_point(int(b.find("LineNo").text)-1, 0)
                     # point = self.main_thread.view.line(p)
-                    print ElementTree.tostring(b)
-                    sublime.set_timeout(lambda: self.main_thread.call_toggle_breakpoint(b), 1000)
+                    sublime.set_timeout(lambda: self.main_thread.call_toggle_breakpoint(b), 1)
 
 
 # Toggles a breakpoint visually. Also saves the breakpoints to the master file.

@@ -161,7 +161,12 @@ class ParserThread(threading.Thread):
                                                      parent_class_name,
                                                      description,
                                                      self.filename)
-                        c.link_to_parent()
+                        
+                        try:
+                            c.link_to_parent()
+                        except AttributeError:
+                            print "Something is wrong, better rebuild the cache."
+                            self.view.window().run_command("unreal_rebuild_cache")
                     break
 
     # adds the function to _functions

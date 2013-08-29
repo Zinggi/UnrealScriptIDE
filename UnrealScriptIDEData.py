@@ -333,15 +333,18 @@ class UnrealData:
     def get_completions_from_class(self, class_file_name):
         if isinstance(class_file_name, Struct):
             return ([""], ["### " + class_file_name.name() + "\t-    Variables ###"] + class_file_name.get_variables())
-        if isinstance(class_file_name, ClassReference):
+        elif isinstance(class_file_name, ClassReference):
             my_class = class_file_name
         else:
             my_class = self.get_class_from_filename(class_file_name)
-        if my_class.has_parsed():
-            return (self.get_functions_from_class(my_class), self.get_variables_from_class(my_class))
+        if my_class:
+            if my_class.has_parsed():
+                return (self.get_functions_from_class(my_class), self.get_variables_from_class(my_class))
+            else:
+                my_class.parse_me()
+                return ("parsing...", "parsing...")
         else:
-            my_class.parse_me()
-            return ("parsing...", "parsing...")
+            print "No class found for ", class_file_name
 
     # returns all functions from the given class and all its parent classes
     def get_functions_from_class(self, my_class):
@@ -397,14 +400,6 @@ class UnrealData:
 # stores classes
 # every class can also store all functions and variables that are inside this class
 class ClassReference:
-    _functions = []
-    _variables = []
-    _consts = []
-    _structs = []
-    _b_was_parsed = False
-    _parent_class = None
-    _child_classes = []
-
     def __init__(self, class_name, parent_class, description, file_name, collector_reference):
         self._name = class_name
         self._description = description
@@ -412,6 +407,12 @@ class ClassReference:
         self._parent_class_name = parent_class
         self._collector_reference = collector_reference
         self._child_classes = []
+        self._functions = []
+        self._variables = []
+        self._consts = []
+        self._structs = []
+        self._b_was_parsed = False
+        self._parent_class = None
 
     def description(self):
         return self._description
@@ -678,17 +679,17 @@ class Variable:
 
     def type(self):
         v_type = self._variable_modifiers[-1].strip()
-        if "class<" == v_type[:6]:
+        if "class<" == v_type[:6].lower():
             v_type = "class"
-        elif "array<" == v_type[:6]:
+        elif "array<" == v_type[:6].lower():
             v_type = "array"
         return v_type
 
     def secondary_type(self):
         v_type = self._variable_modifiers[-1].strip()
-        if "class<" == v_type[:6]:
+        if "class<" == v_type[:6].lower():
             v_type = v_type[6:-1].strip()
-        elif "array<" == v_type[:6]:
+        elif "array<" == v_type[:6].lower():
             v_type = v_type[6:-1].strip()
         return v_type
 
@@ -741,7 +742,9 @@ class Const:
         return "CONST = " + self.value()
 
     def comment(self):
-        return self._comment
+        if self._comment.strip() == "":
+            return ""
+        return "    // " + self._comment
 
     def name(self):
         return self._name.strip()
@@ -763,9 +766,7 @@ class Const:
         view.run_command("insert_snippet", {"contents": (Object_Name % {"name": self._name})})
 
     def create_dynamic_tooltip(self, view):
-        documentation = self.description()
-        # ! TODO: test if displays correct.
-        # + "CONST " + self.name() + " = " + self.value() + ";" + (" //" + self.comment() if self.comment() != "" else "")
+        documentation = "const " + self.name() + " = " + self.value() + ";" + self.comment()
         print_to_panel(view, documentation)
 
 
