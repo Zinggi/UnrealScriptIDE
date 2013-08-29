@@ -65,7 +65,7 @@ class UnrealManageBreakpointsCommand(sublime_plugin.TextCommand):
             s = k.find("string")
             points.append([s.text.title(), "   |"])
             current_file = s.text.title().replace(".", "\\Classes\\") + ".uc"
-            self.points.append(current_file + ":0:0")
+            self.points.append(current_file + ":1:0")
             v = item.find("value")
             arr = v.find("ArrayOfBreakpoint")
             for b in arr:
