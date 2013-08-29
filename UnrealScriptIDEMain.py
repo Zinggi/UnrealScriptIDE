@@ -175,7 +175,32 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 row, col = view.rowcol(selection_region.begin())
                 if row > line_number:
                     # below defaultproperties
-                    # ! TODO: add check if in begin object block and use object oriented completions there.
+                    # if declaring begin object block
+                    if line_contents.strip().lower() == "begin object class=":
+                        return self.get_autocomplete_list(prefix, b_no_functions=True, b_no_variables=True, bNoStandardCompletions=True)
+
+                    # if inside a begin object block, get object oriented completions
+                    # find_all(pattern, <flags>, <format>, <extractions>)
+                    result = []
+                    begin_objects = view.find_all(r"begin\sobject\sclass\s?=\s?(\w+)\sname\s?=\s?\w+|begin\sobject\sname\s?=\s?\w+\sclass\s?=\s?(\w+)|begin\sobject\sname\s?=\s?\w+", sublime.IGNORECASE, "\\1\\2", result)
+                    end_objects = view.find_all(r"end object", sublime.IGNORECASE)
+                    if begin_objects and end_objects:
+                        regions = zip([view.rowcol(r.a)[0] for r in begin_objects], [view.rowcol(r.a)[0] for r in end_objects])
+                        for i, p in enumerate(regions):
+                            if p[0] < row < p[1]:
+                                print "in region: ", p, result[i]
+                                c = self.get_class(result[i])
+                                if not c:
+                                    c = "type not found"
+                                    print "nothing found for: ", result[i]
+                                if c.has_parsed():
+                                    return self.get_autocomplete_list(prefix, True, True, False, c, bNoStandardCompletions=True)
+                                else:
+                                    c.parse_me()
+                                    self.b_wanted_to_autocomplete = True
+                                    return [("just a moment...", ""), ("", "")]
+
+
                     return self.get_autocomplete_list(prefix, True, True, bNoStandardCompletions=True)
 
             # no defaultproperties found or above defaults:
@@ -202,7 +227,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     return self.get_autocomplete_list(prefix, True, False, False, c, bNoStandardCompletions=True)
                 else:
                     self.b_wanted_to_autocomplete = True
-                    return [("just a moment...", "")]
+                    return [("just a moment...", ""), ("", "")]
 
             # get standard completions
             else:
