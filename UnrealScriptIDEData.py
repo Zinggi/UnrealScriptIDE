@@ -591,11 +591,13 @@ class Function:
             return " " + self._return_type
         return self._return_type
 
-    def function_name(self):
+    def function_name(self, b_pretty=False):
+        if b_pretty:
+            return " " + self._function_name
         return self._function_name
 
     def declaration(self):
-        return self.function_modifiers() + ("function" if self._b_is_function == 1 else "event") + self.return_type() + self.function_name() + "(" + self.arguments() + ")"
+        return self.function_modifiers() + ("function" if self._b_is_function == 1 else "event") + self.return_type(True) + self.function_name(True) + "(" + self.arguments() + ")"
 
     def arguments(self):
         return self._arguments
