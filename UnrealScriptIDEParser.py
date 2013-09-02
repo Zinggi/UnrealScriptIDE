@@ -295,6 +295,8 @@ class ParserThread(threading.Thread):
                 elif "var" in left_line:  # get possible lines containing variables
                     # 1: vartype, 2: name, 3: documentation
                     var_doc_line = line.split('//')
+                    if len(var_doc_line) < 2:
+                        var_doc_line = line.split('/**')
                     var_line = var_doc_line[0].split()
                     if var_line and "var" not in var_line[0]:
                         continue
