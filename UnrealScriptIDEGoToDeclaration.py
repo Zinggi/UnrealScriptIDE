@@ -99,8 +99,13 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand):
 
         if os.path.exists(file_name):
             # somehow calling this twice fixes a bug that makes sublime crash, no idea why though...
-            window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
-            window.open_file(file_name + ':' + str(line_number) + ':0', sublime.ENCODED_POSITION | sublime.TRANSIENT)
+            
+            settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
+            new_w = settings.get('b_create_new_window_goto_def')
+
+            flags = sublime.ENCODED_POSITION if new_w else (sublime.ENCODED_POSITION|sublime.TRANSIENT)
+            window.open_file(file_name + ':' + str(line_number) + ':0', flags)
+            window.open_file(file_name + ':' + str(line_number) + ':0', flags)
             current_location = file_name
         else:
             self.view.set_status('UnrealScriptGotoDefinition', '"' + file_name + '" does not exist!')

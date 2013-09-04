@@ -71,31 +71,8 @@
 	// save all unreal script files before starting build
 	"save_all_on_build": true,
 
-
-
-	// --------------------------------------
-	// DO NOT SET BOTH SETTINGS BELOW TO TRUE
-	//---------------------------------------
-	// If this is set to true, you wont get asked if you want to open the error log or start the game when there were only warnings in your build.
-	// Instead the log will be opened immediately as if there were build errors.
-	"always_open_log": false,
-	// If this is set to true, you wont get asked if you want to open the error log or start the game when there were only warnings in your build.
-	// Instead it will start the game, as if there were 0 errors and 0 warnings.
-	"always_start_game": false,
-
-
-
-
-	//=======================
-	// Nothing of interest...
-	//=======================
-	// Used to save your last opened map. No need to overwrite this, as it is done automatically
-	"last_opened_map": "",
-	// Used to save your last used configuration.
-	"last_used_configuration": "",
-	// Used to save your current compile configuration.
-	"current_compile_settings": "Standard 32bit",
-
+	// if true, will open the highlighted word in an new window when using go to definition
+	"b_create_new_window_goto_def": false,
 
 	// keywords to use for auto-completion.
 	"unreal_keywords": ["abstract", "array", "arraycount", "assert", "auto", "automated", "bool", "break", "button",
@@ -126,5 +103,29 @@
 						"bShowOnlyWhenTrue=",
 						"FriendlyName=",
 						"AllowAbstract",
-						"AutoComment="]
+						"AutoComment="],
+
+
+	// --------------------------------------
+	// DO NOT SET BOTH SETTINGS BELOW TO TRUE
+	//---------------------------------------
+	// If this is set to true, you wont get asked if you want to open the error log or start the game when there were only warnings in your build.
+	// Instead the log will be opened immediately as if there were build errors.
+	"always_open_log": false,
+	// If this is set to true, you wont get asked if you want to open the error log or start the game when there were only warnings in your build.
+	// Instead it will start the game, as if there were 0 errors and 0 warnings.
+	"always_start_game": false,
+
+
+
+
+	//=======================
+	// Nothing of interest...
+	//=======================
+	// Used to save your last opened map. No need to overwrite this, as it is done automatically
+	"last_opened_map": "",
+	// Used to save your last used configuration.
+	"last_used_configuration": "",
+	// Used to save your current compile configuration.
+	"current_compile_settings": "Standard 32bit"
 }
