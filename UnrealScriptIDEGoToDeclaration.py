@@ -27,8 +27,9 @@ def is_unreal_log_file(filename):
 # Go to Declaration
 # -----------------
 #
-# ! (TODO):
-#   - erase status 'not found'
+# TODO:
+#   - Add a navigation history for better navigation.
+#   - (erase status 'not found') ??? don't remember what that was about...
 ####################################################
 
 # opens the definition of the current selected word.
@@ -98,12 +99,12 @@ class UnrealGotoDefinitionCommand(sublime_plugin.TextCommand):
             last_location = "%s:%d" % (active_file, row + 1)
 
         if os.path.exists(file_name):
-            # somehow calling this twice fixes a bug that makes sublime crash, no idea why though...
             
             settings = sublime.load_settings('UnrealScriptIDE.sublime-settings')
             new_w = settings.get('b_create_new_window_goto_def')
 
             flags = sublime.ENCODED_POSITION if new_w else (sublime.ENCODED_POSITION|sublime.TRANSIENT)
+            # somehow calling this twice fixes a bug that makes sublime crash, no idea why though...
             window.open_file(file_name + ':' + str(line_number) + ':0', flags)
             window.open_file(file_name + ':' + str(line_number) + ':0', flags)
             current_location = file_name

@@ -87,7 +87,7 @@ class UnrealData:
             c.link_to_parent()
 
     # returns the found object inside out_of (self, class object)
-    def get_object(self, word, out_of, b_no_classes=False, b_no_functions=False, b_no_variables=False, b_second_type=False):
+    def get_object(self, word, out_of, b_no_classes=False, b_no_functions=False, b_no_variables=False, b_second_type=False, local_vars=[]):
         if not out_of:
             out_of = self
         if word[-1:] == ']':
@@ -109,6 +109,10 @@ class UnrealData:
             v = out_of.get_variable(word)
             if v is not None:
                 return v if not b_second_type else (v, True)
+        if local_vars:
+            local = [x for x in local_vars if x.name().lower() == word]
+            if local:
+                return local[0]
         if isinstance(out_of, ClassReference):
             if not out_of.has_parsed():
                 print "class ", out_of.name(), " not parsed yet, parse class now..."
@@ -119,23 +123,28 @@ class UnrealData:
         view = sublime.active_window().active_view()
         regex_var = r"(var|local)(\(\w*\))?\s([^\s]+)\s" + word
         regex_func = r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*("+word+r")([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?"
-        var = view.find(regex_var, 0, sublime.IGNORECASE)
-        if var:
-            var_lines = view.substr(var).split()[:-1]
-            row, col = view.rowcol(var.a)
-            return Variable(var_lines, word, "", row + 1, sublime.active_window().active_view().file_name(), "")
-        func = view.find(regex_func, 0, sublime.IGNORECASE)
-        if func:
-            line = view.substr(func)
-            row, col = view.rowcol(func.a)
-            print line
-            matches = re.search(regex_func, line)    # search for:  1: modifiers, 2: coerce, 3: ?, 4: return type, 5: name, ..,  7: arguments ...
-            if matches:
-                return Function(matches.group(1).strip(), matches.group(4).strip(), word, matches.group(7).strip(), row + 1, sublime.active_window().active_view().file_name(), "", True)
+        try:
+            var = view.find(regex_var, 0, sublime.IGNORECASE)
+        except RuntimeError as err:
+            print err
+            return None
+        else:    
+            if var:
+                var_lines = view.substr(var).split()[:-1]
+                row, col = view.rowcol(var.a)
+                return Variable(var_lines, word, "", row + 1, sublime.active_window().active_view().file_name(), "")
+            func = view.find(regex_func, 0, sublime.IGNORECASE)
+            if func:
+                line = view.substr(func)
+                row, col = view.rowcol(func.a)
+                print line
+                matches = re.search(regex_func, line)    # search for:  1: modifiers, 2: coerce, 3: ?, 4: return type, 5: name, ..,  7: arguments ...
+                if matches:
+                    return Function(matches.group(1).strip(), matches.group(4).strip(), word, matches.group(7).strip(), row + 1, sublime.active_window().active_view().file_name(), "", True)
         return None
 
     # returns the type (class) of the object before the dot
-    def get_class_from_context(self, line, from_class=None):
+    def get_class_from_context(self, line, from_class=None, local_vars=[]):
         # ! TODO: not entirely correct, doesn't work properly on foo(foo2.arg, foo3.arg2).
         #           => DONT split on a dot!
         objs = line[:-1].split('.')
@@ -172,7 +181,7 @@ class UnrealData:
                 if from_class:
                     o = self.get_object(obj, from_class, b_no_classes=True, b_second_type=True)
                 else:
-                    o = self.get_object(obj, self, b_no_classes=True, b_second_type=True)
+                    o = self.get_object(obj, self, b_no_classes=True, b_second_type=True, local_vars=local_vars)
                 if o == "parsing...":
                     return o
                 return self.get_object_type(o, from_class)
@@ -265,7 +274,7 @@ class UnrealData:
 
     # returns the current suggestions for this file.
     # if from_class is given, returns the completions for the given class
-    def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None, bNoStandardCompletions=False):
+    def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None, bNoStandardCompletions=False, local_vars=[]):
         unsorted_autocomplete_list = []
         current_list = -1
         autocomplete_list = []
@@ -284,7 +293,6 @@ class UnrealData:
             self.completion_class = from_class
 
         else:
-            # ! TODO: add local variables
             functions = self._functions
             variables = self._variables
             if self._inbuilt_functions == []:
@@ -321,6 +329,10 @@ class UnrealData:
             for _class in self._classes:
                 if word.lower() in _class.name().lower():
                     autocomplete_list.append((_class.name() + '\t' + "Class", _class.name()))
+
+        if local_vars:
+            for local in local_vars:
+                autocomplete_list.append((local.name() + '\t' + local.var_modifiers(), local.name()))
 
         if bNoStandardCompletions:
             return autocomplete_list, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS

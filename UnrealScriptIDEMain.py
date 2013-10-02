@@ -15,6 +15,7 @@ import UnrealScriptIDEData as USData
 import UnrealScriptIDEParser as Parser
 import os
 import pickle
+import re
 
 
 # get the event manager
@@ -36,6 +37,7 @@ def is_unrealscript_file():
 # returns the code fragment that is actually relevant for auto-completion / go to declaration.
 # e.g. a single statement
 #   something = other + function(a, b).foo. returns function().foo.
+#   # I have no idea how this works, sorry.
 def get_relevant_text(text):
     left_line = text.lstrip().lower()
     i = 0
@@ -206,11 +208,62 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             # no defaultproperties found or above defaults:
 
             # on a variable declaration line:
-            if len(split_lines) > 0 and ("var" == split_lines[0].lower() or "var(" in split_lines[0].lower()):
+            if len(split_lines) > 0 and (any([x == split_lines[0].lower() for x in ["var","local","param"]]) or "var(" in split_lines[0].lower()):
                 # not an array
                 if len(split_lines) > 1 and not "array" in split_lines[1].lower():
                     if any(line_contents[-1] == c for c in ["<", "|"]):
                         return [(item + "\tmetadata tag", item) for item in self.get_metadata_tags()]
+
+            # check if inside a function, get parameters and local variables:
+            local_vars = []
+            super_txt = ""
+            if len(split_lines) > 0:
+                region = sublime.Region(0, locations[0])
+                contents = view.substr(region)
+                # reverse by lines:
+                rev_content = reversed(contents.split('\n'))
+                f_reg = re.compile(r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
+                line_number = view.rowcol(locations[0])[0]
+                for line in rev_content:
+                    # Yes I know this is bad, actually it's very bad. But I don't want to refract the parser again.
+                    # ########
+                    if "local" in line:  # get possible lines containing variables
+                        # 1: vartype, 2: name, 3: documentation
+                        var_doc_line = line.split('//')
+                        if len(var_doc_line) < 2:
+                            var_doc_line = line.split('/**')
+                        var_line = var_doc_line[0].split()
+                        if var_line and "local" not in var_line[0]:
+                            continue
+                        elif not var_line:
+                            continue
+
+                        doc_line = ''
+                        if len(var_doc_line) > 1:
+                            doc_line = var_doc_line[1].rstrip()
+
+                        var_names = []
+                        if "<" in var_line[-1] or ">" in var_line[-1]:
+                            var_line = re.sub(r'\<.*?\>', '', " ".join(var_line)).split()
+                        var_names.append(var_line.pop().rstrip('\n\r\t ;'))     # get the right most variable
+                        for v in var_line:
+                            if "," in var_line[-1]:     # if there are multiple variable names in one line separated by ',' , get them.
+                                var_names.append(var_line.pop().rstrip('\n\r\t ,'))
+                            else:
+                                break
+                        for name in var_names:
+                            local_vars.append(USData.Variable(var_line, name, doc_line, line_number, ""))
+                    # ########
+                    line_number -= 1
+
+                    match = f_reg.match(line)
+                    if match:
+                        if match.group(7):
+                            super_txt = "super." + match.group(5) + "(" + ", ".join([x.split()[-1] for x in match.group(7).split(',')]) + ")"
+                        for param in match.group(7).split(','):
+                            local_vars.append(USData.Variable(["param"] + param.strip().split()[:-1], param.split()[-1], "blajsn", line_number, ""))
+                            print local_vars[-1].name(), local_vars[-1].var_modifiers()
+                        break
 
             # check if wants object oriented completions
             if len(line_contents) > 0 and line_contents[-1] == '.':
@@ -219,7 +272,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     left_line = ".".join(left_line.split('.')[:-1]) + '.'
                 # print "object.* :  ", left_line
 
-                c = self.get_class_from_context(left_line)
+                c = self.get_class_from_context(left_line, local_vars=local_vars)
                 if not c:
                     c = "type not found"
                     print "nothing found for: ", left_line
@@ -234,7 +287,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 compl_default = [view.extract_completions(prefix)]
                 compl_default = [(item + "\tbuffer", item) for sublist in compl_default for item in sublist]       # format
                 keywords = [(item + "\tkeyword", item) for item in self.get_keywords()]
-                return self.get_autocomplete_list(prefix) + keywords + compl_default
+                return self.get_autocomplete_list(prefix, local_vars=local_vars) + keywords + compl_default + [(super_txt, super_txt)]
 
     # called right before auto completion.
     def on_query_context(self, view, key, operator, operand, match_all):
