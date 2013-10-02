@@ -57,13 +57,6 @@ Planned
 
 * **Add support for enumerations**
 
-* **Support for local variables**
-	* local variables and function arguments should also appear in the completion list
-
-* **live parsing of the current file**
-	* if you have declared a variable such as: var Pawn MyPawn; and immediately afterwards type MyPawn.* it won't give you any suggestions.
-	To get your suggestions you have to save your file first.
-
 * **Your suggestion here?**
 	* You can suggest features, report bugs and vote for features on this site here: [UnrealScript IDE - Userecho](http://unrealscriptide.userecho.com/)
 
