@@ -231,6 +231,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 # reverse by lines:
                 rev_content = reversed(contents.split('\n'))
                 f_reg = re.compile(r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
+                e_reg = re.compile(r"([a-zA-Z0-9()\s]*?)event[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*([a-zA-z0-9_-]+)([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?")
                 line_number = view.rowcol(locations[0])[0]
                 for line in rev_content:
                     # Yes I know this is bad, actually it's very bad. But I don't want to refract the parser again.
@@ -264,13 +265,19 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     # ########
                     line_number -= 1
 
-                    match = f_reg.match(line)
-                    if match:
+                    match_f, match_e = f_reg.match(line), e_reg.match(line)
+
+                    if match_f or match_e:
+                        match = match_f if match_f else match_e
+                        if match.group(5):
+                            try:
+                                super_txt = "super." + match.group(5) + "(" + ", ".join([x.split()[-1] for x in match.group(7).split(',')]) + ")"
+                            except IndexError:
+                                super_txt = "super." + match.group(5) + "()"
                         if match.group(7):
-                            super_txt = "super." + match.group(5) + "(" + ", ".join([x.split()[-1] for x in match.group(7).split(',')]) + ")"
-                        for param in match.group(7).split(','):
-                            local_vars.append(USData.Variable(["param"] + param.strip().split()[:-1], param.split()[-1], "blajsn", line_number, ""))
-                            print local_vars[-1].name(), local_vars[-1].var_modifiers()
+                            for param in match.group(7).split(','):
+                                local_vars.append(USData.Variable(["param"] + param.strip().split()[:-1], param.split()[-1], "blajsn", line_number, ""))
+                                print local_vars[-1].name(), local_vars[-1].var_modifiers()
                         break
 
             # check if wants object oriented completions
