@@ -6,6 +6,14 @@
 #   and inserts them as dynamic snippets.
 #   It searches in all parent classes of the current class.
 #   Uses context sensitive completions.
+#   
+#   Delete folder?:
+    # import os
+    # import glob
+
+    # files = glob.glob('/YOUR/PATH/*')
+    # for f in files:
+    #     os.remove(f)
 #
 # (c) Florian Zinggeler
 #-----------------------------------------------------------------------------------
