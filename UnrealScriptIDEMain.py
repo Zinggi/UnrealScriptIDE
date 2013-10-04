@@ -57,10 +57,30 @@ def get_relevant_text(text):
         elif c == '(':
             i -= 1
         if (c == ' ' or c == ',' or c == '\t') and i == 0:
-            return obj_string[-2::-1]
+            obj_string = obj_string[-2::-1]
         elif c == '(' and i == -1:
-            return obj_string[-2::-1]
-    return obj_string[::-1].lstrip()
+            obj_string = obj_string[-2::-1]
+    obj_string = obj_string[::-1].lstrip()
+    return get_rid_of_arguments(obj_string)
+
+# gets rid of function arguments: foo(a.ssdd, asd.eef.sd()).go(sd, ds()) -> foo().go()
+def get_rid_of_arguments(text):
+    i, start, end = 0, 0, 0
+    result = ""
+    for j, c in enumerate(text):
+        if c == '(':
+            if i == 0:
+                start = j
+                result += text[end:start]
+            i += 1
+        elif c == ')':
+            i -= 1
+            if i == 0:
+                end = j + 1
+                result += '()'
+    if result == "":
+        return text
+    return result + text[end:]
 
 
 ####################################################

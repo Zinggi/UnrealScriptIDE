@@ -145,9 +145,8 @@ class UnrealData:
 
     # returns the type (class) of the object before the dot
     def get_class_from_context(self, line, from_class=None, local_vars=[]):
-        # ! TODO: not entirely correct, doesn't work properly on foo(foo2.arg, foo3.arg2).
-        #           => DONT split on a dot!
         objs = line[:-1].split('.')
+        print line
         print objs, from_class.name() if from_class else ""
         # we're lucky, it's just one object, easy.
         if len(objs) == 1:
@@ -157,7 +156,6 @@ class UnrealData:
 
             if line[-6:] == "super.":
                 active_file = sublime.active_window().active_view().file_name()
-                # return self.get_class(self.get_class_from_filename(active_file).parent_class())
                 return self.get_class_from_filename(active_file).get_parent()
 
             # something like 'super(Actor).' or 'Actor(controller).'
@@ -189,7 +187,7 @@ class UnrealData:
         # (= more than one dot)
         else:
             # find class of the first object
-            c = self.get_class_from_context(objs[0] + '.', from_class)
+            c = self.get_class_from_context(objs[0] + '.', from_class, local_vars=local_vars)
             if c == "parsing...":
                 return c
             if c:
