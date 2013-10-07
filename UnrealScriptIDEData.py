@@ -119,28 +119,29 @@ class UnrealData:
                 out_of.parse_me()
                 return "parsing..."
 
+        # ## What was I thinking here??!
         # Nothing found, search in the current view
-        view = sublime.active_window().active_view()
-        regex_var = r"(var|local)(\(\w*\))?\s([^\s]+)\s" + word
-        regex_func = r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*("+word+r")([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?"
-        try:
-            var = view.find(regex_var, 0, sublime.IGNORECASE)
-        except RuntimeError as err:
-            print err
-            return None
-        else:    
-            if var:
-                var_lines = view.substr(var).split()[:-1]
-                row, col = view.rowcol(var.a)
-                return Variable(var_lines, word, "", row + 1, sublime.active_window().active_view().file_name(), "")
-            func = view.find(regex_func, 0, sublime.IGNORECASE)
-            if func:
-                line = view.substr(func)
-                row, col = view.rowcol(func.a)
-                print line
-                matches = re.search(regex_func, line)    # search for:  1: modifiers, 2: coerce, 3: ?, 4: return type, 5: name, ..,  7: arguments ...
-                if matches:
-                    return Function(matches.group(1).strip(), matches.group(4).strip(), word, matches.group(7).strip(), row + 1, sublime.active_window().active_view().file_name(), "", True)
+        # view = sublime.active_window().active_view()
+        # regex_var = r"(var|local)(\(\w*\))?\s([^\s]+)\s" + word
+        # regex_func = r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*("+word+r")([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?"
+        # try:
+        #     var = view.find(regex_var, 0, sublime.IGNORECASE)
+        # except RuntimeError as err:
+        #     print err
+        #     return None
+        # else:    
+        #     if var:
+        #         var_lines = view.substr(var).split()[:-1]
+        #         row, col = view.rowcol(var.a)
+        #         return Variable(var_lines, word, "", row + 1, sublime.active_window().active_view().file_name(), "")
+        #     func = view.find(regex_func, 0, sublime.IGNORECASE)
+        #     if func:
+        #         line = view.substr(func)
+        #         row, col = view.rowcol(func.a)
+        #         print line
+        #         matches = re.search(regex_func, line)    # search for:  1: modifiers, 2: coerce, 3: ?, 4: return type, 5: name, ..,  7: arguments ...
+        #         if matches:
+        #             return Function(matches.group(1).strip(), matches.group(4).strip(), word, matches.group(7).strip(), row + 1, sublime.active_window().active_view().file_name(), "", True)
         return None
 
     # returns the type (class) of the object before the dot

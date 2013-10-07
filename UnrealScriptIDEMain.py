@@ -57,9 +57,9 @@ def get_relevant_text(text):
         elif c == '(':
             i -= 1
         if (c == ' ' or c == ',' or c == '\t') and i == 0:
-            obj_string = obj_string[-2::-1]
+            return get_rid_of_arguments(obj_string[-2::-1])
         elif c == '(' and i == -1:
-            obj_string = obj_string[-2::-1]
+            return get_rid_of_arguments(obj_string[-2::-1])
     obj_string = obj_string[::-1].lstrip()
     return get_rid_of_arguments(obj_string)
 
