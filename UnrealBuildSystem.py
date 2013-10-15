@@ -317,8 +317,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
         for config in startup_configuration:
             if "SERVER: " == config[:8]:
                 b_server = True
-                args = " /C " + exe_path + " server " + self._last_opened_map + config[8:]
-                subprocess.Popen(["cmd", args], creationflags=0x08000000)
+                args = " /C \"" + exe_path + "\" server " + self._last_opened_map + config[8:]
+                cmd = "cmd" + args
+                subprocess.Popen(cmd, creationflags=0x08000000)
                 # subprocess.Popen([exe_path, "server " + self._last_opened_map + config[8:]])
             elif "LISTEN: " == config[:8]:
                 b_server = True
@@ -329,8 +330,9 @@ class UnrealBuildProjectCommand(sublime_plugin.TextCommand):
                 else:
                     subprocess.Popen([exe_path, self._last_opened_map + config[8:]])
             elif "EDITOR: ":
-                args = " /C " + exe_path + " editor " + self._last_opened_map + config[8:]
-                subprocess.Popen(["cmd", args], creationflags=0x08000000)
+                args = " /C \"" + exe_path + "\" editor " + self._last_opened_map + config[8:]
+                cmd = "cmd" + args
+                subprocess.Popen(cmd, creationflags=0x08000000)
                 # subprocess.Popen([exe_path, "editor " + self._last_opened_map + config[8:]])
             else:
                 print "something is wrong in your settings, the startup string should start with either 'SERVER: ', 'LISTEN: ' or 'CLIENT: '"
@@ -507,13 +509,14 @@ class UDKbuild(threading.Thread):
             return
         print "compiling with: " + self._collector.compile_settings[0] + " and " + self._collector.compile_settings[1]
         args = "make " + self._collector.compile_settings[1]
-        args = " /C " + self.exe_path + " " + args  # + " -unattended"
-        print args
+        args = " /C \"" + self.exe_path + "\" " + args  # + " -unattended"
         if "-debug" in args:
             self._collector.b_compiled_debug = True
             sublime.set_timeout(lambda: self._collector.view.run_command("unreal_install_debugger", {"b_64bit": "Win64" == self._collector.compile_settings[0][:5]}), 0)
         # pipe = subprocess.Popen([self.exe_path, args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
-        pipe = subprocess.Popen(["cmd", args], stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
+        cmd = "cmd" + args
+        print cmd
+        pipe = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=0x08000000)
         # saves output lines
         bfirst = True
         while True:
