@@ -414,7 +414,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             else:
                 self.get_and_open_object(word, c, window, b_new_start_point, True)
         else:
-            print "case not handled!!!"
+            print "case not handled!!!", left_line
 
     # gets the object out of out_of and if found opens it
     # ! TODO: if there is a variable and a class, ask which to open.
