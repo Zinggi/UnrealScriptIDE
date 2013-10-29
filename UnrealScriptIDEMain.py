@@ -272,8 +272,6 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                             doc_line = var_doc_line[1].rstrip()
 
                         var_names = []
-                        if "<" in var_line[-1] or ">" in var_line[-1]:
-                            var_line = re.sub(r'\<.*?\>', '', " ".join(var_line)).split()
                         var_names.append(var_line.pop().rstrip('\n\r\t ;'))     # get the right most variable
                         for v in var_line:
                             if "," in var_line[-1]:     # if there are multiple variable names in one line separated by ',' , get them.
@@ -281,6 +279,8 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                             else:
                                 break
                         for name in var_names:
+                            if "<" in name or ">" in name:
+                                name = re.sub(r'\<.*?\>', '', name)
                             local_vars.append(USData.Variable(var_line, name, doc_line, line_number, ""))
                     # ########
                     line_number -= 1

@@ -308,8 +308,6 @@ class ParserThread(threading.Thread):
                         doc_line = var_doc_line[1].rstrip()
 
                     var_names = []
-                    if "<" in var_line[-1] or ">" in var_line[-1]:
-                        var_line = re.sub(r'\<.*?\>', '', " ".join(var_line)).split()
                     var_names.append(var_line.pop().rstrip('\n\r\t ;'))     # get the right most variable
                     for v in var_line:
                         if "," in var_line[-1]:     # if there are multiple variable names in one line separated by ',' , get them.
@@ -317,6 +315,8 @@ class ParserThread(threading.Thread):
                         else:
                             break
                     for name in var_names:
+                        if "<" in name or ">" in name:
+                            name = re.sub(r'\<.*?\>', '', name)
                         self.add_var(var_line, name, doc_line, i, file_name, current_documentation, bStruct)
                     current_documentation = ""
 

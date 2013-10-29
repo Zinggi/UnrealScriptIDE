@@ -11,7 +11,6 @@
 # (c) Florian Zinggeler
 #-----------------------------------------------------------------------------------
 import sublime
-import re
 
 # if the helper panel is displayed, this is true
 # ! (TODO): use an event instead
@@ -90,7 +89,8 @@ class UnrealData:
     def get_object(self, word, out_of, b_no_classes=False, b_no_functions=False, b_no_variables=False, b_second_type=False, local_vars=[]):
         if not out_of:
             out_of = self
-        if word[-1:] == ']':
+        if word[-1] == ']':
+            num = word.count('[')
             word = word.split('[')[0]
         elif b_second_type:
             b_second_type = False
@@ -100,48 +100,24 @@ class UnrealData:
         if not isinstance(out_of, ClassReference) and not b_no_classes:
             c = out_of.get_class(word)
             if c is not None:
-                return c if not b_second_type else (c, True)
+                return (c if not b_second_type else (c, num))
         if not b_no_functions:
             f = out_of.get_function(word)
             if f is not None:
-                return f if not b_second_type else (f, True)
+                return (f if not b_second_type else (f, num))
         if not b_no_variables:
             v = out_of.get_variable(word)
             if v is not None:
-                return v if not b_second_type else (v, True)
+                return (v if not b_second_type else (v, num))
         if local_vars:
             local = [x for x in local_vars if x.name().lower() == word]
             if local:
-                return local[0]
+                return (local[0] if not b_second_type else (local[0], num))
         if isinstance(out_of, ClassReference):
             if not out_of.has_parsed():
                 print "class ", out_of.name(), " not parsed yet, parse class now..."
                 out_of.parse_me()
                 return "parsing..."
-
-        # ## What was I thinking here??!
-        # Nothing found, search in the current view
-        # view = sublime.active_window().active_view()
-        # regex_var = r"(var|local)(\(\w*\))?\s([^\s]+)\s" + word
-        # regex_func = r"([a-zA-Z0-9()\s]*?)function[\s]+((coerce)\s*)?([a-zA-z0-9<>_]*?)[\s]*("+word+r")([\s]*\(+)(.*)((\s*\))+)[\s]*(const)?[\s]*;?[\s]*(\/\/.*)?"
-        # try:
-        #     var = view.find(regex_var, 0, sublime.IGNORECASE)
-        # except RuntimeError as err:
-        #     print err
-        #     return None
-        # else:    
-        #     if var:
-        #         var_lines = view.substr(var).split()[:-1]
-        #         row, col = view.rowcol(var.a)
-        #         return Variable(var_lines, word, "", row + 1, sublime.active_window().active_view().file_name(), "")
-        #     func = view.find(regex_func, 0, sublime.IGNORECASE)
-        #     if func:
-        #         line = view.substr(func)
-        #         row, col = view.rowcol(func.a)
-        #         print line
-        #         matches = re.search(regex_func, line)    # search for:  1: modifiers, 2: coerce, 3: ?, 4: return type, 5: name, ..,  7: arguments ...
-        #         if matches:
-        #             return Function(matches.group(1).strip(), matches.group(4).strip(), word, matches.group(7).strip(), row + 1, sublime.active_window().active_view().file_name(), "", True)
         return None
 
     # returns the type (class) of the object before the dot
@@ -173,17 +149,25 @@ class UnrealData:
                         o = self.get_object(obj, self, b_second_type=True)
                     if o == "parsing...":
                         return o
-                    return self.get_object_type(o, from_class)
+                    t = self.get_object_type(o, from_class)
+                    if isinstance(t, basestring):
+                        return self.get_class_from_context(t, from_class, local_vars)
+                    return t
             # a single object
             else:
                 obj = line[:-1]
+                # print "a single object"
                 if from_class:
                     o = self.get_object(obj, from_class, b_no_classes=True, b_second_type=True)
                 else:
                     o = self.get_object(obj, self, b_no_classes=True, b_second_type=True, local_vars=local_vars)
                 if o == "parsing...":
                     return o
-                return self.get_object_type(o, from_class)
+                # print o
+                t = self.get_object_type(o, from_class)
+                if isinstance(t, basestring):
+                    return self.get_class_from_context(t, from_class, local_vars)
+                return t
 
         # (= more than one dot)
         else:
@@ -197,14 +181,14 @@ class UnrealData:
 
     # returns the objects type (its class)
     def get_object_type(self, obj, its_class=None):
-        b_second_type = False
+        second_type = 0
         if isinstance(obj, tuple):
-            obj = obj[0]
-            b_second_type = True
+            obj, num = obj[0], obj[1]
+            second_type = num
         if isinstance(obj, Function):
             class_name = obj.return_type()
         elif isinstance(obj, Variable):
-            class_name = obj.type() if not b_second_type else obj.secondary_type()
+            class_name = obj.type(second_type)
         elif isinstance(obj, ClassReference):
             return obj
         else:
@@ -690,20 +674,21 @@ class Variable:
     def var_modifiers(self):
         return ' '.join(self._variable_modifiers) + ' '
 
-    def type(self):
-        v_type = self._variable_modifiers[-1].strip()
+    def type(self, secondary_level=0, new_v_type=""):
+        v_type = "".join(self._variable_modifiers[1:]).strip()
+
+        if new_v_type != "":
+            v_type = new_v_type
+        if secondary_level > 0:
+            new_v_type = "<".join(v_type.split('<')[1:])
+            return self.type(secondary_level - 1, new_v_type[:-1])
         if "class<" == v_type[:6].lower():
             v_type = "class"
         elif "array<" == v_type[:6].lower():
             v_type = "array"
-        return v_type
-
-    def secondary_type(self):
-        v_type = self._variable_modifiers[-1].strip()
-        if "class<" == v_type[:6].lower():
-            v_type = v_type[6:-1].strip()
-        elif "array<" == v_type[:6].lower():
-            v_type = v_type[6:-1].strip()
+        # elif '.' in v_type:
+        #     sp = v_type.split('.')
+        #     return sp[0] + "()." + sp[1] + "."
         return v_type
 
     def comment(self):
