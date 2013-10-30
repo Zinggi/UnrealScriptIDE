@@ -75,9 +75,9 @@ class ClassesCollectorThread(threading.Thread):
         with open(self.filename, 'rU') as file_lines:
             for line in file_lines:
                 description += line
-                classline = re.match(r'(class\b.+\bextends )(\b.+\b)', line.lower())  # get class declaration line of current file
+                classline = re.search(r'(class\s+.+[\n]?\s*extends\s+)(\w+)', description, re.MULTILINE)  # get class declaration line of current file //line.lower()  '(class\b.+\bextends )(\b.+\b)'
                 if classline is not None:
-                    parent_class_name = classline.group(2)  # get parent class
+                    parent_class_name = classline.group(2).lower()  # get parent class
                     self.collector.add_class(os.path.basename(self.filename).split('.')[0],
                                              parent_class_name,
                                              description,
@@ -150,9 +150,9 @@ class ParserThread(threading.Thread):
         with open(self.filename, 'rU') as file_lines:
             for line in file_lines:
                 description += line
-                classline = re.match(r'(class\b.+\bextends )(\b.+\b)', line.lower())  # get class declaration line of current file
+                classline = re.search(r'(class\s+.+[\n]?\s*extends\s+)(\w+)', description, re.MULTILINE)  # get class declaration line of current file
                 if classline is not None:
-                    parent_class_name = classline.group(2)  # get parent class
+                    parent_class_name = classline.group(2).lower()  # get parent class
                     if my_class:
                         if my_class.parent_class() != parent_class_name or my_class.description() != description:
                             my_class.update_class(parent_class_name, description)
