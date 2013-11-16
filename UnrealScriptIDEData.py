@@ -31,6 +31,7 @@ def print_to_panel(view, text, b_overwrite=True):
     panel_edit = panel.begin_edit()
     panel.insert(panel_edit, panel.size(), text)
     panel.end_edit(panel_edit)
+    panel.set_syntax_file(view.settings().get('syntax'))
     if not b_overwrite:
         panel.show(panel.size())
     view.window().run_command("show_panel", {"panel": "output.UnrealScriptAutocomplete_panel"})
@@ -212,6 +213,8 @@ class UnrealData:
 
     # returns the class with the given filename
     def get_class_from_filename(self, filename):
+        if isinstance(filename, ClassReference):
+            return filename
         for _class in self._classes:
             if _class.file_name().lower() == filename.lower():
                 return _class
