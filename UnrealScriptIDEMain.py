@@ -363,7 +363,8 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
 
             elif self.help_panel_line_number != -1:
                 # if we are modifying anything above or below the helper panel line, hide the panel.
-                if view.rowcol(view.sel()[0].begin())[0] != self.help_panel_line_number:
+                lno = view.rowcol(view.sel()[0].begin())[0]
+                if lno != self.help_panel_line_number and lno != 0:
                     view.window().run_command("hide_panel", {"panel": "output.UnrealScriptAutocomplete_panel"})
                     self.help_panel_line_number = -1
 

@@ -28,6 +28,7 @@ output_view = None
 def print_to_panel(view, text, b_overwrite=True, bLog=False):
     global b_helper_panel_on, output_view
 
+    b_helper_panel_on = True
     if not ST3:
         if b_overwrite or not output_view:
             # get_output_panel doesn't "get" the panel, it *creates* it, so we should only call get_output_panel once
@@ -45,7 +46,7 @@ def print_to_panel(view, text, b_overwrite=True, bLog=False):
         else:
             panel = output_view
         # panel.run_command('erase_view')
-        print(text)
+        # print(text)
         panel.run_command('append', {'characters': text})
 
     if not b_overwrite:
@@ -58,7 +59,6 @@ def print_to_panel(view, text, b_overwrite=True, bLog=False):
         panel.set_syntax_file(view.settings().get('syntax'))
 
     view.window().run_command("show_panel", {"panel": "output.UnrealScriptAutocomplete_panel"})
-    b_helper_panel_on = True
 
 
 # base class for adding new auto-complete suggestions
@@ -236,6 +236,8 @@ class UnrealData:
 
     # returns the class with the given filename
     def get_class_from_filename(self, filename):
+        if not filename:
+            return None
         if isinstance(filename, ClassReference):
             return filename
         for _class in self._classes:
@@ -366,6 +368,7 @@ class UnrealData:
                 return ("parsing...", "parsing...")
         else:
             print("No class found for ", class_file_name)
+            return ("parsing...", "parsing...")
 
     # returns all functions from the given class and all its parent classes
     def get_functions_from_class(self, my_class):
