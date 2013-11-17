@@ -5,7 +5,12 @@ UnrealScript IDE has been updated
 New Stuff:
 ----------
 * **UnrealScript IDE does now support Sublime Text 3!!!**
+
+
+
 * please report **any** bug you find, in Sublime Text 3 and also in Sublime Text 2 because some things might have gone wrong when porting over...
+
+
 * **if you change sublime version you will very likely have to rebuild the cache!**
 ----------
 
