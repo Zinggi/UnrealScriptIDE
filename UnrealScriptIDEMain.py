@@ -131,19 +131,28 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
     # ! (TODO): clear completions for current file
     # def on_close(self, view):
     #     pass
-
     # gets called when a file is saved. re-parse the current file.
-    def on_post_save(self, view):
+    def on_post_save(self, view, async=False):
+        if ST3 and not async:
+            return
         if is_unrealscript_file():
             filename = view.file_name()
             if filename:
                 self.remove_file(filename)
-                self.on_activated(view)
+                if ST3:
+                    self.on_activated_async(view)
+                else:
+                    self.on_activated(view)
+
+    def on_post_save_async(self, view):
+        self.on_post_save(view, async=True)
 
     # start parsing the active file when a tab becomes active
     # at first startup, scan for all classes and save them to _classes
     # at later startups, load _classes from cache.
-    def on_activated(self, view):
+    def on_activated(self, view, async=False):
+        if ST3 and not async:
+            return
         if is_unrealscript_file():
             self.clear()    # empty the completions list, so that we only get the relevant ones.
             self.b_built_for_current_file = True
@@ -186,9 +195,12 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     print("already parsed, load completions for file: ", file_name)
                     self.load_completions_for_file(file_name)
 
+    def on_activated_async(self, view):
+        self.on_activated(view, async=True)
+
     # This function is called when auto-complete pop-up box is displayed.
     # Used to get context sensitive suggestions
-    def on_query_completions(self, view, prefix, locations):
+    def on_query_completions(self, view, prefix, locations, async=False):
         if is_unrealscript_file():
             selection_region = view.sel()[0]
             line = view.line(selection_region)
@@ -340,7 +352,9 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     self.b_did_autocomplete = True
 
     # remove auto completion and insert dynamic snippet instead, just after auto completion
-    def on_modified(self, view):
+    def on_modified(self, view, async=False):
+        if ST3 and not async:
+            return
         if is_unrealscript_file():
             # if the helper panel has just been displayed, save the line number
             if USData.b_helper_panel_on:
@@ -357,6 +371,9 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 self.b_did_autocomplete = False
                 # use timeout to reduce time needed inside the on_modified event
                 sublime.set_timeout(lambda: self.insert_dynamic_snippet_for_completion(view, self.completion_class), 0)
+
+    def on_modified_async(self, view):
+        self.on_modified(view, async=True)
 
     # if there is a dynamic snippet available for the just added word,
     # remove the last word and insert the snippet instead
@@ -476,7 +493,10 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 self.b_still_parsing_classes = False
                 # self.save_classes_to_cache()
                 self.link_classes()
-                self.on_activated(view)
+                if ST3:
+                    self.on_activated_async(view)
+                else:
+                    self.on_activated(view)
             else:
                 if self.b_wanted_to_go_to_definition:
                     print("wanted to go to definition!")
@@ -506,7 +526,10 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             c.clear()
         self._classes = []
         self.b_still_parsing_classes = True
-        self.on_activated(view)
+        if ST3:
+            self.on_activated_async(view)
+        else:
+            self.on_activated(view)
 
     # save the _classes array to a cache file in the src folder
     def save_classes_to_cache(self):
