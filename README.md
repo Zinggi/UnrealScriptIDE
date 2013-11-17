@@ -1,7 +1,7 @@
-UnrealScript IDE Plug-in for Sublime Text 2
+UnrealScript IDE Plug-in for Sublime Text 2/3
 ===========================
 
-UnrealScript IDE adds many features to Sublime Text 2 that you'd expect from a good UnrealScript IDE.  
+UnrealScript IDE adds many features to Sublime Text 2/3 that you'd expect from a good UnrealScript IDE.  
 Fully featured object-oriented auto-completion, go to declaration, syntax highlighting, build and run, snippets and some more to name a few...
 
 
@@ -16,7 +16,7 @@ Features
 	* context sensitive completions (e.g. in the defaultproperties block you only want to get variables)
 	* parameter hints
 	* display documentation when you need it
-	* completions feel like the great Sublime Text 2 snippets
+	* completions feel like the great Sublime Text 2/3 snippets
 
 * **Go to declaration and back again**
 	* object-oriented go to declaration (pressing it over controller.GetPlayerViewPoint(a, b) will take you to the declaration of GetPlayerViewPoint in Controller)
@@ -25,7 +25,7 @@ Features
 
 * **Debugger**
 	* UnrealScript IDE comes with [UnrealDebugger](https://code.google.com/p/unreal-debugger/) integrated.
-	* You can set breakpoints directly inside Sublime Text 2
+	* You can set breakpoints directly inside Sublime Text 2/3
 	* [more information](https://github.com/Zinggi/UnrealScriptIDE/wiki/Usage#debugger)
 
 * **Syntax highlighting**
@@ -63,7 +63,7 @@ Planned
 
 Installation
 ------------
-**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control) right inside Sublime Text 2 (Package Control needs to be installed):**
+**Very easy with [Package Control](http://wbond.net/sublime_packages/package_control) right inside Sublime Text 2/3 (Package Control needs to be installed):**
 
 1.	Ctrl + shift + P
 2.  Search for "install", hit enter
@@ -116,7 +116,7 @@ Here are some relevant settings for auto-completion that I've found quite helpfu
 * * *
 License
 ------------
-UnrealScript IDE Plug-in for Sublime Text 2
+UnrealScript IDE Plug-in for Sublime Text 2/3
 Copyright (C) 2013 Florian Zinggeler
 
 This program is free software: you can redistribute it and/or modify

@@ -12,6 +12,11 @@
 #-----------------------------------------------------------------------------------
 import sublime
 
+ST3 = int(sublime.version()) > 3000
+
+if ST3:
+    basestring = (str, bytes)
+
 # if the helper panel is displayed, this is true
 # ! (TODO): use an event instead
 b_helper_panel_on = False
@@ -20,20 +25,38 @@ output_view = None
 
 # prints the text to the "helper panel" (Actually the console)
 # ! (TODO): fire show_helper_panel
-def print_to_panel(view, text, b_overwrite=True):
+def print_to_panel(view, text, b_overwrite=True, bLog=False):
     global b_helper_panel_on, output_view
-    # get_output_panel doesn't "get" the panel, it *creates* it, so we should only call get_output_panel once
-    if b_overwrite or not output_view:
-        panel = view.window().get_output_panel('UnrealScriptAutocomplete_panel')
-        output_view = panel
+
+    if not ST3:
+        if b_overwrite or not output_view:
+            # get_output_panel doesn't "get" the panel, it *creates* it, so we should only call get_output_panel once
+            panel = view.window().get_output_panel('UnrealScriptAutocomplete_panel')
+            output_view = panel
+        else:
+            panel = output_view
+        panel_edit = panel.begin_edit()
+        panel.insert(panel_edit, panel.size(), text)
+        panel.end_edit(panel_edit)
     else:
-        panel = output_view
-    panel_edit = panel.begin_edit()
-    panel.insert(panel_edit, panel.size(), text)
-    panel.end_edit(panel_edit)
-    panel.set_syntax_file(view.settings().get('syntax'))
+        if b_overwrite or not output_view:
+            panel = view.window().create_output_panel('UnrealScriptAutocomplete_panel')
+            output_view = panel
+        else:
+            panel = output_view
+        # panel.run_command('erase_view')
+        print(text)
+        panel.run_command('append', {'characters': text})
+
     if not b_overwrite:
         panel.show(panel.size())
+
+    if bLog:
+        panel.set_syntax_file("Packages/UnrealScriptIDE/Log.tmLanguage")
+        panel.set_name("UnrealLog")
+    else:
+        panel.set_syntax_file(view.settings().get('syntax'))
+
     view.window().run_command("show_panel", {"panel": "output.UnrealScriptAutocomplete_panel"})
     b_helper_panel_on = True
 
@@ -116,7 +139,7 @@ class UnrealData:
                 return (local[0] if not b_second_type else (local[0], num))
         if isinstance(out_of, ClassReference):
             if not out_of.has_parsed():
-                print "class ", out_of.name(), " not parsed yet, parse class now..."
+                print("class ", out_of.name(), " not parsed yet, parse class now...")
                 out_of.parse_me()
                 return "parsing..."
         return None
@@ -124,8 +147,8 @@ class UnrealData:
     # returns the type (class) of the object before the dot
     def get_class_from_context(self, line, from_class=None, local_vars=[]):
         objs = line[:-1].split('.')
-        print line
-        print objs, from_class.name() if from_class else ""
+        print(line)
+        print(objs, from_class.name() if from_class else "")
         # we're lucky, it's just one object, easy.
         if len(objs) == 1:
             if line[-5:] == "self.":
@@ -157,14 +180,14 @@ class UnrealData:
             # a single object
             else:
                 obj = line[:-1]
-                # print "a single object"
+                # print("a single object")
                 if from_class:
                     o = self.get_object(obj, from_class, b_no_classes=True, b_second_type=True)
                 else:
                     o = self.get_object(obj, self, b_no_classes=True, b_second_type=True, local_vars=local_vars)
                 if o == "parsing...":
                     return o
-                # print o
+                # print(o)
                 t = self.get_object_type(o, from_class)
                 if isinstance(t, basestring):
                     return self.get_class_from_context(t, from_class, local_vars)
@@ -193,10 +216,10 @@ class UnrealData:
         elif isinstance(obj, ClassReference):
             return obj
         else:
-            print "obj ", obj, " has no type!"
+            print("obj ", obj, " has no type!")
             return None
         if class_name:
-            print "object type: ", class_name
+            print("object type: ", class_name)
             c = self.get_class(class_name)
             if c:
                 return c
@@ -308,8 +331,8 @@ class UnrealData:
                     # autocomplete_list.append((function_str, function.function_name()))
 
         # sort
-        for i in range(0, len(unsorted_autocomplete_list)/2):
-            autocomplete_list += unsorted_autocomplete_list[i] + unsorted_autocomplete_list[i + len(unsorted_autocomplete_list)/2]
+        for i in range(0, len(unsorted_autocomplete_list)//2):
+            autocomplete_list += unsorted_autocomplete_list[i] + unsorted_autocomplete_list[i + len(unsorted_autocomplete_list)//2]
 
         if not b_no_classes:
             for _class in self._classes:
@@ -342,7 +365,7 @@ class UnrealData:
                 my_class.parse_me()
                 return ("parsing...", "parsing...")
         else:
-            print "No class found for ", class_file_name
+            print("No class found for ", class_file_name)
 
     # returns all functions from the given class and all its parent classes
     def get_functions_from_class(self, my_class):
@@ -430,7 +453,7 @@ class ClassReference:
             self._parent_class.set_child(self)
 
     def set_child(self, child):
-        # print "link: ", child.name(), "  to: ", self.name()
+        # print("link: ", child.name(), "  to: ", self.name())
         self._child_classes.append(child)
 
     def remove_child(self, child):
@@ -639,13 +662,14 @@ class Function:
             #     description = '${1:' + self.documentation() + '}'
 
             view.run_command("insert_snippet",
-                            {"contents": (Function_Snippet_Declaration % {  "function_modifiers": self.function_modifiers(),
-                                                                            "return_type": self.return_type(True),
-                                                                            "function_name": self._function_name,
-                                                                            "arguments": self._arguments,
-                                                                            # "description": description,
-                                                                            "funct": "function" if self._b_is_function == 1 else "event",
-                                                                            "less_arguments": less_arguments})})
+                             {"contents": (Function_Snippet_Declaration % {"function_modifiers": self.function_modifiers(),
+                                                                           "return_type": self.return_type(True),
+                                                                           "function_name": self._function_name,
+                                                                           "arguments": self._arguments,
+                                                                           # "description": description,
+                                                                           "funct": "function" if self._b_is_function == 1 else "event",
+                                                                           "less_arguments": less_arguments})})
+
         else:
             less_args = self._arguments.split(',')
             arguments = ""
@@ -678,7 +702,11 @@ class Variable:
         return ' '.join(self._variable_modifiers) + ' '
 
     def type(self, secondary_level=0, new_v_type=""):
-        v_type = "".join(self._variable_modifiers[1:]).strip()
+        v_type = self._variable_modifiers[-1].strip()
+        for i, mod in enumerate(self._variable_modifiers):
+            if 'Array' in mod or 'Class' in mod:
+                v_type = "".join(self._variable_modifiers[i:]).strip()
+                break
 
         if new_v_type != "":
             v_type = new_v_type
@@ -776,14 +804,14 @@ class Const:
 # ----------------
 
 Function_Snippet_Declaration = \
-"""%(function_modifiers)s%(funct)s%(return_type)s %(function_name)s(%(arguments)s)
+    """%(function_modifiers)s%(funct)s%(return_type)s %(function_name)s(%(arguments)s)
 {
     ${2:super.%(function_name)s(%(less_arguments)s);}
-    ${3://}
+    ${3:///}
 }"""
 
 Function_Snippet_Call = \
-"""%(function_name)s(%(arguments)s)"""
+    """%(function_name)s(%(arguments)s)"""
 
 Object_Name = \
-"""%(name)s"""
+    """%(name)s"""

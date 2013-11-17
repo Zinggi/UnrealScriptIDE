@@ -79,7 +79,7 @@ class UnrealManageBreakpointsCommand(sublime_plugin.TextCommand):
         return points
 
     def display_points(self, points):
-        points = ["Deactivate all Breakpoints", "Activate all Breakpoints",
+        points = [["Deactivate all Breakpoints"], ["Activate all Breakpoints"],
                  ["Remove all Breakpoints", "______________________________________________________________________"]] + points
         self.view.window().show_quick_panel(points, self.on_click_point)
 
@@ -120,7 +120,7 @@ class UnrealManageBreakpointsCommand(sublime_plugin.TextCommand):
                 view.add_regions("breakpoint_deactivated", [], "breakpoint", "dirty_circle_light", sublime.HIDDEN | sublime.PERSISTENT)
                 view.add_regions("breakpoint_enabled", [], "breakpoint", "circle", sublime.HIDDEN | sublime.PERSISTENT)
         else:
-            print self.points
+            print(self.points)
             open_folder_arr = self.view.window().folders()
             inst_dir, source_dir = get_paths(open_folder_arr, True)
             file_name = inst_dir[:-15] + "Development\\Src\\" + self.points[num - 3]
@@ -144,21 +144,24 @@ class UnrealInstallDebuggerCommand(sublime_plugin.TextCommand):
                     # backup
                     if filename == "DebuggerInterface.dll":
                         if not os.path.exists(os.path.join(self.install_dir, "DebuggerInterface.dll-old-UScriptIDE")):
-                            print "Another debugger was found. Creating backup"
+                            print("Another debugger was found. Creating backup")
                             os.rename(os.path.join(self.install_dir, filename), os.path.join(self.install_dir, "DebuggerInterface.dll-old-UScriptIDE"))
                     # install
-                    print "install newer version", filename
+                    print("install newer version", filename)
                     self.install(os.path.join(self.source_dir, filename), os.path.join(self.install_dir, filename))
             except os.error:
                 # install
-                print "fresh install", filename
+                print("fresh install", filename)
                 self.install(os.path.join(self.source_dir, filename), os.path.join(self.install_dir, filename))
         self.view.window().run_command("unreal_load_breakpoints", {"b_set_breakpoints": True})
 
     # copy file or directory
     def install(self, src, dst):
         if os.path.isdir(src):
-            shutil.copytree(src, dst)
+            try:
+                shutil.copytree(src, dst)
+            except FileExistsError:
+                print("cannot copy file: ", src, "  file already exists!")
         else:
             shutil.copy(src, dst)
 
@@ -174,7 +177,7 @@ class UnrealUninstallDebuggerCommand(sublime_plugin.TextCommand):
 
     # deletes all debugger files and restores the backup
     def uninstall(self, src, uninst):
-        print "uninstall debugger from ", uninst
+        print("uninstall debugger from ", uninst)
         for f in os.listdir(src):
             uninst_f_path = os.path.join(uninst, f)
             if os.path.exists(uninst_f_path):
@@ -185,7 +188,7 @@ class UnrealUninstallDebuggerCommand(sublime_plugin.TextCommand):
         backup = os.path.join(uninst, "DebuggerInterface.dll-old-UScriptIDE")
         if os.path.exists(backup):
             if not os.path.exists(backup[:-15]):
-                print "old debugger found, reinstalling the debugger"
+                print("old debugger found, reinstalling the debugger")
                 os.rename(backup, backup[:-15])
 
 
@@ -203,11 +206,11 @@ class UnrealLoadBreakpointsCommand(sublime_plugin.TextCommand):
                 xml_tree = ElementTree.parse(self.breakpoints_xml)
                 breakpoints = xml_tree.find("Breakpoints")
                 if b_set_breakpoints:
-                    print "set breakpoints"
+                    print("set breakpoints")
                     self.set_breakpoints(breakpoints, install_dir_32 + "UnrealDebugger.project")
                     self.set_breakpoints(breakpoints, install_dir_64 + "UnrealDebugger.project")
                 else:
-                    print "load breakpoints"
+                    print("load breakpoints")
                     LoadBreakpoints(breakpoints, self).start()
                     # self.load_breakpoints(breakpoints)
 
@@ -226,7 +229,7 @@ class UnrealLoadBreakpointsCommand(sublime_plugin.TextCommand):
                 s = sublime.load_settings('UnrealScriptIDE.sublime-settings')
                 break_on_first_line.text = "false" if not s.get('break_on_first_line') else "true"
             else:
-                print "not found!!, ", break_on_first_line
+                print("not found!!, ", break_on_first_line)
 
             debugger_breakpoints = debugger_tree.find("Breakpoints")
             dic = breakpoints.find("Dictionary")
@@ -249,11 +252,6 @@ class LoadBreakpoints(threading.Thread):
 
     def run(self):  # gets called when the thread is created
         self.load_breakpoints(self.breakpoints)
-        self.stop()
-
-    def stop(self):
-        if self.isAlive():
-            self._Thread__stop()
 
     # loads the saved breakpoints from the master file to the current view
     def load_breakpoints(self, breakpoints):
@@ -263,7 +261,7 @@ class LoadBreakpoints(threading.Thread):
             k = item.find("key")
             s = k.find("string")
             if s.text.split('.')[-1].lower() == current_file:
-                print "load breakpoints for file ", current_file
+                print("load breakpoints for file ", current_file)
                 v = item.find("value")
                 arr = v.find("ArrayOfBreakpoint")
                 for b in arr:
@@ -279,7 +277,7 @@ class UnrealToggleBreakpointCommand(sublime_plugin.TextCommand):
         old_breakpoints_deactivated = self.view.get_regions("breakpoint_deactivated")
 
         if breakpoint_a and breakpoint_b:
-            print breakpoint_a, breakpoint_b, b_deactivate
+            print(breakpoint_a, breakpoint_b, b_deactivate)
             breakpoint = [sublime.Region(breakpoint_a, breakpoint_b)]
             if breakpoint[0] not in old_breakpoints and breakpoint[0] not in old_breakpoints_deactivated:
                 if not b_deactivate:
@@ -314,14 +312,14 @@ class UnrealToggleBreakpointCommand(sublime_plugin.TextCommand):
         for b in breakpoints_deactivated:
             line, c = self.view.rowcol(b.a)
             breakpoints_formatted.append((line + 1, False))
-        print breakpoints_formatted
+        print(breakpoints_formatted)
 
         open_folder_arr = self.view.window().folders()
         install_dir_64, src_dir = get_paths(open_folder_arr, True)
         breakpoints_xml = install_dir_64[:-6] + "UScriptIDE_Breakpoints.xml"
 
         if os.path.exists(breakpoints_xml):
-            print "append breakpoints to existing xml"
+            print("append breakpoints to existing xml")
             xml_tree = ElementTree.parse(breakpoints_xml)
             bs = xml_tree.find("Breakpoints")
             d = bs.find('Dictionary')
@@ -337,7 +335,7 @@ class UnrealToggleBreakpointCommand(sublime_plugin.TextCommand):
 
             xml_tree.write(breakpoints_xml)
         else:
-            print "create new xml with breakpoints"
+            print("create new xml with breakpoints")
             root = ElementTree.Element('Project')
 
             bs = ElementTree.SubElement(root, "Breakpoints")

@@ -14,9 +14,15 @@
 #-----------------------------------------------------------------------------------
 import sublime
 import threading
-import UnrealScriptIDEData as USData
 import re
 import os
+
+ST3 = int(sublime.version()) > 3000
+
+if ST3:
+    import UnrealScriptIDE.UnrealScriptIDEData as USData
+else:
+    import UnrealScriptIDEData as USData
 
 
 # Adds the class inside (filename) to the collector.
@@ -38,19 +44,17 @@ class ClassesCollectorThread(threading.Thread):
                     self.collector.src_folder = f
                     # if we saved the classes to a cache before, load them from there.
                     if not self.collector.b_rebuild_cache and os.path.exists(os.path.join(f, "classes_cache.obj")):
-                        print "cache exists. Loading classes from memory"
+                        print("cache exists. Loading classes from memory")
                         self.collector.load_classes_from_cache()
                     else:
-                        print "no cache file found, start parsing all classes"
+                        print("no cache file found, start parsing all classes")
                         self.get_classes(f)
                         self.get_inbuilt_classes()
                     break
-            self.stop()
 
         else:
             if self.filename is not None:
                 self.save_classes()
-                self.stop()
 
     # creates a new thread for every file in the src directory
     def get_classes(self, path):
@@ -91,10 +95,6 @@ class ClassesCollectorThread(threading.Thread):
                                                  self.filename)
                         break
 
-    def stop(self):
-        if self.isAlive():
-            self._Thread__stop()
-
 
 # parses one file and creates a new thread for the parent class
 # this saves all functions and variables in the according classes object
@@ -124,14 +124,13 @@ class ParserThread(threading.Thread):
             # check if this file was already parsed
             my_class = self.collector.get_class_from_filename(self.filename)
             if my_class is not None and my_class.has_parsed():
-                print "already parsed: ", self.filename
-                self.stop()
+                print("already parsed: ", self.filename)
                 return
 
             elif my_class is None:
                 self.update_class(my_class)
 
-            print "not parsed yet: ", self.filename
+            print("not parsed yet: ", self.filename)
             self.update_class(my_class)
             self.save_functions(self.filename)  # parse current file
 
@@ -141,8 +140,6 @@ class ParserThread(threading.Thread):
                 self.collector.add_function_collector_thread(parent_file)   # create a new thread to parse the parent_file too
 
             my_class.save_completions(self._functions, self._variables, self._consts, self._structs)
-
-        self.stop()
 
     # checks the class and if there are changes, update the class declaration of to the class
     def update_class(self, my_class=None):
@@ -161,11 +158,11 @@ class ParserThread(threading.Thread):
                                                      parent_class_name,
                                                      description,
                                                      self.filename)
-                        
+
                         try:
                             c.link_to_parent()
                         except AttributeError:
-                            print "Something is wrong, better rebuild the cache."
+                            print("Something is wrong, better rebuild the cache.")
                             self.view.window().run_command("unreal_rebuild_cache")
                     break
 
@@ -255,7 +252,7 @@ class ParserThread(threading.Thread):
                         new_line = ' '.join(long_line.split()) + ')'
                         if not self.extract_functions(new_line, new_line, i, file_name, current_documentation, regex_f, regex_e):
                             if not self.extract_comlicated_function(new_line, new_line, i, file_name, current_documentation, regex_f, regex_e):
-                                print "Failed to parse this function/event:\n", new_line, "\n(it probably should fail. If you see a line that fails that shouldn't, contact me)"
+                                print("Failed to parse this function/event:\n", new_line, "\n(it probably should fail. If you see a line that fails that shouldn't, contact me)")
                             # if "event final Inventory CreateInventory( class<Inventory> NewInvClass, optional bool bDoNotActivate ) {)" == new_line:
                             #     self.add_func("", "Inventory", "CreateInventory", "class<Inventory> NewInvClass, optional bool bDoNotActivate", i, file_name, current_documentation, False)
                             # elif "native noexport final function coerce actor Spawn ( class<actor> SpawnClass, optional actor SpawnOwner, optional name SpawnTag, optional vector SpawnLocation, optional rotator SpawnRotation, optional Actor ActorTemplate, optional bool bNoCollisionFail)" in new_line:
@@ -284,7 +281,7 @@ class ParserThread(threading.Thread):
                             if txt.lower() == "function" or txt.lower() == "event":
                                 b_fail = False
                                 if '(' in left_line.split()[i:] and ')' in left_line.split()[i:]:
-                                    print "Failed to parse this function/event:\n", line, "(it probably should fail. If you see a line that fails that shouldn't, contact me)"
+                                    print("Failed to parse this function/event:\n", line, "(it probably should fail. If you see a line that fails that shouldn't, contact me)")
                                     b_fail = True
                                     continue
                                 continue
@@ -324,7 +321,7 @@ class ParserThread(threading.Thread):
                     if self.extract_const(line, i, file_name, current_documentation, regex_c):
                         current_documentation = ""
                     else:   # fail to capture const
-                        print "Failed to parse const:\n", line, "(it probably should fail. If you see a line that fails that shouldn't, contact me)"
+                        print("Failed to parse const:\n", line, "(it probably should fail. If you see a line that fails that shouldn't, contact me)")
 
     # get the function in left_line. If this failed return false
     def extract_functions(self, line, left_line, i, file_name, current_documentation, regex_f, regex_e):
@@ -335,7 +332,7 @@ class ParserThread(threading.Thread):
             b_function = False
             regex = regex_e
         else:
-            print "No function or event in ", left_line.lower(), "   . full line: ", line
+            print("No function or event in ", left_line.lower(), "   . full line: ", line)
             return False
 
         matches = regex.search(line.strip())    # search for:  1: modifiers, 2: return type, 3: name, 4: arguments, 5: const, 6: comment
@@ -361,7 +358,3 @@ class ParserThread(threading.Thread):
             self.add_const(matches.group(1), matches.group(2), comment, i, file_name, current_documentation)
             return True
         return False
-
-    def stop(self):
-        if self.isAlive():
-            self._Thread__stop()

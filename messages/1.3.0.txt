@@ -1,0 +1,10 @@
+=================================
+UnrealScript IDE has been updated
+=================================
+
+New Stuff:
+----------
+* **UnrealScript IDE does now support Sublime Text 3!!!**
+----------
+
+Read the wiki: https://github.com/Zinggi/UnrealScriptIDE/wiki

@@ -6,7 +6,7 @@
 #   and inserts them as dynamic snippets.
 #   It searches in all parent classes of the current class.
 #   Uses context sensitive completions.
-#   
+#
 #   Delete folder?:
     # import os
     # import glob
@@ -19,11 +19,18 @@
 #-----------------------------------------------------------------------------------
 import sublime
 import sublime_plugin
-import UnrealScriptIDEData as USData
-import UnrealScriptIDEParser as Parser
 import os
 import pickle
 import re
+
+ST3 = int(sublime.version()) > 3000
+
+if ST3:
+    import UnrealScriptIDE.UnrealScriptIDEData as USData
+    import UnrealScriptIDE.UnrealScriptIDEParser as Parser
+else:
+    import UnrealScriptIDEData as USData
+    import UnrealScriptIDEParser as Parser
 
 
 # get the event manager
@@ -62,6 +69,7 @@ def get_relevant_text(text):
             return get_rid_of_arguments(obj_string[-2::-1])
     obj_string = obj_string[::-1].lstrip()
     return get_rid_of_arguments(obj_string)
+
 
 # gets rid of function arguments: foo(a.ssdd, asd.eef.sd()).go(sd, ds()) -> foo().go()
 def get_rid_of_arguments(text):
@@ -157,7 +165,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 evt_m().get_and_open_object += self.get_and_open_object
 
                 view.set_status('UnrealScriptAutocomplete', "startup: start parsing classes...")
-                print "startup: start parsing classes..."
+                print("startup: start parsing classes...")
                 open_folder_arr = window.folders()   # Gets all opened folders in the Sublime Text editor.
                 self._collector_threads.append(Parser.ClassesCollectorThread(self, "", 30, open_folder_arr, True))
                 self._collector_threads[-1].start()
@@ -169,13 +177,13 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             if not self.b_still_parsing_classes and file_name is not None:
                 # if the file wasn't parsed before, parse it now.
                 if file_name not in self._filenames:
-                    print "start parsing file: ", file_name
+                    print("start parsing file: ", file_name)
                     self._filenames.append(file_name)
                     self.add_function_collector_thread(file_name)  # create a new thread to search for relevant functions for the active file
                     self.handle_threads(self._collector_threads, view)  # display progress bar
 
                 else:
-                    print "already parsed, load completions for file: ", file_name
+                    print("already parsed, load completions for file: ", file_name)
                     self.load_completions_for_file(file_name)
 
     # This function is called when auto-complete pop-up box is displayed.
@@ -218,11 +226,11 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                         regions = zip([view.rowcol(r.a)[0] for r in begin_objects], [view.rowcol(r.a)[0] for r in end_objects])
                         for i, p in enumerate(regions):
                             if p[0] < row < p[1]:
-                                print "in region: ", p, result[i]
+                                print("in region: ", p, result[i])
                                 c = self.get_class(result[i])
                                 if not c:
                                     c = "type not found"
-                                    print "nothing found for: ", result[i]
+                                    print("nothing found for: ", result[i])
                                 if c.has_parsed():
                                     return self.get_autocomplete_list(prefix, True, True, False, c, bNoStandardCompletions=True)
                                 else:
@@ -230,13 +238,12 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                                     self.b_wanted_to_autocomplete = True
                                     return [("just a moment...", ""), ("", "")]
 
-
                     return self.get_autocomplete_list(prefix, True, True, bNoStandardCompletions=True)
 
             # no defaultproperties found or above defaults:
 
             # on a variable declaration line:
-            if len(split_lines) > 0 and (any([x == split_lines[0].lower() for x in ["var","local","param"]]) or "var(" in split_lines[0].lower()):
+            if len(split_lines) > 0 and (any([x == split_lines[0].lower() for x in ["var", "local", "param"]]) or "var(" in split_lines[0].lower()):
                 # not an array
                 if len(split_lines) > 1 and not "array" in split_lines[1].lower():
                     if any(line_contents[-1] == c for c in ["<", "|"]):
@@ -297,7 +304,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                         if match.group(7):
                             for param in match.group(7).split(','):
                                 local_vars.append(USData.Variable(["param"] + param.strip().split()[:-1], param.split()[-1], "blajsn", line_number, ""))
-                                print local_vars[-1].name(), local_vars[-1].var_modifiers()
+                                print(local_vars[-1].name(), local_vars[-1].var_modifiers())
                         break
 
             # check if wants object oriented completions
@@ -305,12 +312,12 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 left_line = get_relevant_text(line_contents)
                 if '.' != left_line[-1]:
                     left_line = ".".join(left_line.split('.')[:-1]) + '.'
-                # print "object.* :  ", left_line
+                # print("object.* :  ", left_line)
 
                 c = self.get_class_from_context(left_line, local_vars=local_vars)
                 if not c:
                     c = "type not found"
-                    print "nothing found for: ", left_line
+                    print("nothing found for: ", left_line)
                 if c != "parsing...":
                     return self.get_autocomplete_list(prefix, True, False, False, c, bNoStandardCompletions=True)
                 else:
@@ -366,15 +373,18 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                 o = self.get_object(word, self)
 
             if o:
-                edit = view.begin_edit('UnrealScriptAutocomplete')
-                view.replace(edit, region_word, "")     # remove last word
-                view.end_edit(edit)
+                if ST3:
+                    view.window().run_command('replace_region', {'regionA': region_word.a, 'regionB': region_word.b})
+                else:
+                    edit = view.begin_edit('UnrealScriptAutocomplete')
+                    view.replace(edit, region_word, "")     # remove last word
+                    view.end_edit(edit)
                 o.insert_dynamic_snippet(view)
 
     # go to the definition of the object below the cursor
     def on_go_to_definition(self, left_line, word, full_line, b_new_start_point):
         window = sublime.active_window()
-        # print "on_go_to_definition: full_line:\t", full_line, "\t left_line:\t'" + left_line + "'\t Word:\t", word
+        # print("on_go_to_definition: full_line:\t", full_line, "\t left_line:\t'" + left_line + "'\t Word:\t", word)
 
         # probably a declaration or super.
         # => go to the parent declaration
@@ -408,19 +418,19 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             c = self.get_class_from_context(left_line)
             if c == "parsing...":
                 window.active_view().set_status('UnrealScriptAutocomplete', "just a moment...")
-                print "still parsing..."
+                print("still parsing...")
                 self.b_wanted_to_go_to_definition = True
                 self.b_new_start_point = b_new_start_point
             else:
                 self.get_and_open_object(word, c, window, b_new_start_point, True)
         else:
-            print "case not handled!!!", left_line
+            print("case not handled!!!", left_line)
 
     # gets the object out of out_of and if found opens it
     # ! TODO: if there is a variable and a class, ask which to open.
     def get_and_open_object(self, word, out_of, window, b_new_start_point, b_no_classes=False, b_no_functions=False, b_no_variables=False):
         o = self.get_object(word, out_of, b_no_classes, b_no_functions, b_no_variables)
-        # print "object ", o
+        # print("object ", o)
         if o is not None and o != "parsing...":
             window.run_command("unreal_goto_definition", {"b_new_start_point": b_new_start_point, "line_number": o.line_number(), "filename": o.file_name()})
             return True
@@ -462,18 +472,18 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             self.save_classes_to_cache()
             view.erase_status('UnrealScriptAutocomplete')
             if self.b_still_parsing_classes:
-                print "finished parsing classes, start parsing current file"
+                print("finished parsing classes, start parsing current file")
                 self.b_still_parsing_classes = False
                 # self.save_classes_to_cache()
                 self.link_classes()
                 self.on_activated(view)
             else:
                 if self.b_wanted_to_go_to_definition:
-                    print "wanted to go to definition!"
+                    print("wanted to go to definition!")
                     self.b_wanted_to_go_to_definition = False
                     sublime.active_window().run_command("unreal_goto_definition", {"b_new_start_point": self.b_new_start_point})
                 elif self.b_wanted_to_autocomplete:
-                    print "wanted to auto-complete!"
+                    print("wanted to auto-complete!")
                     self.b_wanted_to_autocomplete = False
                     sublime.active_window().run_command("hide_auto_complete")
                     sublime.set_timeout(lambda: view.run_command("auto_complete"), 0)
@@ -501,19 +511,27 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
     # save the _classes array to a cache file in the src folder
     def save_classes_to_cache(self):
         if os.path.exists(self.src_folder):
-            with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'w') as cache_file:
-                pickle.dump(self._classes, cache_file)
+            if ST3:
+                with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'wb') as cache_file:
+                    pickle.dump(self._classes, cache_file)
+            else:
+                with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'w') as cache_file:
+                    pickle.dump(self._classes, cache_file)
 
     # loads the _classes from the cache file
     def load_classes_from_cache(self):
         if os.path.exists(self.src_folder):
-            with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'r') as cache_file:
-                self._classes = pickle.load(cache_file)
+            if ST3:
+                with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'rb') as cache_file:
+                    self._classes = pickle.load(cache_file)
+            else:
+                with open(os.path.join(self.src_folder, 'classes_cache.obj'), 'r') as cache_file:
+                    self._classes = pickle.load(cache_file)
             for c in self._classes:
                 c.set_collector_reference(self)
 
     def on_rebuild_cache(self, view):
-        print "rebuild cache"
+        print("rebuild cache")
         self.clear_all(view)
 
     def on_get_classes_reference(self, callback):
@@ -541,8 +559,7 @@ class UnrealRebuildCacheCommand(sublime_plugin.TextCommand):
                         if os.path.exists(os.path.join(f, "classes_cache.obj")):
                             evt_m().rebuild_cache(self.view)
         else:
-            print "no UnrealScript file, try again with a .uc file focused"
-
+            print("no UnrealScript file, try again with a .uc file focused")
 
 
 ########################################################
@@ -587,7 +604,12 @@ class EventManager():
         self.get_and_open_object = Event()
 
 
+class ReplaceRegionCommand(sublime_plugin.TextCommand):
+    def run(self, edit, regionA, regionB, text=""):
+        region = sublime.Region(regionA, regionB)
+        self.view.replace(edit, region, text)
+
 # def on_parsing_finished(self, arg):
-#     print arg
+#     print(arg)
 
 # evt_m().parsing_finished += self.on_parsing_finished

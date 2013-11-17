@@ -8,7 +8,14 @@
 #-----------------------------------------------------------------------------------
 import sublime
 import sublime_plugin
-import UnrealScriptIDEMain as USMain
+
+ST3 = int(sublime.version()) > 3000
+if ST3:
+    import UnrealScriptIDE.UnrealScriptIDEMain as USMain
+    from UnrealScriptIDE.UnrealBuildSystem import show_quick_panel
+else:
+    import UnrealScriptIDEMain as USMain
+    from UnrealBuildSystem import show_quick_panel
 
 
 class UnrealClassBrowserCommand(sublime_plugin.TextCommand):
@@ -27,9 +34,10 @@ class UnrealClassBrowserCommand(sublime_plugin.TextCommand):
 
     def show_tree(self, b_expand=False):
         self.b_expand = b_expand
-        self.input_list = [("Back to " + self.selected_file.parent_class()) if self.selected_file.parent_class() != "" else "Close",
+        self.input_list = [[("Back to " + self.selected_file.parent_class()) if self.selected_file.parent_class() != "" else "Close"],
                            ["Open file: " + self.selected_file.name(),
-                           self.selected_file.file_name()]]
+                            self.selected_file.file_name()]]
+
         if not b_expand:
             self.input_list += [["v Expand Members v",
                                  "expand and show all functions and variables. (Might take a moment)"]]
@@ -51,8 +59,8 @@ class UnrealClassBrowserCommand(sublime_plugin.TextCommand):
         for c in self.selected_file.children():
             self.input_list.append(["    " + c.name()])
 
-        # sublime.set_timeout(lambda: self.view.window().show_quick_panel(self.input_list, self.on_click), 10)
-        self.view.window().show_quick_panel(self.input_list, self.on_click)
+        # self.view.window().
+        show_quick_panel(self.input_list, self.on_click)
 
     def receive_object(self, obj):
         self.object = obj
@@ -63,8 +71,10 @@ class UnrealClassBrowserCommand(sublime_plugin.TextCommand):
             if len(self.history) >= 1:
                 self.selected_file = self.history.pop()
                 self.show_tree(self.b_expand)
+            else:
+                USMain.evt_m().parsing_finished -= self.on_parsing_finished
         elif index == 1:
-            print "open"
+            print("open")
         elif index == 2:
             self.show_tree(not self.b_expand)
         else:
