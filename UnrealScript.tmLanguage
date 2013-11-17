@@ -176,7 +176,7 @@
 				<key>3</key><dict><key>name</key><string>storage.type.source.uc</string></dict>
 			</dict>
 			<key>match</key>
-			<string>(?i:(dependson|implements|classgroup))(\s*?\((?'CLASS_NAME'\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?)\g'CLASS_NAME'*\s*?\))</string>
+			<string>(?i:(dependson|implements|classgroup))(\s*?\((?'CLASS_NAME'\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?)\g'CLASS_NAME'*\s*?\)?)?</string>
 		</dict>
 
 		<!-- Any modifier with multiple NAME parameters such as HideCategories(Don't put Var(...) in here because that's an declaration!) -Eliot -->
@@ -187,7 +187,7 @@
 				<key>3</key><dict><key>name</key><string>string.quoted.single.uc</string></dict>
 			</dict>
 			<key>match</key>
-			<string>(?i:(hidecategories|showcategories|autocollapsecategories|dontautocollapsecategories|autoexpandcategories|dontsortcategories))(\s*?\((?'CLASS_NAME'\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?)\g'CLASS_NAME'*\s*?\))</string>
+			<string>(?i:(hidecategories|showcategories|autocollapsecategories|dontautocollapsecategories|autoexpandcategories|dontsortcategories))(\s*?\((?'CLASS_NAME'\s*?([a-z-A-Z_][a-z-A-Z_0-9]+)\s*?,?)\g'CLASS_NAME'*\s*?\)?)?</string>
 		</dict>
 
 		<!--
