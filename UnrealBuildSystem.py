@@ -569,12 +569,12 @@ class UDKbuild(threading.Thread):
                 if ST3:
                     print_to_panel(self._collector.view, line, bLog=True)
                 else:
-                    sublime.set_timeout(lambda: print_to_panel(self._collector.view, line[:]), 0, bLog=True)
+                    sublime.set_timeout(lambda: print_to_panel(self._collector.view, line[:], bLog=True), 0)
             else:
                 if ST3:
                     print_to_panel(self._collector.view, line, False, bLog=True)
                 else:
-                    sublime.set_timeout(lambda: print_to_panel(self._collector.view, line[:], False), 0, bLog=True)
+                    sublime.set_timeout(lambda: print_to_panel(self._collector.view, line[:], False, bLog=True), 0)
             if not ST3:
                 time.sleep(0.002)
 
