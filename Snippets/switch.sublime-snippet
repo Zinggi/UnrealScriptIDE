@@ -2,15 +2,15 @@
 	<content><![CDATA[
 switch (${1:expression})
 {
-  case ${2:expression2}:
-    $3
-    break;
-  
-  case ${4:expression3}:
-    $5
-  
-  default:
-    $6
+	case ${2:expression2}:
+		$3
+		break;
+
+	case ${4:expression3}:
+		$5
+
+	default:
+		$6
 }]]></content>
 	<!-- Optional: Set a tabTrigger to define how to trigger the snippet -->
 	<tabTrigger>switch</tabTrigger>

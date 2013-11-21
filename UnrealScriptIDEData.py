@@ -809,8 +809,8 @@ class Const:
 Function_Snippet_Declaration = \
     """%(function_modifiers)s%(funct)s%(return_type)s %(function_name)s(%(arguments)s)
 {
-    ${2:super.%(function_name)s(%(less_arguments)s);}
-    ${3:///}
+\t${2:super.%(function_name)s(%(less_arguments)s);}
+\t${3:///}
 }"""
 
 Function_Snippet_Call = \
