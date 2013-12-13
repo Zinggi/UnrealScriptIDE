@@ -17,6 +17,8 @@ ST3 = int(sublime.version()) > 3000
 if ST3:
     basestring = (str, bytes)
 
+import re
+
 # if the helper panel is displayed, this is true
 # ! (TODO): use an event instead
 b_helper_panel_on = False
@@ -91,6 +93,10 @@ class UnrealData:
     # inbuilt functions should always be present.
     _inbuilt_functions = []
     _inbuilt_variables = []
+
+    # will be loaded when used first, contains the asset library as a list of tuples:
+    # [(ClassName, AssetName), ...]
+    _assets = None
 
     # clear the completions for the current file.
     def clear(self):
@@ -285,7 +291,7 @@ class UnrealData:
 
     # returns the current suggestions for this file.
     # if from_class is given, returns the completions for the given class
-    def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None, bNoStandardCompletions=False, local_vars=[]):
+    def get_autocomplete_list(self, word, b_no_classes=False, b_no_functions=False, b_no_variables=False, from_class=None, bNoStandardCompletions=False, local_vars=[], b_no_assets=True, assets_filtering=None):
         unsorted_autocomplete_list = []
         current_list = -1
         autocomplete_list = []
@@ -345,6 +351,13 @@ class UnrealData:
             for local in local_vars:
                 autocomplete_list.append((local.name() + '\t' + local.var_modifiers(), local.name()))
 
+        if not b_no_assets and assets_filtering:
+            # print("filter for :", assets_filtering)
+            self.load_assets_database()
+            for asset in self._assets:
+                if any(a.lower() == asset[0].lower() for a in assets_filtering):
+                    autocomplete_list.append((asset[1] + '\t' + asset[0], asset[0]+"\'"+asset[1]+"\'"))
+
         if bNoStandardCompletions:
             return autocomplete_list, sublime.INHIBIT_WORD_COMPLETIONS | sublime.INHIBIT_EXPLICIT_COMPLETIONS
         else:
@@ -397,6 +410,23 @@ class UnrealData:
 
         variables += self.get_variables_from_class(parent_file)
         return variables
+
+    def load_assets_database(self):
+        """ loads all assets """
+        if self._assets is not None:
+            return
+        out = ""
+        DBfile = self.src_folder[:-15] + "UDKGame\\Content\\GameAssetDatabase.checkpoint"
+        with open(DBfile, "rb") as f:
+            for line in f:
+                # a bit hacky, but all text after those '[Ghost]' tags can be ignored
+                if "ghost" in line.decode("utf-8", "ignore").lower():
+                    break
+                # split at null chars, ..
+                for l in line.decode("utf-8", "ignore").split('\x00'):
+                    # ... and strip away first and last char, because the file always contains garbage there
+                    out += l[1:-1]
+        self._assets = re.findall(r"\W?(\w+) ((?:\w+\.)+\w+)", out)
 
     # saves all completions to a file.
     # ! TODO: have a look at comment for _completions_for_file
@@ -451,9 +481,10 @@ class ClassReference:
         return self._file_name
 
     def link_to_parent(self):
-        self._parent_class = self._collector_reference.get_class(self._parent_class_name)
-        if self._parent_class:
-            self._parent_class.set_child(self)
+        if self._parent_class is None:
+            self._parent_class = self._collector_reference.get_class(self._parent_class_name)
+            if self._parent_class:
+                self._parent_class.set_child(self)
 
     def set_child(self, child):
         # print("link: ", child.name(), "  to: ", self.name())
@@ -464,6 +495,12 @@ class ClassReference:
 
     def children(self):
         return self._child_classes
+
+    def all_child_classes(self):
+        names = []
+        for child in self.children():
+            names += child.all_child_classes()
+        return [self.name()] + names
 
     def get_parent(self):
         return self._parent_class

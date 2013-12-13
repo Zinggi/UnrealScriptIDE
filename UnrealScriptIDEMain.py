@@ -7,13 +7,6 @@
 #   It searches in all parent classes of the current class.
 #   Uses context sensitive completions.
 #
-#   Delete folder?:
-    # import os
-    # import glob
-
-    # files = glob.glob('/YOUR/PATH/*')
-    # for f in files:
-    #     os.remove(f)
 #
 # (c) Florian Zinggeler
 #-----------------------------------------------------------------------------------
@@ -221,6 +214,22 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
             line_number = 1000000
             defaultproperties_region = view.find('defaultproperties', 0, sublime.IGNORECASE)
             if defaultproperties_region:
+                # if "MyAsset = ", and MyAsset is an asset type (Texture2D, SoundCue, ...)
+                # set b_no_assets=False
+                b_no_assets = True
+                assets_filtering = None
+                match = re.match(r"(\w+)[ \t]*=", line_contents.strip().lower())
+                if match:
+                    var = match.group(1)
+                    o = self.get_object(var, self)
+                    if o:
+                        type_ = o.type()
+                        if type_:
+                            class_ = self.get_object(type_, self)
+                            if class_:
+                                assets_filtering = class_.all_child_classes()
+                                b_no_assets = False
+
                 line_number, col = view.rowcol(defaultproperties_region.a)
                 row, col = view.rowcol(selection_region.begin())
                 if row > line_number:
@@ -243,14 +252,15 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                                 if not c:
                                     c = "type not found"
                                     print("nothing found for: ", result[i])
+                                    break
                                 if c.has_parsed():
-                                    return self.get_autocomplete_list(prefix, True, True, False, c, bNoStandardCompletions=True)
+                                    return self.get_autocomplete_list(prefix, True, True, False, c, bNoStandardCompletions=True, b_no_assets=b_no_assets, assets_filtering=assets_filtering)
                                 else:
                                     c.parse_me()
                                     self.b_wanted_to_autocomplete = True
                                     return [("just a moment...", ""), ("", "")]
 
-                    return self.get_autocomplete_list(prefix, True, True, bNoStandardCompletions=True)
+                    return self.get_autocomplete_list(prefix, True, True, bNoStandardCompletions=True, b_no_assets=b_no_assets, assets_filtering=assets_filtering)
 
             # no defaultproperties found or above defaults:
 
