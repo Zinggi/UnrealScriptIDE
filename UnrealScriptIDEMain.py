@@ -225,7 +225,7 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                     if o:
                         type_ = o.type()
                         if type_:
-                            class_ = self.get_object(type_, self)
+                            class_ = self.get_object(type_, self, b_no_functions=True, b_no_variables=True)
                             if class_:
                                 assets_filtering = class_.all_child_classes()
                                 b_no_assets = False
