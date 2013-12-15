@@ -228,7 +228,9 @@ class UnrealScriptIDEMain(USData.UnrealData, sublime_plugin.EventListener):
                             class_ = self.get_object(type_, self, b_no_functions=True, b_no_variables=True)
                             if class_:
                                 assets_filtering = class_.all_child_classes()
-                                b_no_assets = False
+                            else:
+                                assets_filtering = [type_]
+                            b_no_assets = False
 
                 line_number, col = view.rowcol(defaultproperties_region.a)
                 row, col = view.rowcol(selection_region.begin())
