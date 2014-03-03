@@ -14,6 +14,7 @@ Features
 * **Dynamic, intelligent auto-completions**
 	* fully object-oriented completions
 	* context sensitive completions (e.g. in the defaultproperties block you only want to get variables)
+	* content assist. You wont have to open the editor anymore to search for asset names.
 	* parameter hints
 	* display documentation when you need it
 	* completions feel like the great Sublime Text 2/3 snippets
