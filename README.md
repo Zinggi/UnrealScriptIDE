@@ -5,7 +5,7 @@ UnrealScript IDE adds many features to Sublime Text 2/3 that you'd expect from a
 Fully featured object-oriented auto-completion, go to declaration, syntax highlighting, build and run, snippets and some more to name a few...
 
 
-![Pic](http://www.mediafire.com/conv/a12c7703e035e63ecb6ff1d39b8677716286a0f50c386ac5de0329f53e3e1e3d6g.jpg)
+![Pic](https://lh3.googleusercontent.com/6SCT5fHTmFYPba4meCnon_axbqgirn48rjUVfRqZmzE=w1599-h423-no)
 
 
 Features
